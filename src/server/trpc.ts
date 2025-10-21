@@ -1,0 +1,35 @@
+import { initTRPC, TRPCError } from "@trpc/server";
+import { headers } from "next/headers";
+import superjson from "superjson";
+import { auth } from "@/lib/auth";
+
+export const createTRPCContext = async () => {
+	const headersList = await headers();
+	const session = await auth.api.getSession({
+		headers: headersList,
+	});
+
+	return {
+		session,
+		user: session?.user ?? null,
+	};
+};
+
+const t = initTRPC.context<typeof createTRPCContext>().create({
+	transformer: superjson,
+});
+
+export const router = t.router;
+export const publicProcedure = t.procedure;
+
+export const protectedProcedure = t.procedure.use(({ ctx, next }) => {
+	if (!ctx.session || !ctx.user) {
+		throw new TRPCError({ code: "UNAUTHORIZED" });
+	}
+	return next({
+		ctx: {
+			session: ctx.session,
+			user: ctx.user,
+		},
+	});
+});
