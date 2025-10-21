@@ -74,7 +74,10 @@ export default function ChatPage() {
 											alt={message.role === "user" ? "You" : "AI"}
 											fallback={message.role === "user" ? "U" : "AI"}
 										/>
-										<MessageContent markdown={message.role === "assistant"}>
+										<MessageContent 
+											markdown={message.role === "assistant"}
+											className="prose dark:prose-invert max-w-none prose-pre:bg-muted prose-pre:border prose-pre:border-border"
+										>
 											{content}
 										</MessageContent>
 									</Message>
