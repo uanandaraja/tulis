@@ -33,7 +33,8 @@
 				"useSemanticElements": "off"
 			},
 			"suspicious": {
-				"noUnknownAtRules": "off"
+				"noUnknownAtRules": "off",
+				"noDocumentCookie": "off"
 			},
 			"performance": {
 				"noImgElement": "off"

@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
+import { AppSidebar } from "@/components/layouts/app-sidebar";
 import { DashboardLayout } from "@/components/layouts/dashboard-layout";
+import { SidebarProvider } from "@/components/ui/sidebar";
 import { auth } from "@/lib/auth";
 
 export const metadata: Metadata = {
@@ -21,5 +23,10 @@ export default async function DashboardGroupLayout({
 		redirect("/auth");
 	}
 
-	return <DashboardLayout>{children}</DashboardLayout>;
+	return (
+		<SidebarProvider>
+			<AppSidebar />
+			<DashboardLayout>{children}</DashboardLayout>
+		</SidebarProvider>
+	);
 }
