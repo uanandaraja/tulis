@@ -1,7 +1,7 @@
 import { openrouter } from "@openrouter/ai-sdk-provider";
-import { streamText, convertToModelMessages, type UIMessage } from "ai";
-import { auth } from "@/lib/auth";
+import { convertToModelMessages, streamText, type UIMessage } from "ai";
 import { headers } from "next/headers";
+import { auth } from "@/lib/auth";
 
 export async function POST(req: Request) {
 	const headersList = await headers();

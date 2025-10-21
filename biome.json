@@ -14,7 +14,8 @@
 			"!.next",
 			"!node_modules",
 			"!*.lock",
-			"!bun.lock"
+			"!bun.lock",
+			"!src/components/ui"
 		]
 	},
 	"formatter": {
