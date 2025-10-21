@@ -9,6 +9,7 @@ import {
 	ChatContainerContent,
 	ChatContainerRoot,
 } from "@/components/ui/chat-container";
+import { ScrollButton } from "@/components/ui/scroll-button";
 import { Loader } from "@/components/ui/loader";
 import {
 	Message,
@@ -44,7 +45,7 @@ export default function ChatPage() {
 				</div>
 
 				<ChatContainerRoot
-					className="flex-1 border rounded-lg"
+					className="flex-1 border rounded-lg relative"
 					style={{ minHeight: 0 }}
 				>
 					<ChatContainerContent className="p-4 space-y-4">
@@ -94,6 +95,9 @@ export default function ChatPage() {
 								</Message>
 							)}
 					</ChatContainerContent>
+					<div className="absolute right-4 bottom-4">
+						<ScrollButton />
+					</div>
 				</ChatContainerRoot>
 
 				{error && (
