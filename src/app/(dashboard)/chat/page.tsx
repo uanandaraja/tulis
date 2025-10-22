@@ -6,7 +6,26 @@ import { DefaultChatTransport } from "ai";
 import { ArrowUp, Brain } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Toggle } from "@/components/ui/toggle";
+import {
+	ChatContainerContent,
+	ChatContainerRoot,
+} from "@/components/ui/chat-container";
+import { Loader } from "@/components/ui/loader";
+import { MessageContent } from "@/components/ui/message";
+import { PromptInput, PromptInputTextarea } from "@/components/ui/prompt-input";
+import {
+	Reasoning,
+	ReasoningContent,
+	ReasoningTrigger,
+} from "@/components/ui/reasoning";
+import { ScrollButton } from "@/components/ui/scroll-button";
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from "@/components/ui/select";
 import {
 	Tooltip,
 	TooltipContent,
@@ -18,30 +37,6 @@ import {
 	DEFAULT_MODEL,
 	modelSupportsReasoning,
 } from "@/lib/constants/models";
-import {
-	Select,
-	SelectContent,
-	SelectItem,
-	SelectTrigger,
-	SelectValue,
-} from "@/components/ui/select";
-import {
-	ChatContainerContent,
-	ChatContainerRoot,
-} from "@/components/ui/chat-container";
-import { ScrollButton } from "@/components/ui/scroll-button";
-import { Loader } from "@/components/ui/loader";
-import {
-	Message,
-	MessageAvatar,
-	MessageContent,
-} from "@/components/ui/message";
-import { PromptInput, PromptInputTextarea } from "@/components/ui/prompt-input";
-import {
-	Reasoning,
-	ReasoningContent,
-	ReasoningTrigger,
-} from "@/components/ui/reasoning";
 
 export default function ChatPage() {
 	const [input, setInput] = useState("");
@@ -151,8 +146,8 @@ export default function ChatPage() {
 									<div className="rounded-lg p-2 text-foreground bg-secondary">
 										{modelSupportsReasoning(selectedModel) ? (
 											<Loader
-												variant="loading-dots"
-												size="sm"
+												variant="text-shimmer"
+												size="md"
 												text="Thinking"
 											/>
 										) : (
@@ -168,8 +163,8 @@ export default function ChatPage() {
 									<div className="rounded-lg p-2 text-foreground bg-secondary">
 										{modelSupportsReasoning(selectedModel) ? (
 											<Loader
-												variant="loading-dots"
-												size="sm"
+												variant="text-shimmer"
+												size="md"
 												text="Thinking"
 											/>
 										) : (
