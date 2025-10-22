@@ -3,8 +3,12 @@
 import { useChat } from "@ai-sdk/react";
 import type { UIMessage } from "ai";
 import { DefaultChatTransport, isToolUIPart } from "ai";
-import { ArrowUp, Brain, FileText, Globe } from "lucide-react";
-import { useState } from "react";
+import { ArrowUp, Brain, FileEdit, FileText, Globe } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import {
+	DocumentEditor,
+	type EditorHandle,
+} from "@/components/editor/document-editor";
 import { Button } from "@/components/ui/button";
 import {
 	ChatContainerContent,
@@ -12,6 +16,7 @@ import {
 } from "@/components/ui/chat-container";
 import { Loader } from "@/components/ui/loader";
 import { MessageContent } from "@/components/ui/message";
+import { EditorArtifact } from "@/components/ui/editor-artifact";
 import { PromptInput, PromptInputTextarea } from "@/components/ui/prompt-input";
 import {
 	Reasoning,
@@ -43,17 +48,23 @@ import {
 	isWebSearchToolOutput,
 	toToolPart,
 	type WebSearchToolUIPart,
+	type WriteToEditorToolOutput,
 } from "@/lib/types/ai";
 
 const TOOL_ICONS: Record<string, React.ReactNode> = {
 	globe: <Globe className="h-4 w-4 text-blue-500" />,
 	fileText: <FileText className="h-4 w-4 text-amber-500" />,
+	fileEdit: <FileEdit className="h-4 w-4 text-purple-500" />,
 };
 
 export default function ChatPage() {
 	const [input, setInput] = useState("");
 	const [selectedModel, setSelectedModel] = useState(DEFAULT_MODEL);
 	const [enableReasoning, setEnableReasoning] = useState(false);
+	const [showEditor, setShowEditor] = useState(false);
+	const editorRef = useRef<EditorHandle>(null);
+	const prevEditorContentRef = useRef<string | null>(null);
+
 	const { messages, sendMessage, status, error } = useChat({
 		transport: new DefaultChatTransport({
 			api: "/api/chat",
@@ -63,6 +74,43 @@ export default function ChatPage() {
 	const isLoading = status === "submitted" || status === "streaming";
 	const isStreaming = status === "streaming";
 	const supportsReasoning = modelSupportsReasoning(selectedModel);
+
+	const getEditorContent = () => {
+		for (const message of [...messages].reverse()) {
+			if (message.role !== "assistant") continue;
+
+			const writeToEditorParts = message.parts.filter(
+				(part) =>
+					isToolUIPart(part) &&
+					part.type === "tool-writeToEditor" &&
+					part.state === "output-available",
+			);
+
+			for (const part of writeToEditorParts) {
+				if (!isToolUIPart(part)) continue;
+				const output = part.output as WriteToEditorToolOutput;
+
+				if (output.success) {
+					let fullContent = output.content;
+					if (output.title) {
+						fullContent = `# ${output.title}\n\n${output.content}`;
+					}
+					return fullContent;
+				}
+			}
+		}
+		return null;
+	};
+
+	const editorContent = getEditorContent();
+	const hasEditorContent = editorContent !== null;
+
+	if (editorContent && editorContent !== prevEditorContentRef.current) {
+		prevEditorContentRef.current = editorContent;
+		if (!showEditor) {
+			setShowEditor(true);
+		}
+	}
 
 	const handleSubmit = () => {
 		if (input.trim() && !isLoading) {
@@ -82,8 +130,12 @@ export default function ChatPage() {
 	};
 
 	return (
-		<div className="flex flex-col h-[calc(100vh-4rem)] px-4 py-8 max-w-4xl mx-auto w-full">
-			<div className="flex flex-col flex-1 min-h-0">
+		<div
+			className={`flex h-[calc(100vh-4rem)] gap-4 px-4 py-8 w-full ${showEditor ? "max-w-none" : "max-w-4xl mx-auto"}`}
+		>
+			<div
+				className={`flex flex-col min-h-0 ${showEditor ? "w-[600px]" : "flex-1"}`}
+			>
 				<ChatContainerRoot className="flex-1 relative" style={{ minHeight: 0 }}>
 					<ChatContainerContent className="p-4 space-y-4">
 						{messages.length === 0 ? (
@@ -178,6 +230,21 @@ export default function ChatPage() {
 												const icon = config.iconName
 													? TOOL_ICONS[config.iconName]
 													: null;
+
+												if (
+													toolPart.type === "tool-writeToEditor" &&
+													toolPart.state === "output-available"
+												) {
+													const output =
+														toolPart.output as WriteToEditorToolOutput;
+													return (
+														<EditorArtifact
+															key={toolPart.toolCallId}
+															title={output.title}
+															onShowDocumentAction={() => setShowEditor(true)}
+														/>
+													);
+												}
 
 												return (
 													<Tool
@@ -315,6 +382,27 @@ export default function ChatPage() {
 					</Button>
 				</form>
 			</div>
+
+			{showEditor && hasEditorContent && (
+				<div className="flex flex-col flex-1 min-h-0 border-l">
+					<div className="flex items-center justify-end p-2 border-b">
+						<Button
+							variant="ghost"
+							size="sm"
+							onClick={() => setShowEditor(false)}
+						>
+							Hide Editor
+						</Button>
+					</div>
+					<div className="flex-1 overflow-auto">
+						<DocumentEditor
+							ref={editorRef}
+							initialContent={editorContent}
+							key={editorContent}
+						/>
+					</div>
+				</div>
+			)}
 		</div>
 	);
 }

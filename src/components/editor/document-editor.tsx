@@ -12,7 +12,13 @@ import ActionMenuList, {
 	DefaultActionMenuRender,
 } from "@yoopta/action-menu-list";
 import Toolbar, { DefaultToolbarRender } from "@yoopta/toolbar";
-import { forwardRef, useImperativeHandle, useMemo, useRef } from "react";
+import {
+	forwardRef,
+	useEffect,
+	useImperativeHandle,
+	useMemo,
+	useRef,
+} from "react";
 import { cn } from "@/lib/utils";
 
 export interface EditorHandle {
@@ -26,6 +32,7 @@ export interface EditorHandle {
 export interface DocumentEditorProps {
 	className?: string;
 	placeholder?: string;
+	initialContent?: string;
 }
 
 const plugins = [
@@ -42,9 +49,13 @@ const plugins = [
 const marks = [Bold, Italic, Strike, Underline];
 
 export const DocumentEditor = forwardRef<EditorHandle, DocumentEditorProps>(
-	({ className, placeholder = "Type '/' for commands..." }, ref) => {
+	(
+		{ className, placeholder = "Type '/' for commands...", initialContent },
+		ref,
+	) => {
 		const editor = useMemo(() => createYooptaEditor(), []);
 		const selectionRef = useRef(null);
+		const isInitialized = useRef(false);
 
 		const parseInlineMarkdown = (text: string) => {
 			const children: any[] = [];
@@ -170,11 +181,9 @@ export const DocumentEditor = forwardRef<EditorHandle, DocumentEditorProps>(
 				editor.setEditorValue(value);
 			},
 			appendContent: (_content: string) => {
-				// TODO: Implement append
 				console.log("Append not yet implemented for Yoopta");
 			},
 			prependContent: (_content: string) => {
-				// TODO: Implement prepend
 				console.log("Prepend not yet implemented for Yoopta");
 			},
 			getContent: () => {
@@ -184,6 +193,14 @@ export const DocumentEditor = forwardRef<EditorHandle, DocumentEditorProps>(
 				editor.setEditorValue({});
 			},
 		}));
+
+		useEffect(() => {
+			if (initialContent && !isInitialized.current) {
+				const value = parseMarkdownToYoopta(initialContent);
+				editor.setEditorValue(value);
+				isInitialized.current = true;
+			}
+		}, [initialContent, editor]);
 
 		return (
 			<div
@@ -197,7 +214,7 @@ export const DocumentEditor = forwardRef<EditorHandle, DocumentEditorProps>(
 					<YooptaEditor
 						editor={editor}
 						className="w-full max-w-none"
-						style={{ width: '100%' }}
+						style={{ width: "100%" }}
 						plugins={plugins}
 						marks={marks}
 						tools={{
