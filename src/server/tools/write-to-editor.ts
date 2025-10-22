@@ -11,11 +11,17 @@ export const writeToEditorTool = tool({
 				"How to add content: 'set' replaces all content, 'append' adds to end, 'prepend' adds to beginning",
 			)
 			.default("set"),
-		content: z.string().describe("The content to write (use markdown format)"),
+		content: z
+			.string()
+			.describe(
+				"The main body content to write (use markdown format). Do NOT include the title in the content - put it in the separate 'title' field instead.",
+			),
 		title: z
 			.string()
 			.optional()
-			.describe("Optional title or heading for the content"),
+			.describe(
+				"The title/heading for the document. Keep separate from content.",
+			),
 	}),
 	execute: async ({ action, content, title }) => {
 		return {
