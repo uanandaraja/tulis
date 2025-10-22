@@ -103,7 +103,7 @@ export default function ChatPage() {
 									(part) => part.type === "source",
 								);
 
-								const exaSources = toolParts
+								const allExaSources = toolParts
 									.filter((part) => part.type === "tool-webSearch")
 									.flatMap((part) => {
 										if (
@@ -114,6 +114,7 @@ export default function ChatPage() {
 											return part.output.results
 												.filter(
 													(result: {
+														id: number;
 														url: string;
 														title: string;
 														snippet: string;
@@ -121,10 +122,12 @@ export default function ChatPage() {
 												)
 												.map(
 													(result: {
+														id: number;
 														url: string;
 														title: string;
 														snippet: string;
 													}) => ({
+														id: result.id,
 														url: result.url,
 														title: result.title,
 													}),
@@ -132,6 +135,16 @@ export default function ChatPage() {
 										}
 										return [];
 									});
+
+								const citedSourceIds = new Set(
+									(textContent.match(/\[(\d+)\]/g) || []).map((match) =>
+										parseInt(match.slice(1, -1), 10),
+									),
+								);
+
+								const exaSources = allExaSources.filter((source) =>
+									citedSourceIds.has(source.id),
+								);
 
 								if (
 									!textContent.trim() &&
@@ -185,12 +198,13 @@ export default function ChatPage() {
 											{textContent && (
 												<MessageContent
 													markdown={!isUserMessage}
-													className="prose dark:prose-invert max-w-none prose-pre:bg-muted prose-pre:border prose-pre:border-border"
+													className={`prose dark:prose-invert max-w-none prose-pre:bg-muted prose-pre:border prose-pre:border-border ${!isUserMessage ? "p-4" : ""}`}
+													sources={exaSources}
 												>
 													{textContent}
 												</MessageContent>
 											)}
-											{(sourceParts.length > 0 || exaSources.length > 0) && (
+											{sourceParts.length > 0 && (
 												<div className="flex flex-wrap gap-2">
 													{sourceParts.map((sourcePart) => {
 														if (sourcePart.type !== "source") return null;
@@ -207,18 +221,6 @@ export default function ChatPage() {
 															</Source>
 														);
 													})}
-													{exaSources.map((source, idx) => (
-														<Source
-															key={`exa-${idx}-${source.url}`}
-															href={source.url}
-														>
-															<SourceTrigger showFavicon />
-															<SourceContent
-																title={source.title}
-																description={source.url}
-															/>
-														</Source>
-													))}
 												</div>
 											)}
 										</div>

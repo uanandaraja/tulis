@@ -7,6 +7,8 @@ import {
 } from "@/components/ui/tooltip"
 import { cn } from "@/lib/utils"
 import { Markdown } from "./markdown"
+import { Source, SourceTrigger, SourceContent } from "./source"
+import type { Components } from "react-markdown"
 
 export type MessageProps = {
   children: React.ReactNode
@@ -48,13 +50,26 @@ export type MessageContentProps = {
   children: React.ReactNode
   markdown?: boolean
   className?: string
+  sources?: Array<{ id: number; url: string; title: string }>
 } & React.ComponentProps<typeof Markdown> &
   React.HTMLProps<HTMLDivElement>
+
+const replaceCitationsWithSources = (
+  text: string,
+  sources: Array<{ id: number; url: string; title: string }>
+): string => {
+  return text.replace(/\[(\d+)\]/g, (match) => {
+    const id = parseInt(match.slice(1, -1), 10)
+    const source = sources.find(s => s.id === id)
+    return source ? `[${source.title}](${source.url})` : match
+  })
+}
 
 const MessageContent = ({
   children,
   markdown = false,
   className,
+  sources = [],
   ...props
 }: MessageContentProps) => {
   const classNames = cn(
@@ -62,9 +77,30 @@ const MessageContent = ({
     className
   )
 
+  const processedContent = markdown && sources.length > 0 
+    ? replaceCitationsWithSources(children as string, sources)
+    : (children as string)
+
+  const customComponents: Partial<Components> | undefined = markdown && sources.length > 0 ? {
+    a: ({ href, children: linkChildren }) => {
+      if (!href) return <a>{linkChildren}</a>
+      const source = sources.find(s => s.url === href)
+      const linkText = Array.isArray(linkChildren) ? linkChildren[0] : linkChildren
+      if (source && typeof linkText === 'string') {
+        return (
+          <Source href={href}>
+            <SourceTrigger showFavicon label={linkText} />
+            <SourceContent title={source.title} description={href} />
+          </Source>
+        )
+      }
+      return <a href={href} target="_blank" rel="noopener noreferrer">{linkChildren}</a>
+    },
+  } : undefined
+
   return markdown ? (
-    <Markdown className={classNames} {...props}>
-      {children as string}
+    <Markdown className={classNames} components={customComponents} {...props}>
+      {processedContent}
     </Markdown>
   ) : (
     <div className={classNames} {...props}>

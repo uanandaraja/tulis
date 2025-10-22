@@ -4,7 +4,7 @@ import { exa } from "@/lib/exa";
 
 export const webSearchTool = tool({
 	description:
-		"Search the web for current information, news, articles, and research. Use this when you need up-to-date information that may not be in your training data.",
+		"Search the web for current information, news, articles, and research. Use this when you need up-to-date information that may not be in your training data. IMPORTANT: When using results from this tool, cite them by their ID in square brackets at the END of sentences or clauses, with each citation as a separate reference like [1] [2] [3], NOT as comma-separated lists like [1, 2, 3]. For example: 'The company announced new features [1]. They plan to expand next year [2] [3].' This allows sources to be displayed inline to the user.",
 	inputSchema: z.object({
 		query: z.string().describe("The search query to find relevant web content"),
 	}),
@@ -32,18 +32,27 @@ export const webSearchTool = tool({
 				};
 			}
 
-			const formattedResults = searchResponse.results.map((result) => ({
+			const formattedResults = searchResponse.results.map((result, index) => ({
+				id: index + 1,
 				title: result.title,
 				url: result.url,
 				snippet: result.text || "",
 				publishedDate: result.publishedDate || null,
 			}));
 
+			const citationFormat = formattedResults
+				.map(
+					(result) =>
+						`[${result.id}] "${result.title}" (${result.url})\n${result.snippet}\n`,
+				)
+				.join("\n");
+
 			return {
 				success: true,
 				query,
 				results: formattedResults,
 				totalResults: formattedResults.length,
+				citationFormat: `Use these sources and cite them by ID in your response:\n\n${citationFormat}`,
 			};
 		} catch (error) {
 			console.error("Web search error:", error);
