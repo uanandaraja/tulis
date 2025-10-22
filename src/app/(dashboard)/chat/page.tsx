@@ -12,7 +12,7 @@ import {
 	ListChecks,
 	X,
 } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import {
 	DocumentEditor,
 	type EditorHandle,
@@ -22,9 +22,9 @@ import {
 	ChatContainerContent,
 	ChatContainerRoot,
 } from "@/components/ui/chat-container";
+import { EditorArtifact } from "@/components/ui/editor-artifact";
 import { Loader } from "@/components/ui/loader";
 import { MessageContent } from "@/components/ui/message";
-import { EditorArtifact } from "@/components/ui/editor-artifact";
 import { PlanSteps } from "@/components/ui/plan-steps";
 import { PromptInput, PromptInputTextarea } from "@/components/ui/prompt-input";
 import {
@@ -55,8 +55,8 @@ import {
 import {
 	getToolConfig,
 	isWebSearchToolOutput,
-	toToolPart,
 	type PlanStepsToolOutput,
+	toToolPart,
 	type WebSearchToolUIPart,
 	type WriteToEditorToolOutput,
 } from "@/lib/types/ai";
@@ -224,8 +224,8 @@ export default function ChatPage() {
 													const reasoningText = "text" in part ? part.text : "";
 													return (
 														<Reasoning
-															key={`reasoning-${index}`}
-															defaultOpen={
+															key={`reasoning-${part.text?.slice(0, 20) || index}`}
+															open={
 																isStreaming &&
 																enableReasoning &&
 																supportsReasoning
@@ -243,16 +243,14 @@ export default function ChatPage() {
 
 												// Render plan steps (only the latest one)
 												if (
-													isToolUIPart(part) &&
-													part.type === "tool-planSteps" &&
-													part.state === "output-available" &&
 													latestPlanStepsPart &&
-													part.toolCallId === latestPlanStepsPart.toolCallId
+													part === latestPlanStepsPart
 												) {
-													const output = part.output as PlanStepsToolOutput;
+													const toolPart = part as any;
+													const output = toolPart.output as PlanStepsToolOutput;
 													return (
 														<PlanSteps
-															key={`plan-${part.toolCallId}`}
+															key={`plan-${toolPart.toolCallId}`}
 															output={output}
 														/>
 													);
@@ -313,7 +311,7 @@ export default function ChatPage() {
 
 													return (
 														<MessageContent
-															key={`text-${index}`}
+															key={`text-${textContent.slice(0, 20) || index}`}
 															markdown={true}
 															className="prose dark:prose-invert max-w-none prose-pre:bg-muted prose-pre:border prose-pre:border-border bg-transparent p-0"
 															sources={exaSources}

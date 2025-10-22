@@ -30,8 +30,8 @@ export const AI_MODELS = [
 		supportsReasoning: true,
 	},
 	{
-		value: "google/gemini-2.5-flash",
-		label: "Gemini 2.5 Flash",
+		value: "google/gemini-2.5-flash-preview-09-2025",
+		label: "Gemini 2.5 Flash Preview 09/25",
 		supportsReasoning: true,
 	},
 ] as const;
