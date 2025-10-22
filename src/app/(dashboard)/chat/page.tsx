@@ -2,7 +2,7 @@
 
 import { useChat } from "@ai-sdk/react";
 import type { UIMessage } from "ai";
-import { DefaultChatTransport } from "ai";
+import { DefaultChatTransport, isToolUIPart } from "ai";
 import { ArrowUp, Brain, Globe } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -26,8 +26,7 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select";
-import { Source, SourceContent, SourceTrigger } from "@/components/ui/source";
-import { Tool } from "@/components/ui/tool";
+import { Tool, type ToolPart } from "@/components/ui/tool";
 import {
 	Tooltip,
 	TooltipContent,
@@ -95,46 +94,49 @@ export default function ChatPage() {
 									.map((part) => ("text" in part ? part.text : ""))
 									.join("\n");
 
-								const toolParts = message.parts.filter(
-									(part) => part.type === "tool-webSearch",
-								);
+								const toolParts = message.parts.filter(isToolUIPart);
 
-								const sourceParts = message.parts.filter(
-									(part) => part.type === "source",
-								);
-
-								const allExaSources = toolParts
-									.filter((part) => part.type === "tool-webSearch")
-									.flatMap((part) => {
-										if (
-											part.state === "output-available" &&
-											part.output?.success &&
-											part.output?.results
-										) {
-											return part.output.results
-												.filter(
-													(result: {
-														id: number;
-														url: string;
-														title: string;
-														snippet: string;
-													}) => result.url && result.title,
-												)
-												.map(
-													(result: {
-														id: number;
-														url: string;
-														title: string;
-														snippet: string;
-													}) => ({
-														id: result.id,
-														url: result.url,
-														title: result.title,
-													}),
-												);
-										}
-										return [];
-									});
+								const allExaSources = toolParts.flatMap((part) => {
+									if (
+										part.type === "tool-webSearch" &&
+										part.state === "output-available" &&
+										part.output &&
+										typeof part.output === "object" &&
+										"success" in part.output &&
+										(part.output as Record<string, unknown>).success &&
+										"results" in part.output
+									) {
+										const results = (part.output as Record<string, unknown>)
+											.results as Array<{
+											id: number;
+											url: string;
+											title: string;
+											snippet: string;
+										}>;
+										return results
+											.filter(
+												(result: {
+													id: number;
+													url: string;
+													title: string;
+													snippet: string;
+												}) => result.url && result.title,
+											)
+											.map(
+												(result: {
+													id: number;
+													url: string;
+													title: string;
+													snippet: string;
+												}) => ({
+													id: result.id,
+													url: result.url,
+													title: result.title,
+												}),
+											);
+									}
+									return [];
+								});
 
 								const citedSourceIds = new Set(
 									(textContent.match(/\[(\d+)\]/g) || []).map((match) =>
@@ -185,10 +187,19 @@ export default function ChatPage() {
 											{toolParts.map((toolPart) => {
 												if (toolPart.type !== "tool-webSearch") return null;
 
+												const part: ToolPart = {
+													type: toolPart.type,
+													state: toolPart.state,
+													input: toolPart.input as Record<string, unknown>,
+													output: toolPart.output as Record<string, unknown>,
+													toolCallId: toolPart.toolCallId,
+													errorText: toolPart.errorText,
+												};
+
 												return (
 													<Tool
 														key={toolPart.toolCallId}
-														toolPart={toolPart}
+														toolPart={part}
 														defaultOpen={toolPart.state === "output-available"}
 														displayName="Searching the web"
 														icon={<Globe className="h-4 w-4 text-blue-500" />}
@@ -203,25 +214,6 @@ export default function ChatPage() {
 												>
 													{textContent}
 												</MessageContent>
-											)}
-											{sourceParts.length > 0 && (
-												<div className="flex flex-wrap gap-2">
-													{sourceParts.map((sourcePart) => {
-														if (sourcePart.type !== "source") return null;
-														return (
-															<Source
-																key={sourcePart.source.id}
-																href={sourcePart.source.url}
-															>
-																<SourceTrigger showFavicon />
-																<SourceContent
-																	title={sourcePart.source.title || "Source"}
-																	description={sourcePart.source.url}
-																/>
-															</Source>
-														);
-													})}
-												</div>
 											)}
 										</div>
 									</div>
