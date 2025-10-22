@@ -74,7 +74,7 @@ export const DocumentEditor = forwardRef<EditorHandle, DocumentEditorProps>(
 				{ regex: /`(.+?)`/g, marks: { code: true } },
 			];
 
-			const matchIndex = 0;
+			const _matchIndex = 0;
 			const matches: Array<{
 				start: number;
 				end: number;

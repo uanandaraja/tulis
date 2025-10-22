@@ -366,13 +366,13 @@
 
 /* Yoopta Editor Headings - Override default styles */
 .yoopta-heading-one {
-	font-size: 1.5rem;
+	font-size: 1.5rem !important;
 }
 
 .yoopta-heading-two {
-	font-size: 1.25rem;
+	font-size: 1.25rem !important;
 }
 
 .yoopta-heading-three {
-	font-size: 1.125rem;
+	font-size: 1.1rem !important;
 }

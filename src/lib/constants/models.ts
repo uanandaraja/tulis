@@ -34,6 +34,11 @@ export const AI_MODELS = [
 		label: "Gemini 2.5 Flash Preview 09/25",
 		supportsReasoning: true,
 	},
+	{
+		value: "moonshotai/kimi-k2-0905",
+		label: "Kimi K2",
+		supportsReasoning: true,
+	},
 ] as const;
 
 export const DEFAULT_MODEL = "google/gemini-2.5-flash-lite-preview-09-2025";
