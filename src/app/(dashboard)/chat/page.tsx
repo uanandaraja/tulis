@@ -145,10 +145,13 @@ export default function ChatPage() {
 			className={`flex h-[calc(100vh-4rem)] gap-4 px-4 py-8 w-full ${showEditor ? "max-w-none" : "max-w-4xl mx-auto"}`}
 		>
 			<div
-				className={`flex flex-col min-h-0 ${showEditor ? "w-[600px]" : "flex-1"}`}
+				className={`flex flex-col min-h-0 min-w-0 ${showEditor ? "w-[600px]" : "flex-1"}`}
 			>
-				<ChatContainerRoot className="flex-1 relative" style={{ minHeight: 0 }}>
-					<ChatContainerContent className="p-4 space-y-4">
+				<ChatContainerRoot
+					className="flex-1 relative overflow-x-hidden"
+					style={{ minHeight: 0 }}
+				>
+					<ChatContainerContent className="p-4 space-y-4 max-w-full">
 						{messages.length === 0 ? (
 							<div className="text-center text-muted-foreground py-12">
 								Start a conversation by typing a message below
@@ -213,8 +216,8 @@ export default function ChatPage() {
 										: null;
 
 								return (
-									<div key={message.id} className="flex justify-start">
-										<div className="flex flex-col gap-3 max-w-full">
+									<div key={message.id} className="flex justify-start w-full">
+										<div className="flex flex-col gap-3 w-full min-w-0">
 											{message.parts.map((part, index) => {
 												// Render reasoning
 												if (

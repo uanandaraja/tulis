@@ -132,7 +132,7 @@ const Tool = ({ toolPart, defaultOpen = false, className, displayName, icon }: T
   return (
     <div
       className={cn(
-        "border-border mt-3 overflow-hidden rounded-lg border",
+        "border-border mt-3 rounded-lg border w-full min-w-0",
         className
       )}
     >
@@ -140,35 +140,35 @@ const Tool = ({ toolPart, defaultOpen = false, className, displayName, icon }: T
         <CollapsibleTrigger asChild>
           <Button
             variant="ghost"
-            className="bg-background h-auto w-full justify-between rounded-b-none px-3 py-2 font-normal"
+            className="bg-background h-auto w-full justify-between rounded-b-none px-3 py-2 font-normal min-w-0"
           >
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 min-w-0 overflow-hidden">
               {icon || getStateIcon()}
-              <span className="font-mono text-sm font-medium">
+              <span className="font-mono text-sm font-medium truncate">
                 {displayName || toolPart.type}
               </span>
               {getStateBadge()}
             </div>
-            <ChevronDown className={cn("h-4 w-4", isOpen && "rotate-180")} />
+            <ChevronDown className={cn("h-4 w-4 flex-shrink-0", isOpen && "rotate-180")} />
           </Button>
         </CollapsibleTrigger>
         <CollapsibleContent
           className={cn(
-            "border-border border-t",
-            "data-[state=closed]:animate-collapsible-up data-[state=open]:animate-collapsible-down overflow-hidden"
+            "border-border border-t overflow-hidden",
+            "data-[state=closed]:animate-collapsible-up data-[state=open]:animate-collapsible-down"
           )}
         >
-          <div className="bg-background space-y-3 p-3">
+          <div className="bg-background space-y-3 p-3 min-w-0">
             {input && Object.keys(input).length > 0 && (
-              <div>
+              <div className="min-w-0">
                 <h4 className="text-muted-foreground mb-2 text-sm font-medium">
                   Input
                 </h4>
-                <div className="bg-background rounded-lg border p-2 font-mono text-sm">
+                <div className="bg-background rounded-lg border p-2 font-mono text-sm overflow-x-auto max-w-full">
                   {Object.entries(input).map(([key, value]) => (
                     <div key={key} className="mb-1">
                       <span className="text-muted-foreground">{key}:</span>{" "}
-                      <span>{formatValue(value)}</span>
+                      <span className="whitespace-pre-wrap break-words">{formatValue(value)}</span>
                     </div>
                   ))}
                 </div>
@@ -176,12 +176,12 @@ const Tool = ({ toolPart, defaultOpen = false, className, displayName, icon }: T
             )}
 
             {output && (
-              <div>
+              <div className="min-w-0">
                 <h4 className="text-muted-foreground mb-2 text-sm font-medium">
                   Output
                 </h4>
-                <div className="max-h-60 overflow-auto">
-                  <CodeBlock>
+                <div className="max-h-60 overflow-auto max-w-full">
+                  <CodeBlock className="min-w-0">
                     <CodeBlockCode
                       code={formatValue(output)}
                       language="json"
@@ -193,9 +193,9 @@ const Tool = ({ toolPart, defaultOpen = false, className, displayName, icon }: T
             )}
 
             {state === "output-error" && toolPart.errorText && (
-              <div>
+              <div className="min-w-0">
                 <h4 className="mb-2 text-sm font-medium text-red-500">Error</h4>
-                <div className="bg-background rounded border border-red-200 p-2 text-sm dark:border-red-950 dark:bg-red-900/20">
+                <div className="bg-background rounded border border-red-200 p-2 text-sm dark:border-red-950 dark:bg-red-900/20 break-words">
                   {toolPart.errorText}
                 </div>
               </div>
@@ -208,8 +208,8 @@ const Tool = ({ toolPart, defaultOpen = false, className, displayName, icon }: T
             )}
 
             {toolCallId && (
-              <div className="text-muted-foreground border-t border-blue-200 pt-2 text-xs">
-                <span className="font-mono">Call ID: {toolCallId}</span>
+              <div className="text-muted-foreground border-t border-blue-200 pt-2 text-xs min-w-0">
+                <span className="font-mono truncate block">Call ID: {toolCallId}</span>
               </div>
             )}
           </div>
