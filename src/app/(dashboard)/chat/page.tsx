@@ -2,9 +2,22 @@
 
 import { useChat } from "@ai-sdk/react";
 import type { UIMessage } from "ai";
+import { DefaultChatTransport } from "ai";
 import { ArrowUp } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import {
+	AI_MODELS,
+	DEFAULT_MODEL,
+	modelSupportsReasoning,
+} from "@/lib/constants/models";
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from "@/components/ui/select";
 import {
 	ChatContainerContent,
 	ChatContainerRoot,
@@ -17,37 +30,47 @@ import {
 	MessageContent,
 } from "@/components/ui/message";
 import { PromptInput, PromptInputTextarea } from "@/components/ui/prompt-input";
+import {
+	Reasoning,
+	ReasoningContent,
+	ReasoningTrigger,
+} from "@/components/ui/reasoning";
 
 export default function ChatPage() {
 	const [input, setInput] = useState("");
+	const [selectedModel, setSelectedModel] = useState(DEFAULT_MODEL);
+	const [enableReasoning, setEnableReasoning] = useState(false);
 	const { messages, sendMessage, status, error } = useChat({
-		api: "/api/chat",
+		transport: new DefaultChatTransport({
+			api: "/api/chat",
+		}),
 	});
 
 	const isLoading = status === "submitted" || status === "streaming";
+	const isStreaming = status === "streaming";
+	const supportsReasoning = modelSupportsReasoning(selectedModel);
 
 	const handleSubmit = () => {
 		if (input.trim() && !isLoading) {
-			sendMessage({
-				role: "user",
-				text: input,
-			});
+			sendMessage(
+				{
+					text: input,
+				},
+				{
+					body: {
+						selectedModel,
+						enableReasoning: enableReasoning && supportsReasoning,
+					},
+				},
+			);
 			setInput("");
 		}
 	};
 
 	return (
 		<div className="flex flex-col h-[calc(100vh-4rem)] px-4 py-8 max-w-4xl mx-auto w-full">
-			<div className="flex flex-col flex-1 min-h-0 gap-6">
-				<div className="flex-shrink-0">
-					<h1 className="text-3xl font-bold tracking-tight">AI Chat</h1>
-					<p className="text-muted-foreground mt-2">Chat with AI</p>
-				</div>
-
-				<ChatContainerRoot
-					className="flex-1 border rounded-lg relative"
-					style={{ minHeight: 0 }}
-				>
+			<div className="flex flex-col flex-1 min-h-0">
+				<ChatContainerRoot className="flex-1 relative" style={{ minHeight: 0 }}>
 					<ChatContainerContent className="p-4 space-y-4">
 						{messages.length === 0 ? (
 							<div className="text-center text-muted-foreground py-12">
@@ -55,44 +78,98 @@ export default function ChatPage() {
 							</div>
 						) : (
 							messages.map((message: UIMessage) => {
-								// Extract text from all text parts
-								const content = message.parts
+								// Extract text and reasoning parts
+								const textContent = message.parts
 									.filter((part) => part.type === "text")
 									.map((part) => ("text" in part ? part.text : ""))
 									.join("");
 
+								const reasoningParts = message.parts.filter(
+									(part) => part.type === "reasoning",
+								);
+
+								const reasoningText = reasoningParts
+									.map((part) => ("text" in part ? part.text : ""))
+									.join("\n");
+
 								// Only render if there's content
-								if (!content.trim()) return null;
+								if (!textContent.trim() && reasoningParts.length === 0)
+									return null;
+
+								const isUserMessage = message.role === "user";
+								const showReasoning =
+									reasoningParts.length > 0 &&
+									modelSupportsReasoning(selectedModel);
 
 								return (
-									<Message key={message.id}>
-										<MessageAvatar
-											src={
-												message.role === "user"
-													? "/placeholder.svg"
-													: "/logo.svg"
-											}
-											alt={message.role === "user" ? "You" : "AI"}
-											fallback={message.role === "user" ? "U" : "AI"}
-										/>
-										<MessageContent 
-											markdown={message.role === "assistant"}
-											className="prose dark:prose-invert max-w-none prose-pre:bg-muted prose-pre:border prose-pre:border-border"
-										>
-											{content}
-										</MessageContent>
-									</Message>
+									<div
+										key={message.id}
+										className={`flex ${isUserMessage ? "justify-end" : "justify-start"}`}
+									>
+										<div className="flex flex-col gap-2">
+											{(showReasoning ||
+												(isStreaming &&
+													enableReasoning &&
+													supportsReasoning)) && (
+												<Reasoning
+													isStreaming={
+														isStreaming &&
+														enableReasoning &&
+														supportsReasoning &&
+														message.role === "assistant"
+													}
+												>
+													<ReasoningTrigger>Show reasoning</ReasoningTrigger>
+													<ReasoningContent markdown>
+														{reasoningText || "Thinking..."}
+													</ReasoningContent>
+												</Reasoning>
+											)}
+											{textContent && (
+												<MessageContent
+													markdown={!isUserMessage}
+													className="prose dark:prose-invert max-w-none prose-pre:bg-muted prose-pre:border prose-pre:border-border"
+												>
+													{textContent}
+												</MessageContent>
+											)}
+										</div>
+									</div>
 								);
 							})
 						)}
 						{isLoading &&
 							messages[messages.length - 1]?.role !== "assistant" && (
-								<Message>
-									<MessageAvatar src="/logo.svg" alt="AI" fallback="AI" />
+								<div className="flex justify-start">
 									<div className="rounded-lg p-2 text-foreground bg-secondary">
-										<Loader variant="typing" size="sm" />
+										{modelSupportsReasoning(selectedModel) ? (
+											<Loader
+												variant="loading-dots"
+												size="sm"
+												text="Thinking"
+											/>
+										) : (
+											<Loader variant="typing" size="sm" />
+										)}
 									</div>
-								</Message>
+								</div>
+							)}
+						{isLoading &&
+							messages[messages.length - 1]?.role === "assistant" &&
+							messages[messages.length - 1]?.parts?.length === 0 && (
+								<div className="flex justify-start">
+									<div className="rounded-lg p-2 text-foreground bg-secondary">
+										{modelSupportsReasoning(selectedModel) ? (
+											<Loader
+												variant="loading-dots"
+												size="sm"
+												text="Thinking"
+											/>
+										) : (
+											<Loader variant="typing" size="sm" />
+										)}
+									</div>
+								</div>
 							)}
 					</ChatContainerContent>
 					<div className="absolute right-4 bottom-4">
@@ -123,6 +200,33 @@ export default function ChatPage() {
 							placeholder="Ask me anything..."
 							className="pr-14"
 						/>
+						<div className="flex items-center gap-3 px-2">
+							<Select value={selectedModel} onValueChange={setSelectedModel}>
+								<SelectTrigger className="w-[200px] border-0 shadow-none focus:ring-0">
+									<SelectValue placeholder="Select model" />
+								</SelectTrigger>
+								<SelectContent>
+									{AI_MODELS.map((model) => (
+										<SelectItem key={model.value} value={model.value}>
+											{model.label}
+										</SelectItem>
+									))}
+								</SelectContent>
+							</Select>
+							{supportsReasoning && (
+								<label className="flex items-center gap-2 cursor-pointer">
+									<input
+										type="checkbox"
+										checked={enableReasoning}
+										onChange={(e) => setEnableReasoning(e.target.checked)}
+										className="rounded border-muted-foreground"
+									/>
+									<span className="text-sm text-muted-foreground">
+										Reasoning
+									</span>
+								</label>
+							)}
+						</div>
 					</PromptInput>
 					<Button
 						type="submit"

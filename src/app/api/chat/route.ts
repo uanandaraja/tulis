@@ -2,6 +2,7 @@ import { openrouter } from "@openrouter/ai-sdk-provider";
 import { convertToModelMessages, streamText, type UIMessage } from "ai";
 import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
+import { DEFAULT_MODEL } from "@/lib/constants/models";
 
 export async function POST(req: Request) {
 	const headersList = await headers();
@@ -13,16 +14,34 @@ export async function POST(req: Request) {
 		return new Response("Unauthorized", { status: 401 });
 	}
 
-	const { messages }: { messages: UIMessage[] } = await req.json();
+	const {
+		messages,
+		selectedModel,
+		enableReasoning,
+	}: {
+		messages: UIMessage[];
+		selectedModel?: string;
+		enableReasoning?: boolean;
+	} = await req.json();
 
-	const model = process.env.OPENROUTER_MODEL || "openai/gpt-4o";
+	const model = selectedModel || DEFAULT_MODEL;
 
 	const result = streamText({
 		model: openrouter(model),
 		messages: convertToModelMessages(messages),
+		providerOptions: enableReasoning
+			? {
+					openrouter: {
+						reasoning: {
+							max_tokens: 5000,
+						},
+					},
+				}
+			: undefined,
 	});
 
 	return result.toUIMessageStreamResponse({
 		originalMessages: messages,
+		sendReasoning: true,
 	});
 }
