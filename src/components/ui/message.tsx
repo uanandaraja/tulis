@@ -85,11 +85,10 @@ const MessageContent = ({
     a: ({ href, children: linkChildren }) => {
       if (!href) return <a>{linkChildren}</a>
       const source = sources.find(s => s.url === href)
-      const linkText = Array.isArray(linkChildren) ? linkChildren[0] : linkChildren
-      if (source && typeof linkText === 'string') {
+      if (source) {
         return (
           <Source href={href}>
-            <SourceTrigger showFavicon label={linkText} />
+            <SourceTrigger showFavicon label="" className="px-1" />
             <SourceContent title={source.title} description={href} />
           </Source>
         )
