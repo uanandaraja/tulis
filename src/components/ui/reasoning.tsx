@@ -133,20 +133,11 @@ function ReasoningContent({
   useEffect(() => {
     if (!contentRef.current || !innerRef.current) return
 
-    const observer = new ResizeObserver(() => {
-      if (contentRef.current && innerRef.current && isOpen) {
-        contentRef.current.style.maxHeight = `${innerRef.current.scrollHeight}px`
-      }
-    })
-
-    observer.observe(innerRef.current)
-
     if (isOpen) {
-      contentRef.current.style.maxHeight = `${innerRef.current.scrollHeight}px`
+      // Remove max-height when open to allow full content
+      contentRef.current.style.maxHeight = "none"
     }
-
-    return () => observer.disconnect()
-  }, [isOpen])
+  }, [isOpen, children])
 
   const content = markdown ? (
     <Markdown>{children as string}</Markdown>
@@ -162,7 +153,7 @@ function ReasoningContent({
         className
       )}
       style={{
-        maxHeight: isOpen ? contentRef.current?.scrollHeight : "0px",
+        maxHeight: isOpen ? "none" : "0px",
       }}
       {...props}
     >

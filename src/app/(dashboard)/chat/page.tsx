@@ -3,9 +3,16 @@
 import { useChat } from "@ai-sdk/react";
 import type { UIMessage } from "ai";
 import { DefaultChatTransport } from "ai";
-import { ArrowUp } from "lucide-react";
+import { ArrowUp, Brain } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { Toggle } from "@/components/ui/toggle";
+import {
+	Tooltip,
+	TooltipContent,
+	TooltipProvider,
+	TooltipTrigger,
+} from "@/components/ui/tooltip";
 import {
 	AI_MODELS,
 	DEFAULT_MODEL,
@@ -214,17 +221,33 @@ export default function ChatPage() {
 								</SelectContent>
 							</Select>
 							{supportsReasoning && (
-								<label className="flex items-center gap-2 cursor-pointer">
-									<input
-										type="checkbox"
-										checked={enableReasoning}
-										onChange={(e) => setEnableReasoning(e.target.checked)}
-										className="rounded border-muted-foreground"
-									/>
-									<span className="text-sm text-muted-foreground">
-										Reasoning
-									</span>
-								</label>
+								<TooltipProvider>
+									<Tooltip>
+										<TooltipTrigger asChild>
+											<Toggle
+												pressed={enableReasoning}
+												onPressedChange={setEnableReasoning}
+												aria-label="Toggle reasoning"
+												size="sm"
+												variant="outline"
+												className={
+													enableReasoning
+														? "bg-zinc-800 text-white dark:bg-zinc-200 dark:text-black"
+														: ""
+												}
+											>
+												<Brain className="h-4 w-4" />
+											</Toggle>
+										</TooltipTrigger>
+										<TooltipContent>
+											<p>
+												{enableReasoning
+													? "Reasoning enabled - model will show thinking process"
+													: "Enable reasoning to see model's thinking process"}
+											</p>
+										</TooltipContent>
+									</Tooltip>
+								</TooltipProvider>
 							)}
 						</div>
 					</PromptInput>
