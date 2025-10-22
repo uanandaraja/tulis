@@ -8,6 +8,7 @@ import {
 import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
 import { DEFAULT_MODEL } from "@/lib/constants/models";
+import { SYSTEM_PROMPT } from "@/lib/prompts";
 import { tools } from "@/server/tools";
 
 export async function POST(req: Request) {
@@ -32,19 +33,10 @@ export async function POST(req: Request) {
 
 	const model = selectedModel || DEFAULT_MODEL;
 
-	const systemPrompt = `You are a helpful assistant. When you use the web search tool to find information, you MUST cite your sources.
-
-IMPORTANT CITATION FORMAT: Place citations AFTER periods at the end of sentences. Use separate square brackets for each citation like [1] [2] [3], NOT comma-separated like [1, 2, 3].
-
-CORRECT FORMAT: "The company announced new features. [1] They plan to expand next year. [2] [3]"
-INCORRECT FORMAT: "The company announced new features [1, 2]. They plan to expand next year [3]."
-
-This ensures sources display correctly inline in the user interface.`;
-
 	const result = streamText({
 		model: openrouter(model),
 		messages: convertToModelMessages(messages),
-		system: systemPrompt,
+		system: SYSTEM_PROMPT,
 		tools,
 		stopWhen: stepCountIs(10),
 		providerOptions: enableReasoning
