@@ -26,7 +26,7 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select";
-import { Tool, type ToolPart } from "@/components/ui/tool";
+import { Tool } from "@/components/ui/tool";
 import {
 	Tooltip,
 	TooltipContent,
@@ -38,6 +38,11 @@ import {
 	DEFAULT_MODEL,
 	modelSupportsReasoning,
 } from "@/lib/constants/models";
+import {
+	isWebSearchToolOutput,
+	toToolPart,
+	type WebSearchToolUIPart,
+} from "@/lib/types/ai";
 
 export default function ChatPage() {
 	const [input, setInput] = useState("");
@@ -95,45 +100,23 @@ export default function ChatPage() {
 									.join("\n");
 
 								const toolParts = message.parts.filter(isToolUIPart);
+								const webSearchParts = toolParts.filter(
+									(part): part is WebSearchToolUIPart =>
+										part.type === "tool-webSearch",
+								);
 
-								const allExaSources = toolParts.flatMap((part) => {
+								const allExaSources = webSearchParts.flatMap((part) => {
 									if (
-										part.type === "tool-webSearch" &&
 										part.state === "output-available" &&
-										part.output &&
-										typeof part.output === "object" &&
-										"success" in part.output &&
-										(part.output as Record<string, unknown>).success &&
-										"results" in part.output
+										isWebSearchToolOutput(part.output)
 									) {
-										const results = (part.output as Record<string, unknown>)
-											.results as Array<{
-											id: number;
-											url: string;
-											title: string;
-											snippet: string;
-										}>;
-										return results
-											.filter(
-												(result: {
-													id: number;
-													url: string;
-													title: string;
-													snippet: string;
-												}) => result.url && result.title,
-											)
-											.map(
-												(result: {
-													id: number;
-													url: string;
-													title: string;
-													snippet: string;
-												}) => ({
-													id: result.id,
-													url: result.url,
-													title: result.title,
-												}),
-											);
+										return part.output.results
+											.filter((result) => result.url && result.title)
+											.map((result) => ({
+												id: result.id,
+												url: result.url,
+												title: result.title,
+											}));
 									}
 									return [];
 								});
@@ -184,22 +167,11 @@ export default function ChatPage() {
 													</ReasoningContent>
 												</Reasoning>
 											)}
-											{toolParts.map((toolPart) => {
-												if (toolPart.type !== "tool-webSearch") return null;
-
-												const part: ToolPart = {
-													type: toolPart.type,
-													state: toolPart.state,
-													input: toolPart.input as Record<string, unknown>,
-													output: toolPart.output as Record<string, unknown>,
-													toolCallId: toolPart.toolCallId,
-													errorText: toolPart.errorText,
-												};
-
+											{webSearchParts.map((toolPart) => {
 												return (
 													<Tool
 														key={toolPart.toolCallId}
-														toolPart={part}
+														toolPart={toToolPart(toolPart)}
 														defaultOpen={toolPart.state === "output-available"}
 														displayName="Searching the web"
 														icon={<Globe className="h-4 w-4 text-blue-500" />}
