@@ -1,32 +1,24 @@
 import { tool } from "ai";
-import Exa from "exa-js";
 import { z } from "zod";
-
-const exaApiKey = process.env.EXA_API_KEY;
-
-if (!exaApiKey) {
-	throw new Error("EXA_API_KEY environment variable is not set");
-}
-
-const exa = new Exa(exaApiKey);
+import { exa } from "@/lib/exa";
 
 export const webSearchTool = tool({
 	description:
 		"Search the web for current information, news, articles, and research. Use this when you need up-to-date information that may not be in your training data.",
 	inputSchema: z.object({
 		query: z.string().describe("The search query to find relevant web content"),
-		numResults: z
-			.number()
-			.min(1)
-			.max(10)
-			.default(5)
-			.describe("Number of results to return (1-10)"),
 	}),
-	execute: async ({ query, numResults }) => {
+	execute: async ({ query }) => {
+		const numResults = 10;
 		try {
+			const oneMonthAgo = new Date();
+			oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
+
 			const searchResponse = await exa.searchAndContents(query, {
 				numResults,
 				type: "auto",
+				useAutoprompt: true,
+				startPublishedDate: oneMonthAgo.toISOString(),
 				text: {
 					maxCharacters: 1000,
 				},

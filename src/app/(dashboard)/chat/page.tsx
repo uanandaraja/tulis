@@ -26,7 +26,7 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select";
-import { Source } from "@/components/ui/source";
+import { Source, SourceTrigger, SourceContent } from "@/components/ui/source";
 import { Tool } from "@/components/ui/tool";
 import {
 	Tooltip,
@@ -103,6 +103,36 @@ export default function ChatPage() {
 									(part) => part.type === "source",
 								);
 
+								const exaSources = toolParts
+									.filter((part) => part.type === "tool-webSearch")
+									.flatMap((part) => {
+										if (
+											part.state === "output-available" &&
+											part.output?.success &&
+											part.output?.results
+										) {
+											return part.output.results
+												.filter(
+													(result: {
+														url: string;
+														title: string;
+														snippet: string;
+													}) => result.url && result.title,
+												)
+												.map(
+													(result: {
+														url: string;
+														title: string;
+														snippet: string;
+													}) => ({
+														url: result.url,
+														title: result.title,
+													}),
+												);
+										}
+										return [];
+									});
+
 								if (
 									!textContent.trim() &&
 									reasoningParts.length === 0 &&
@@ -158,18 +188,35 @@ export default function ChatPage() {
 													{textContent}
 												</MessageContent>
 											)}
-											{sourceParts.length > 0 && (
+											{(sourceParts.length > 0 || exaSources.length > 0) && (
 												<div className="flex flex-wrap gap-2">
 													{sourceParts.map((sourcePart) => {
 														if (sourcePart.type !== "source") return null;
 														return (
 															<Source
 																key={sourcePart.source.id}
-																url={sourcePart.source.url}
-																title={sourcePart.source.title}
-															/>
+																href={sourcePart.source.url}
+															>
+																<SourceTrigger showFavicon />
+																<SourceContent
+																	title={sourcePart.source.title || "Source"}
+																	description={sourcePart.source.url}
+																/>
+															</Source>
 														);
 													})}
+													{exaSources.map((source, idx) => (
+														<Source
+															key={`exa-${idx}-${source.url}`}
+															href={source.url}
+														>
+															<SourceTrigger showFavicon />
+															<SourceContent
+																title={source.title}
+																description={source.url}
+															/>
+														</Source>
+													))}
 												</div>
 											)}
 										</div>

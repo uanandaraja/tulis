@@ -46,15 +46,6 @@ export async function POST(req: Request) {
 					},
 				}
 			: undefined,
-		onStepFinish({ text, toolCalls, toolResults, finishReason, usage }) {
-			console.log("Step finished:", {
-				text: text?.slice(0, 100),
-				toolCalls: toolCalls?.map((tc) => tc.toolName),
-				toolResults: toolResults?.length,
-				finishReason,
-				usage,
-			});
-		},
 	});
 
 	return result.toUIMessageStreamResponse({
