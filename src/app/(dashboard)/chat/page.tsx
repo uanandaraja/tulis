@@ -3,7 +3,14 @@
 import { useChat } from "@ai-sdk/react";
 import type { UIMessage } from "ai";
 import { DefaultChatTransport, isToolUIPart } from "ai";
-import { ArrowUp, Brain, FileEdit, FileText, Globe } from "lucide-react";
+import {
+	ArrowUp,
+	Brain,
+	FileEdit,
+	FileText,
+	Globe,
+	ListChecks,
+} from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import {
 	DocumentEditor,
@@ -17,6 +24,7 @@ import {
 import { Loader } from "@/components/ui/loader";
 import { MessageContent } from "@/components/ui/message";
 import { EditorArtifact } from "@/components/ui/editor-artifact";
+import { PlanSteps } from "@/components/ui/plan-steps";
 import { PromptInput, PromptInputTextarea } from "@/components/ui/prompt-input";
 import {
 	Reasoning,
@@ -47,6 +55,7 @@ import {
 	getToolConfig,
 	isWebSearchToolOutput,
 	toToolPart,
+	type PlanStepsToolOutput,
 	type WebSearchToolUIPart,
 	type WriteToEditorToolOutput,
 } from "@/lib/types/ai";
@@ -55,6 +64,7 @@ const TOOL_ICONS: Record<string, React.ReactNode> = {
 	globe: <Globe className="h-4 w-4 text-blue-500" />,
 	fileText: <FileText className="h-4 w-4 text-amber-500" />,
 	fileEdit: <FileEdit className="h-4 w-4 text-purple-500" />,
+	listChecks: <ListChecks className="h-4 w-4 text-green-500" />,
 };
 
 export default function ChatPage() {
@@ -158,6 +168,18 @@ export default function ChatPage() {
 									.join("\n");
 
 								const toolParts = message.parts.filter(isToolUIPart);
+
+								const planStepsParts = toolParts.filter(
+									(part) =>
+										part.type === "tool-planSteps" &&
+										part.state === "output-available",
+								);
+								const latestPlanSteps =
+									planStepsParts[planStepsParts.length - 1];
+
+								const nonPlanToolParts = toolParts.filter(
+									(part) => part.type !== "tool-planSteps",
+								);
 								const webSearchParts = toolParts.filter(
 									(part): part is WebSearchToolUIPart =>
 										part.type === "tool-webSearch",
@@ -225,7 +247,13 @@ export default function ChatPage() {
 													</ReasoningContent>
 												</Reasoning>
 											)}
-											{toolParts.map((toolPart) => {
+											{latestPlanSteps && (
+												<PlanSteps
+													key={latestPlanSteps.toolCallId}
+													output={latestPlanSteps.output as PlanStepsToolOutput}
+												/>
+											)}
+											{nonPlanToolParts.map((toolPart) => {
 												const config = getToolConfig(toolPart.type);
 												const icon = config.iconName
 													? TOOL_ICONS[config.iconName]

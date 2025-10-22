@@ -1,5 +1,4 @@
 import type { ToolUIPart } from "ai";
-import type { ReactNode } from "react";
 import type { ToolPart } from "@/components/ui/tool";
 
 export type WebSearchToolUIPart = ToolUIPart & {
@@ -33,6 +32,24 @@ export type ScrapeUrlToolOutput = {
 	};
 };
 
+export type WriteToEditorToolOutput = {
+	success: boolean;
+	action: "set" | "append" | "prepend";
+	content: string;
+	title?: string;
+	message: string;
+};
+
+export type PlanStepsToolOutput = {
+	success: boolean;
+	steps: Array<{
+		title: string;
+		description: string;
+		status: "pending" | "in_progress" | "completed";
+	}>;
+	message: string;
+};
+
 export interface ToolConfig {
 	displayName: string;
 	iconName?: "globe" | "fileText" | string;
@@ -50,6 +67,16 @@ const TOOL_CONFIGS: Record<string, ToolConfig> = {
 		iconName: "fileText",
 		iconColor: "text-amber-500",
 	},
+	"tool-writeToEditor": {
+		displayName: "Writing to editor",
+		iconName: "fileEdit",
+		iconColor: "text-purple-500",
+	},
+	"tool-planSteps": {
+		displayName: "Planning steps",
+		iconName: "listChecks",
+		iconColor: "text-green-500",
+	},
 };
 
 export function getToolConfig(toolType: string): ToolConfig {
@@ -58,15 +85,6 @@ export function getToolConfig(toolType: string): ToolConfig {
 			displayName: toolType.replace(/^tool-/, ""),
 		}
 	);
-}
-
-export function getToolIcon(iconName?: string, iconColor?: string): ReactNode {
-	if (!iconName) return null;
-
-	// Dynamically import and return the icon
-	// This requires the icon components to be passed in from the component
-	// So we return the config instead and let the component handle it
-	return null;
 }
 
 export function toToolPart(toolUIPart: ToolUIPart): ToolPart {
