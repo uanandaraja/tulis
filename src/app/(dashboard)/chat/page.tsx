@@ -200,6 +200,18 @@ export default function ChatPage() {
 									return [];
 								});
 
+								// Get only the latest plan steps to avoid showing outdated plans
+								const planStepsParts = message.parts.filter(
+									(part) =>
+										isToolUIPart(part) &&
+										part.type === "tool-planSteps" &&
+										part.state === "output-available",
+								);
+								const latestPlanStepsPart =
+									planStepsParts.length > 0
+										? planStepsParts[planStepsParts.length - 1]
+										: null;
+
 								return (
 									<div key={message.id} className="flex justify-start">
 										<div className="flex flex-col gap-3 max-w-full">
@@ -229,11 +241,13 @@ export default function ChatPage() {
 													);
 												}
 
-												// Render plan steps
+												// Render plan steps (only the latest one)
 												if (
 													isToolUIPart(part) &&
 													part.type === "tool-planSteps" &&
-													part.state === "output-available"
+													part.state === "output-available" &&
+													latestPlanStepsPart &&
+													part.toolCallId === latestPlanStepsPart.toolCallId
 												) {
 													const output = part.output as PlanStepsToolOutput;
 													return (
