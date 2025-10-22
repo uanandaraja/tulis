@@ -4,7 +4,7 @@ import { exa } from "@/lib/exa";
 
 export const webSearchTool = tool({
 	description:
-		"Search the web for current information, news, articles, and research. Use this when you need up-to-date information that may not be in your training data. IMPORTANT: When using results from this tool, cite them by their ID in square brackets at the END of sentences or clauses, with each citation as a separate reference like [1] [2] [3], NOT as comma-separated lists like [1, 2, 3]. For example: 'The company announced new features [1]. They plan to expand next year [2] [3].' This allows sources to be displayed inline to the user.",
+		"Search the web for current information, news, articles, and research. Use this when you need up-to-date information that may not be in your training data. IMPORTANT: When using results from this tool, cite them by their ID in square brackets AFTER the period at the end of sentences, with each citation as a separate reference like [1] [2] [3], NOT as comma-separated lists like [1, 2, 3]. For example: 'The company announced new features. [1] They plan to expand next year. [2] [3]' This allows sources to be displayed inline to the user.",
 	inputSchema: z.object({
 		query: z.string().describe("The search query to find relevant web content"),
 	}),
