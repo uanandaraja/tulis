@@ -39,6 +39,7 @@ import {
 	modelSupportsReasoning,
 } from "@/lib/constants/models";
 import {
+	getToolConfig,
 	isWebSearchToolOutput,
 	toToolPart,
 	type WebSearchToolUIPart,
@@ -167,17 +168,20 @@ export default function ChatPage() {
 													</ReasoningContent>
 												</Reasoning>
 											)}
-											{webSearchParts.map((toolPart) => {
+											{toolParts.map((toolPart) => {
+												const config = getToolConfig(toolPart.type);
+												const icon =
+													toolPart.type === "tool-webSearch" ? (
+														<Globe className="h-4 w-4 text-blue-500" />
+													) : null;
+
 												return (
 													<Tool
 														key={toolPart.toolCallId}
 														toolPart={toToolPart(toolPart)}
-														defaultOpen={
-															toolPart.state === "input-streaming" ||
-															toolPart.state === "output-available"
-														}
-														displayName="Searching the web"
-														icon={<Globe className="h-4 w-4 text-blue-500" />}
+														defaultOpen={false}
+														displayName={config.displayName}
+														icon={icon}
 													/>
 												);
 											})}

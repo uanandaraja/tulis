@@ -1,4 +1,5 @@
 import type { ToolUIPart } from "ai";
+import type { ReactNode } from "react";
 import type { ToolPart } from "@/components/ui/tool";
 
 export type WebSearchToolUIPart = ToolUIPart & {
@@ -19,6 +20,40 @@ export type WebSearchToolOutput = {
 	message?: string;
 	totalResults?: number;
 };
+
+export type ScrapeUrlToolOutput = {
+	success: boolean;
+	url: string;
+	content?: string;
+	error?: string;
+	metadata?: {
+		title?: string;
+		description?: string;
+		language?: string;
+	};
+};
+
+export interface ToolConfig {
+	displayName: string;
+	icon?: ReactNode;
+}
+
+const TOOL_CONFIGS: Record<string, ToolConfig> = {
+	"tool-webSearch": {
+		displayName: "Searching the web",
+	},
+	"tool-scrapeUrl": {
+		displayName: "Scraping URL",
+	},
+};
+
+export function getToolConfig(toolType: string): ToolConfig {
+	return (
+		TOOL_CONFIGS[toolType] || {
+			displayName: toolType.replace(/^tool-/, ""),
+		}
+	);
+}
 
 export function toToolPart(toolUIPart: ToolUIPart): ToolPart {
 	return {
