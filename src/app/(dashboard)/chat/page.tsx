@@ -170,7 +170,7 @@ export default function ChatPage() {
 										<div key={message.id} className="flex justify-end">
 											<MessageContent
 												markdown={false}
-												className="prose dark:prose-invert max-w-none"
+												className="prose dark:prose-invert max-w-xl p-4"
 											>
 												{textContent}
 											</MessageContent>
@@ -301,7 +301,7 @@ export default function ChatPage() {
 														<MessageContent
 															key={`text-${index}`}
 															markdown={true}
-															className="prose dark:prose-invert max-w-none prose-pre:bg-muted prose-pre:border prose-pre:border-border p-4"
+															className="prose dark:prose-invert max-w-none prose-pre:bg-muted prose-pre:border prose-pre:border-border bg-transparent p-0"
 															sources={exaSources}
 														>
 															{textContent}
