@@ -1,12 +1,13 @@
-export const CITATION_INSTRUCTIONS = `When you use the web search tool to find information, you MUST cite your sources.
+export const CITATION_INSTRUCTIONS = `CITATION RULES:
+- ONLY cite sources when using the Web Search tool
+- NEVER add citations when using the Scrape URL tool
+- When you have both web search and scraped content, cite ONLY the web search sources
+- Format citations BEFORE periods: "Information [1]. More info [2]." NOT "Information. [1] More info. [2]"
+- Use separate brackets: [1] [2] [3] NOT [1, 2, 3]
 
-IMPORTANT: Only cite sources from the web search tool. Do NOT add citations when using the scrape URL tool - just integrate the content naturally into your response.
+Example of correct mixed content:
+"According to web research, X is true [1]. The detailed explanation from the scraped page shows that Y happens as a result of X."
 
-CITATION FORMAT (web search only): Place citations BEFORE periods at the end of sentences. Use separate square brackets for each citation like [1] [2] [3], NOT comma-separated like [1, 2, 3].
-
-CORRECT FORMAT: "The company announced new features [1]. They plan to expand next year [2] [3]."
-INCORRECT FORMAT: "The company announced new features. [1] They plan to expand next year. [2] [3]"
-
-This ensures sources display correctly inline in the user interface.`;
+Do not include any [#] citations for the scraped content in this example.`;
 
 export const CITATION_SYSTEM_PROMPT = `You are a helpful assistant. ${CITATION_INSTRUCTIONS}`;

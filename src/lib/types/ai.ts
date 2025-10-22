@@ -35,15 +35,20 @@ export type ScrapeUrlToolOutput = {
 
 export interface ToolConfig {
 	displayName: string;
-	icon?: ReactNode;
+	iconName?: "globe" | "fileText" | string;
+	iconColor?: string;
 }
 
 const TOOL_CONFIGS: Record<string, ToolConfig> = {
 	"tool-webSearch": {
 		displayName: "Searching the web",
+		iconName: "globe",
+		iconColor: "text-blue-500",
 	},
 	"tool-scrapeUrl": {
 		displayName: "Scraping URL",
+		iconName: "fileText",
+		iconColor: "text-amber-500",
 	},
 };
 
@@ -53,6 +58,15 @@ export function getToolConfig(toolType: string): ToolConfig {
 			displayName: toolType.replace(/^tool-/, ""),
 		}
 	);
+}
+
+export function getToolIcon(iconName?: string, iconColor?: string): ReactNode {
+	if (!iconName) return null;
+
+	// Dynamically import and return the icon
+	// This requires the icon components to be passed in from the component
+	// So we return the config instead and let the component handle it
+	return null;
 }
 
 export function toToolPart(toolUIPart: ToolUIPart): ToolPart {

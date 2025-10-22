@@ -3,7 +3,7 @@
 import { useChat } from "@ai-sdk/react";
 import type { UIMessage } from "ai";
 import { DefaultChatTransport, isToolUIPart } from "ai";
-import { ArrowUp, Brain, Globe } from "lucide-react";
+import { ArrowUp, Brain, FileText, Globe } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -44,6 +44,11 @@ import {
 	toToolPart,
 	type WebSearchToolUIPart,
 } from "@/lib/types/ai";
+
+const TOOL_ICONS: Record<string, React.ReactNode> = {
+	globe: <Globe className="h-4 w-4 text-blue-500" />,
+	fileText: <FileText className="h-4 w-4 text-amber-500" />,
+};
 
 export default function ChatPage() {
 	const [input, setInput] = useState("");
@@ -170,10 +175,9 @@ export default function ChatPage() {
 											)}
 											{toolParts.map((toolPart) => {
 												const config = getToolConfig(toolPart.type);
-												const icon =
-													toolPart.type === "tool-webSearch" ? (
-														<Globe className="h-4 w-4 text-blue-500" />
-													) : null;
+												const icon = config.iconName
+													? TOOL_ICONS[config.iconName]
+													: null;
 
 												return (
 													<Tool
