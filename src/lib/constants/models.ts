@@ -5,6 +5,11 @@ export const AI_MODELS = [
 		supportsReasoning: false,
 	},
 	{
+		value: "anthropic/claude-haiku-4.5",
+		label: "Claude Haiku 4.5",
+		supportsReasoning: false,
+	},
+	{
 		value: "x-ai/grok-4-fast",
 		label: "Grok 4 Fast",
 		supportsReasoning: false,

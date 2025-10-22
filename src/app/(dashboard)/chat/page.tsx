@@ -10,6 +10,7 @@ import {
 	FileText,
 	Globe,
 	ListChecks,
+	X,
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import {
@@ -154,35 +155,33 @@ export default function ChatPage() {
 							</div>
 						) : (
 							messages.map((message: UIMessage) => {
-								const textContent = message.parts
-									.filter((part) => part.type === "text")
-									.map((part) => ("text" in part ? part.text : ""))
-									.join("");
+								if (message.parts.length === 0) return null;
 
-								const reasoningParts = message.parts.filter(
-									(part) => part.type === "reasoning",
-								);
+								const isUserMessage = message.role === "user";
 
-								const reasoningText = reasoningParts
-									.map((part) => ("text" in part ? part.text : ""))
-									.join("\n");
+								// For user messages, just show text
+								if (isUserMessage) {
+									const textContent = message.parts
+										.filter((part) => part.type === "text")
+										.map((part) => ("text" in part ? part.text : ""))
+										.join("");
 
-								const toolParts = message.parts.filter(isToolUIPart);
+									return (
+										<div key={message.id} className="flex justify-end">
+											<MessageContent
+												markdown={false}
+												className="prose dark:prose-invert max-w-none"
+											>
+												{textContent}
+											</MessageContent>
+										</div>
+									);
+								}
 
-								const planStepsParts = toolParts.filter(
-									(part) =>
-										part.type === "tool-planSteps" &&
-										part.state === "output-available",
-								);
-								const latestPlanSteps =
-									planStepsParts[planStepsParts.length - 1];
-
-								const nonPlanToolParts = toolParts.filter(
-									(part) => part.type !== "tool-planSteps",
-								);
-								const webSearchParts = toolParts.filter(
+								// For assistant messages, render parts in chronological order
+								const webSearchParts = message.parts.filter(
 									(part): part is WebSearchToolUIPart =>
-										part.type === "tool-webSearch",
+										isToolUIPart(part) && part.type === "tool-webSearch",
 								);
 
 								const allExaSources = webSearchParts.flatMap((part) => {
@@ -201,98 +200,117 @@ export default function ChatPage() {
 									return [];
 								});
 
-								const citedSourceIds = new Set(
-									(textContent.match(/\[(\d+)\]/g) || []).map((match) =>
-										parseInt(match.slice(1, -1), 10),
-									),
-								);
-
-								const exaSources = allExaSources.filter((source) =>
-									citedSourceIds.has(source.id),
-								);
-
-								if (
-									!textContent.trim() &&
-									reasoningParts.length === 0 &&
-									toolParts.length === 0
-								)
-									return null;
-
-								const isUserMessage = message.role === "user";
-								const showReasoning =
-									reasoningParts.length > 0 &&
-									modelSupportsReasoning(selectedModel);
-
 								return (
-									<div
-										key={message.id}
-										className={`flex ${isUserMessage ? "justify-end" : "justify-start"}`}
-									>
-										<div className="flex flex-col gap-2 max-w-full">
-											{(showReasoning ||
-												(isStreaming &&
-													enableReasoning &&
-													supportsReasoning)) && (
-												<Reasoning
-													isStreaming={
-														isStreaming &&
-														enableReasoning &&
-														supportsReasoning &&
-														message.role === "assistant"
-													}
-												>
-													<ReasoningTrigger>Show reasoning</ReasoningTrigger>
-													<ReasoningContent markdown>
-														{reasoningText || "Thinking..."}
-													</ReasoningContent>
-												</Reasoning>
-											)}
-											{latestPlanSteps && (
-												<PlanSteps
-													key={latestPlanSteps.toolCallId}
-													output={latestPlanSteps.output as PlanStepsToolOutput}
-												/>
-											)}
-											{nonPlanToolParts.map((toolPart) => {
-												const config = getToolConfig(toolPart.type);
-												const icon = config.iconName
-													? TOOL_ICONS[config.iconName]
-													: null;
-
+									<div key={message.id} className="flex justify-start">
+										<div className="flex flex-col gap-3 max-w-full">
+											{message.parts.map((part, index) => {
+												// Render reasoning
 												if (
-													toolPart.type === "tool-writeToEditor" &&
-													toolPart.state === "output-available"
+													part.type === "reasoning" &&
+													modelSupportsReasoning(selectedModel)
 												) {
-													const output =
-														toolPart.output as WriteToEditorToolOutput;
+													const reasoningText = "text" in part ? part.text : "";
+													return (
+														<Reasoning
+															key={`reasoning-${index}`}
+															defaultOpen={
+																isStreaming &&
+																enableReasoning &&
+																supportsReasoning
+															}
+														>
+															<ReasoningTrigger>
+																Show reasoning
+															</ReasoningTrigger>
+															<ReasoningContent markdown>
+																{reasoningText || "Thinking..."}
+															</ReasoningContent>
+														</Reasoning>
+													);
+												}
+
+												// Render plan steps
+												if (
+													isToolUIPart(part) &&
+													part.type === "tool-planSteps" &&
+													part.state === "output-available"
+												) {
+													const output = part.output as PlanStepsToolOutput;
+													return (
+														<PlanSteps
+															key={`plan-${part.toolCallId}`}
+															output={output}
+														/>
+													);
+												}
+
+												// Render write to editor artifact
+												if (
+													isToolUIPart(part) &&
+													part.type === "tool-writeToEditor" &&
+													part.state === "output-available"
+												) {
+													const output = part.output as WriteToEditorToolOutput;
 													return (
 														<EditorArtifact
-															key={toolPart.toolCallId}
+															key={`editor-${part.toolCallId}`}
 															title={output.title}
 															onShowDocumentAction={() => setShowEditor(true)}
 														/>
 													);
 												}
 
-												return (
-													<Tool
-														key={toolPart.toolCallId}
-														toolPart={toToolPart(toolPart)}
-														defaultOpen={false}
-														displayName={config.displayName}
-														icon={icon}
-													/>
-												);
+												// Render other tools
+												if (
+													isToolUIPart(part) &&
+													part.type !== "tool-planSteps" &&
+													part.type !== "tool-writeToEditor"
+												) {
+													const config = getToolConfig(part.type);
+													const icon = config.iconName
+														? TOOL_ICONS[config.iconName]
+														: null;
+													return (
+														<Tool
+															key={`tool-${part.toolCallId}`}
+															toolPart={toToolPart(part)}
+															defaultOpen={false}
+															displayName={config.displayName}
+															icon={icon}
+														/>
+													);
+												}
+
+												// Render text
+												if (
+													part.type === "text" &&
+													"text" in part &&
+													part.text.trim()
+												) {
+													const textContent = part.text;
+													const citedSourceIds = new Set(
+														(textContent.match(/\[(\d+)\]/g) || []).map(
+															(match) => parseInt(match.slice(1, -1), 10),
+														),
+													);
+													const exaSources = allExaSources.filter((source) =>
+														citedSourceIds.has(source.id),
+													);
+
+													return (
+														<MessageContent
+															key={`text-${index}`}
+															markdown={true}
+															className="prose dark:prose-invert max-w-none prose-pre:bg-muted prose-pre:border prose-pre:border-border p-4"
+															sources={exaSources}
+														>
+															{textContent}
+														</MessageContent>
+													);
+												}
+
+												return null;
 											})}
-											{textContent && (
-												<MessageContent
-													markdown={!isUserMessage}
-													className={`prose dark:prose-invert max-w-none prose-pre:bg-muted prose-pre:border prose-pre:border-border ${!isUserMessage ? "p-4" : ""}`}
-													sources={exaSources}
-												>
-													{textContent}
-												</MessageContent>
-											)}
 										</div>
 									</div>
 								);
@@ -412,16 +430,15 @@ export default function ChatPage() {
 			</div>
 
 			{showEditor && hasEditorContent && (
-				<div className="flex flex-col flex-1 min-h-0 border-l">
-					<div className="flex items-center justify-end p-2 border-b">
-						<Button
-							variant="ghost"
-							size="sm"
-							onClick={() => setShowEditor(false)}
-						>
-							Hide Editor
-						</Button>
-					</div>
+				<div className="flex flex-col flex-1 min-h-0 border-l relative">
+					<Button
+						variant="ghost"
+						size="icon"
+						onClick={() => setShowEditor(false)}
+						className="absolute top-2 right-2 z-10 h-8 w-8 rounded-full hover:bg-muted"
+					>
+						<X className="h-4 w-4" />
+					</Button>
 					<div className="flex-1 overflow-auto">
 						<DocumentEditor
 							ref={editorRef}
