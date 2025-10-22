@@ -3,7 +3,7 @@
 import { useChat } from "@ai-sdk/react";
 import type { UIMessage } from "ai";
 import { DefaultChatTransport } from "ai";
-import { ArrowUp, Brain } from "lucide-react";
+import { ArrowUp, Brain, Globe } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -26,7 +26,7 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select";
-import { Source, SourceTrigger, SourceContent } from "@/components/ui/source";
+import { Source, SourceContent, SourceTrigger } from "@/components/ui/source";
 import { Tool } from "@/components/ui/tool";
 import {
 	Tooltip,
@@ -150,7 +150,7 @@ export default function ChatPage() {
 										key={message.id}
 										className={`flex ${isUserMessage ? "justify-end" : "justify-start"}`}
 									>
-										<div className="flex flex-col gap-2">
+										<div className="flex flex-col gap-2 max-w-full">
 											{(showReasoning ||
 												(isStreaming &&
 													enableReasoning &&
@@ -177,6 +177,8 @@ export default function ChatPage() {
 														key={toolPart.toolCallId}
 														toolPart={toolPart}
 														defaultOpen={toolPart.state === "output-available"}
+														displayName="Searching the web"
+														icon={<Globe className="h-4 w-4 text-blue-500" />}
 													/>
 												);
 											})}

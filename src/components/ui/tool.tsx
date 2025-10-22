@@ -1,6 +1,7 @@
 "use client"
 
 import { Button } from "@/components/ui/button"
+import { CodeBlock, CodeBlockCode } from "@/components/ui/code-block"
 import {
   Collapsible,
   CollapsibleContent,
@@ -33,9 +34,11 @@ export type ToolProps = {
   toolPart: ToolPart
   defaultOpen?: boolean
   className?: string
+  displayName?: string
+  icon?: React.ReactNode
 }
 
-const Tool = ({ toolPart, defaultOpen = false, className }: ToolProps) => {
+const Tool = ({ toolPart, defaultOpen = false, className, displayName, icon }: ToolProps) => {
   const [isOpen, setIsOpen] = useState(defaultOpen)
 
   const { state, input, output, toolCallId } = toolPart
@@ -140,9 +143,9 @@ const Tool = ({ toolPart, defaultOpen = false, className }: ToolProps) => {
             className="bg-background h-auto w-full justify-between rounded-b-none px-3 py-2 font-normal"
           >
             <div className="flex items-center gap-2">
-              {getStateIcon()}
+              {icon || getStateIcon()}
               <span className="font-mono text-sm font-medium">
-                {toolPart.type}
+                {displayName || toolPart.type}
               </span>
               {getStateBadge()}
             </div>
@@ -161,7 +164,7 @@ const Tool = ({ toolPart, defaultOpen = false, className }: ToolProps) => {
                 <h4 className="text-muted-foreground mb-2 text-sm font-medium">
                   Input
                 </h4>
-                <div className="bg-background rounded border p-2 font-mono text-sm">
+                <div className="bg-background rounded-lg border p-2 font-mono text-sm">
                   {Object.entries(input).map(([key, value]) => (
                     <div key={key} className="mb-1">
                       <span className="text-muted-foreground">{key}:</span>{" "}
@@ -177,10 +180,14 @@ const Tool = ({ toolPart, defaultOpen = false, className }: ToolProps) => {
                 <h4 className="text-muted-foreground mb-2 text-sm font-medium">
                   Output
                 </h4>
-                <div className="bg-background max-h-60 overflow-auto rounded border p-2 font-mono text-sm">
-                  <pre className="whitespace-pre-wrap">
-                    {formatValue(output)}
-                  </pre>
+                <div className="max-h-60 overflow-auto">
+                  <CodeBlock>
+                    <CodeBlockCode
+                      code={formatValue(output)}
+                      language="json"
+                      theme="github-light"
+                    />
+                  </CodeBlock>
                 </div>
               </div>
             )}
