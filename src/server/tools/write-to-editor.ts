@@ -3,7 +3,7 @@ import { z } from "zod";
 
 export const writeToEditorTool = tool({
 	description:
-		"Write content DIRECTLY to the document editor. Use this when the user asks you to write, draft, or create long-form content like articles, essays, documents, reports, or any substantial written content. IMPORTANT: Do NOT write the content in your response - ONLY use this tool. The content will appear in a rich-text editor. After calling this tool, simply acknowledge that you've written to the editor.",
+		"Write content DIRECTLY to the document editor. Use this when the user asks you to write, draft, or create long-form content like articles, essays, documents, reports, or any substantial written content. IMPORTANT: Do NOT write the content in your response - ONLY use this tool. After calling this tool, say something brief like 'Done' or 'Written to editor'.",
 	inputSchema: z.object({
 		action: z
 			.enum(["set", "append", "prepend"])
@@ -14,13 +14,12 @@ export const writeToEditorTool = tool({
 		content: z
 			.string()
 			.describe(
-				"The main body content to write (use markdown format). Do NOT include the title in the content - put it in the separate 'title' field instead.",
+				"The body content ONLY. DO NOT include the title here - it goes in the 'title' field.",
 			),
 		title: z
 			.string()
-			.optional()
 			.describe(
-				"The title/heading for the document. Keep separate from content.",
+				"The title for the document. REQUIRED. This will be displayed as the heading.",
 			),
 	}),
 	execute: async ({ action, content, title }) => {
