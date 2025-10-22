@@ -26,6 +26,8 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select";
+import { Source } from "@/components/ui/source";
+import { Tool } from "@/components/ui/tool";
 import {
 	Tooltip,
 	TooltipContent,
@@ -80,7 +82,6 @@ export default function ChatPage() {
 							</div>
 						) : (
 							messages.map((message: UIMessage) => {
-								// Extract text and reasoning parts
 								const textContent = message.parts
 									.filter((part) => part.type === "text")
 									.map((part) => ("text" in part ? part.text : ""))
@@ -94,8 +95,19 @@ export default function ChatPage() {
 									.map((part) => ("text" in part ? part.text : ""))
 									.join("\n");
 
-								// Only render if there's content
-								if (!textContent.trim() && reasoningParts.length === 0)
+								const toolParts = message.parts.filter(
+									(part) => part.type === "tool-webSearch",
+								);
+
+								const sourceParts = message.parts.filter(
+									(part) => part.type === "source",
+								);
+
+								if (
+									!textContent.trim() &&
+									reasoningParts.length === 0 &&
+									toolParts.length === 0
+								)
 									return null;
 
 								const isUserMessage = message.role === "user";
@@ -127,6 +139,17 @@ export default function ChatPage() {
 													</ReasoningContent>
 												</Reasoning>
 											)}
+											{toolParts.map((toolPart) => {
+												if (toolPart.type !== "tool-webSearch") return null;
+
+												return (
+													<Tool
+														key={toolPart.toolCallId}
+														toolPart={toolPart}
+														defaultOpen={toolPart.state === "output-available"}
+													/>
+												);
+											})}
 											{textContent && (
 												<MessageContent
 													markdown={!isUserMessage}
@@ -134,6 +157,20 @@ export default function ChatPage() {
 												>
 													{textContent}
 												</MessageContent>
+											)}
+											{sourceParts.length > 0 && (
+												<div className="flex flex-wrap gap-2">
+													{sourceParts.map((sourcePart) => {
+														if (sourcePart.type !== "source") return null;
+														return (
+															<Source
+																key={sourcePart.source.id}
+																url={sourcePart.source.url}
+																title={sourcePart.source.title}
+															/>
+														);
+													})}
+												</div>
 											)}
 										</div>
 									</div>
