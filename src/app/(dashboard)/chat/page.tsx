@@ -224,27 +224,23 @@ export default function ChatPage() {
 								<TooltipProvider>
 									<Tooltip>
 										<TooltipTrigger asChild>
-											<Toggle
-												pressed={enableReasoning}
-												onPressedChange={setEnableReasoning}
+											<button
+												type="button"
+												onClick={() => setEnableReasoning(!enableReasoning)}
 												aria-label="Toggle reasoning"
-												size="sm"
-												variant="outline"
-												className={
-													enableReasoning
-														? "bg-zinc-800 text-white dark:bg-zinc-200 dark:text-black"
-														: ""
-												}
+												className="p-2 rounded-md hover:bg-muted transition-colors"
 											>
-												<Brain className="h-4 w-4" />
-											</Toggle>
+												<Brain
+													className={`h-4 w-4 transition-colors ${
+														enableReasoning
+															? "text-blue-500"
+															: "text-muted-foreground"
+													}`}
+												/>
+											</button>
 										</TooltipTrigger>
 										<TooltipContent>
-											<p>
-												{enableReasoning
-													? "Reasoning enabled - model will show thinking process"
-													: "Enable reasoning to see model's thinking process"}
-											</p>
+											<p>Show reasoning</p>
 										</TooltipContent>
 									</Tooltip>
 								</TooltipProvider>
