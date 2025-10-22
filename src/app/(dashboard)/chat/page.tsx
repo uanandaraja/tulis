@@ -172,7 +172,10 @@ export default function ChatPage() {
 													<Tool
 														key={toolPart.toolCallId}
 														toolPart={toToolPart(toolPart)}
-														defaultOpen={toolPart.state === "output-available"}
+														defaultOpen={
+															toolPart.state === "input-streaming" ||
+															toolPart.state === "output-available"
+														}
 														displayName="Searching the web"
 														icon={<Globe className="h-4 w-4 text-blue-500" />}
 													/>
