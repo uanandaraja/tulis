@@ -13,8 +13,7 @@ import {
 	X,
 } from "lucide-react";
 import { useParams } from "next/navigation";
-import { useRef, useState } from "react";
-import { trpc } from "@/lib/trpc/react";
+import { useEffect, useRef, useState } from "react";
 import {
 	DocumentEditor,
 	type EditorHandle,
@@ -54,6 +53,7 @@ import {
 	DEFAULT_MODEL,
 	modelSupportsReasoning,
 } from "@/lib/constants/models";
+import { trpc } from "@/lib/trpc/react";
 import {
 	getToolConfig,
 	isWebSearchToolOutput,
@@ -80,10 +80,8 @@ export default function ChatPage() {
 			: null;
 	const initialData = initialDataRaw ? JSON.parse(initialDataRaw) : null;
 
-	const { data: savedMessages } = trpc.chat.get.useQuery(
-		{ chatId },
-		{ enabled: !initialData },
-	);
+	const { data: savedMessages, isLoading: isLoadingSavedMessages } =
+		trpc.chat.get.useQuery({ chatId }, { enabled: !initialData });
 
 	const [input, setInput] = useState("");
 	const [selectedModel, setSelectedModel] = useState(
@@ -104,9 +102,9 @@ export default function ChatPage() {
 		},
 	});
 
-	const { messages, sendMessage, status, error } = useChat({
+	const { messages, sendMessage, status, error, setMessages } = useChat({
 		id: chatId,
-		messages: savedMessages,
+		messages: initialData ? [] : savedMessages || [],
 		transport: new DefaultChatTransport({
 			api: "/api/chat",
 		}),
@@ -118,6 +116,18 @@ export default function ChatPage() {
 			});
 		},
 	});
+
+	// Update messages when savedMessages loads (only if not initialData)
+	useEffect(() => {
+		if (!initialData && !isLoadingSavedMessages) {
+			if (savedMessages) {
+				setMessages(savedMessages);
+			} else {
+				// No saved messages found, keep empty array
+				setMessages([]);
+			}
+		}
+	}, [savedMessages, initialData, isLoadingSavedMessages, setMessages]);
 
 	const sendMessageRef = useRef(sendMessage);
 	sendMessageRef.current = sendMessage;
@@ -161,7 +171,8 @@ export default function ChatPage() {
 		}
 	};
 
-	const isLoading = status === "submitted" || status === "streaming";
+	const isLoading =
+		status === "submitted" || status === "streaming" || isLoadingSavedMessages;
 	const isStreaming = status === "streaming";
 	const supportsReasoning = modelSupportsReasoning(selectedModel);
 
@@ -234,7 +245,11 @@ export default function ChatPage() {
 					style={{ minHeight: 0 }}
 				>
 					<ChatContainerContent className="p-4 space-y-4 max-w-full">
-						{messages.length === 0 ? (
+						{messages.length === 0 && isLoadingSavedMessages ? (
+							<div className="flex justify-center py-12">
+								<Loader variant="typing" size="md" />
+							</div>
+						) : messages.length === 0 ? (
 							<div className="text-center text-muted-foreground py-12">
 								Start a conversation by typing a message below
 							</div>
