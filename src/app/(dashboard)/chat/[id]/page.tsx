@@ -27,7 +27,11 @@ import { EditorArtifact } from "@/components/ui/editor-artifact";
 import { Loader } from "@/components/ui/loader";
 import { MessageContent } from "@/components/ui/message";
 import { PlanSteps } from "@/components/ui/plan-steps";
-import { PromptInput, PromptInputTextarea } from "@/components/ui/prompt-input";
+import {
+	PromptInput,
+	PromptInputTextarea,
+	PromptInputActions,
+} from "@/components/ui/prompt-input";
 import {
 	Reasoning,
 	ReasoningContent,
@@ -220,7 +224,7 @@ function ChatInterface({
 			ref={(el) => {
 				if (el) autoSendPrompt();
 			}}
-			className={`flex h-[calc(100vh-4rem)] gap-4 px-4 py-8 w-full ${showEditor ? "max-w-none" : "max-w-4xl mx-auto"}`}
+			className={`flex h-screen gap-4 px-4 w-full ${showEditor ? "max-w-none" : "max-w-4xl mx-auto"}`}
 		>
 			<div
 				className={`flex flex-col min-h-0 min-w-0 ${showEditor ? "w-[600px]" : "flex-1"}`}
@@ -426,7 +430,7 @@ function ChatInterface({
 						e.preventDefault();
 						handleSubmit();
 					}}
-					className="relative"
+					className="pb-4"
 				>
 					<PromptInput
 						value={input}
@@ -434,58 +438,57 @@ function ChatInterface({
 						onSubmit={handleSubmit}
 						isLoading={isLoading}
 					>
-						<PromptInputTextarea
-							placeholder="Ask me anything..."
-							className="pr-14"
-						/>
-						<div className="flex items-center gap-3 px-2">
-							<Select value={selectedModel} onValueChange={setSelectedModel}>
-								<SelectTrigger className="w-[200px] border-0 shadow-none focus:ring-0">
-									<SelectValue placeholder="Select model" />
-								</SelectTrigger>
-								<SelectContent>
-									{AI_MODELS.map((model) => (
-										<SelectItem key={model.value} value={model.value}>
-											{model.label}
-										</SelectItem>
-									))}
-								</SelectContent>
-							</Select>
-							{supportsReasoning && (
-								<TooltipProvider>
-									<Tooltip>
-										<TooltipTrigger asChild>
-											<button
-												type="button"
-												onClick={() => setEnableReasoning(!enableReasoning)}
-												aria-label="Toggle reasoning"
-												className="p-2 rounded-md hover:bg-muted transition-colors"
-											>
-												<Brain
-													className={`h-4 w-4 transition-colors ${
-														enableReasoning
-															? "text-blue-500"
-															: "text-muted-foreground"
-													}`}
-												/>
-											</button>
-										</TooltipTrigger>
-										<TooltipContent>
-											<p>Show reasoning</p>
-										</TooltipContent>
-									</Tooltip>
-								</TooltipProvider>
-							)}
-						</div>
+						<PromptInputTextarea placeholder="Ask me anything..." />
+						<PromptInputActions className="justify-between">
+							<div className="flex items-center gap-2">
+								<Select value={selectedModel} onValueChange={setSelectedModel}>
+									<SelectTrigger className="w-[200px] border-0 shadow-none focus:ring-0">
+										<SelectValue placeholder="Select model" />
+									</SelectTrigger>
+									<SelectContent>
+										{AI_MODELS.map((model) => (
+											<SelectItem key={model.value} value={model.value}>
+												{model.label}
+											</SelectItem>
+										))}
+									</SelectContent>
+								</Select>
+								{supportsReasoning && (
+									<TooltipProvider>
+										<Tooltip>
+											<TooltipTrigger asChild>
+												<button
+													type="button"
+													onClick={() => setEnableReasoning(!enableReasoning)}
+													aria-label="Toggle reasoning"
+													className="p-2 rounded-md hover:bg-muted transition-colors"
+												>
+													<Brain
+														className={`h-4 w-4 transition-colors ${
+															enableReasoning
+																? "text-blue-500"
+																: "text-muted-foreground"
+														}`}
+													/>
+												</button>
+											</TooltipTrigger>
+											<TooltipContent>
+												<p>Show reasoning</p>
+											</TooltipContent>
+										</Tooltip>
+									</TooltipProvider>
+								)}
+							</div>
+							<Button
+								type="submit"
+								size="icon"
+								disabled={isLoading || !input.trim()}
+								className="rounded-full h-8 w-8"
+							>
+								<ArrowUp className="h-4 w-4" />
+							</Button>
+						</PromptInputActions>
 					</PromptInput>
-					<Button
-						type="submit"
-						size="icon"
-						disabled={isLoading || !input.trim()}
-						className="absolute right-3 bottom-3 rounded-full h-8 w-8"
-					>
-						<ArrowUp className="h-4 w-4" />
-					</Button>
 				</form>
 			</div>
 
