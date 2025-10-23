@@ -72,6 +72,10 @@ User: "Write a 1000-word article on climate tech"
 - Logical structure with smooth transitions between sections
 - Concrete examples, data, and evidence from research
 - Proper citations using [1] [2] format for web search results
+- MANDATORY: Include a "## References" section at the END of the document listing all cited sources
+  * Format: [1] "Source Title" - https://url.com
+  * Every citation number used in the document MUST appear in the References section
+  * The References section is the LAST section of the document, after all content
 - Strong, actionable conclusion
 - Audience-appropriate tone and complexity
 - Grammar, clarity, and flow must be publication-ready
