@@ -9,6 +9,7 @@ const client = postgres(connectionString, {
 	max: 10,
 	idle_timeout: 20,
 	connect_timeout: 10,
+	transform: postgres.camel,
 });
 
 export const db = drizzle(client, { schema });

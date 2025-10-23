@@ -1,5 +1,6 @@
 import {
 	boolean,
+	index,
 	integer,
 	pgTable,
 	text,
@@ -56,17 +57,28 @@ export const verification = pgTable("verification", {
 	updatedAt: timestamp("updated_at"),
 });
 
-export const chat = pgTable("chat", {
-	id: text("id").primaryKey(),
-	userId: text("user_id")
-		.notNull()
-		.references(() => user.id, { onDelete: "cascade" }),
-	title: text("title"),
-	model: text("model"),
-	messageCount: integer("message_count").default(0),
-	storageKey: text("storage_key"),
-	createdAt: timestamp("created_at").notNull().defaultNow(),
-	updatedAt: timestamp("updated_at").notNull().defaultNow(),
-});
+export const chat = pgTable(
+	"chat",
+	{
+		id: text("id").primaryKey(),
+		userId: text("user_id")
+			.notNull()
+			.references(() => user.id, { onDelete: "cascade" }),
+		title: text("title"),
+		model: text("model"),
+		messageCount: integer("message_count").default(0),
+		storageKey: text("storage_key"),
+		createdAt: timestamp("created_at").notNull().defaultNow(),
+		updatedAt: timestamp("updated_at").notNull().defaultNow(),
+	},
+	(table) => ({
+		userIdIdx: index("chat_user_id_idx").on(table.userId),
+		updatedAtIdx: index("chat_updated_at_idx").on(table.updatedAt),
+		userIdUpdatedAtIdx: index("chat_user_id_updated_at_idx").on(
+			table.userId,
+			table.updatedAt,
+		),
+	}),
+);
 
 export const schema = { user, session, account, verification, chat };
