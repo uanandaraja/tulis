@@ -15,13 +15,23 @@ export const AI_MODELS = [
 		supportsReasoning: false,
 	},
 	{
-		value: "z-ai/glm-4.6",
+		value: "z-ai/glm-4.6:exacto",
 		label: "GLM 4.6",
 		supportsReasoning: false,
 	},
 	{
 		value: "openai/gpt-5-mini",
 		label: "GPT-5 Mini",
+		supportsReasoning: false,
+	},
+	{
+		value: "openai/gpt-oss-120b:exacto",
+		label: "GPT-OSS 120b",
+		supportsReasoning: false,
+	},
+	{
+		value: "qwen/qwen3-coder:exacto",
+		label: "Qwen3 Coder",
 		supportsReasoning: false,
 	},
 	{
@@ -35,8 +45,13 @@ export const AI_MODELS = [
 		supportsReasoning: true,
 	},
 	{
-		value: "moonshotai/kimi-k2-0905",
+		value: "moonshotai/kimi-k2-0905:exacto",
 		label: "Kimi K2",
+		supportsReasoning: true,
+	},
+	{
+		value: "deepseek/deepseek-v3.1-terminus:exacto",
+		label: "DeepSeek v3.1 Terminus",
 		supportsReasoning: true,
 	},
 ] as const;
