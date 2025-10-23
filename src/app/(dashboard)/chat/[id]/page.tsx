@@ -13,7 +13,7 @@ import {
 	X,
 } from "lucide-react";
 import { useParams } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import {
 	DocumentEditor,
 	type EditorHandle,
@@ -131,7 +131,7 @@ function ChatInterface({
 					{
 						id: chatId,
 						userId: "",
-						title: initialPrompt.slice(0, 100),
+						title: "New Chat",
 						model: selectedModel,
 						messageCount: 0,
 						storageKey: null,
@@ -305,7 +305,7 @@ function ChatInterface({
 													const reasoningText = "text" in part ? part.text : "";
 													return (
 														<Reasoning
-															key={`reasoning-${part.text?.slice(0, 20) || index}`}
+															key={`reasoning-${messageIndex}-${index}`}
 															open={
 																isStreaming &&
 																enableReasoning &&
@@ -392,7 +392,7 @@ function ChatInterface({
 
 													return (
 														<MessageContent
-															key={`text-${textContent.slice(0, 20) || index}`}
+															key={`text-${messageIndex}-${index}`}
 															markdown={true}
 															className="prose dark:prose-invert max-w-none prose-pre:bg-muted prose-pre:border prose-pre:border-border bg-transparent p-0"
 															sources={exaSources}
@@ -532,7 +532,7 @@ export default function ChatPage() {
 	if (isLoadingExistingChat) {
 		return (
 			<div className="flex items-center justify-center h-[calc(100vh-4rem)]">
-				<Loader variant="default" size="lg" />
+				<Loader variant="circular" size="lg" />
 			</div>
 		);
 	}
