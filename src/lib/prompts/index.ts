@@ -4,4 +4,5 @@ export {
 	WRITE_TO_EDITOR_SYSTEM_PROMPT,
 } from "./editor";
 export { SYSTEM_PROMPT } from "./system";
+export { TITLE_GENERATION_PROMPT } from "./title";
 export { TOOLS_INSTRUCTIONS } from "./tools";

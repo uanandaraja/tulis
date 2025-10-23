@@ -1,7 +1,10 @@
-import type { UIMessage } from "ai";
+import { openrouter } from "@openrouter/ai-sdk-provider";
+import { generateText, type UIMessage } from "ai";
 import { and, desc, eq } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { chat } from "@/lib/db/schema";
+import { DEFAULT_MODEL } from "@/lib/constants/models";
+import { TITLE_GENERATION_PROMPT } from "@/lib/prompts";
 import { getChatStorageKey, storage } from "@/lib/storage";
 import type { StoredChatData } from "@/lib/types/chat";
 
@@ -56,11 +59,22 @@ export async function saveChat(
 		type: "application/json",
 	});
 
-	const title =
-		messages
-			.find((m) => m.role === "user")
-			?.parts.find((p) => p.type === "text" && "text" in p)
-			?.text?.slice(0, 100) || "New Chat";
+	const existingChat = await db.query.chat.findFirst({
+		where: eq(chat.id, chatId),
+	});
+
+	let title = "New Chat";
+
+	if (!existingChat) {
+		const userMessage = messages.find((m) => m.role === "user");
+		const userPrompt = userMessage?.parts.find(
+			(p) => p.type === "text" && "text" in p,
+		)?.text;
+
+		if (userPrompt) {
+			title = await generateChatTitle(userPrompt);
+		}
+	}
 
 	await db
 		.insert(chat)
@@ -111,4 +125,18 @@ export async function deleteChat(chatId: string, userId: string) {
 		.where(and(eq(chat.id, chatId), eq(chat.userId, userId)));
 
 	return { success: true };
+}
+
+export async function generateChatTitle(userPrompt: string): Promise<string> {
+	try {
+		const { text } = await generateText({
+			model: openrouter(DEFAULT_MODEL),
+			prompt: `${TITLE_GENERATION_PROMPT}\n\nUser message: ${userPrompt}`,
+		});
+
+		return text.trim().slice(0, 50);
+	} catch (error) {
+		console.error("Failed to generate chat title:", error);
+		return userPrompt.slice(0, 50);
+	}
 }

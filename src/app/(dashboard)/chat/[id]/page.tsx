@@ -235,7 +235,7 @@ function ChatInterface({
 								Start a conversation by typing a message below
 							</div>
 						) : (
-							messages.map((message: UIMessage) => {
+							messages.map((message: UIMessage, messageIndex: number) => {
 								if (message.parts.length === 0) return null;
 
 								const isUserMessage = message.role === "user";
