@@ -80,43 +80,46 @@ export function AppSidebar() {
 							) : chats && chats.length > 0 ? (
 								chats.map((chat) => (
 									<SidebarMenuItem key={chat.id}>
-										<SidebarMenuButton
-											asChild
-											isActive={pathname === `/chat/${chat.id}`}
-										>
-											<Link href={`/chat/${chat.id}`}>
-												<span className="truncate flex-1">{chat.title}</span>
-											</Link>
-										</SidebarMenuButton>
-										<AlertDialog>
-											<AlertDialogTrigger asChild>
-												<Button
-													variant="ghost"
-													size="icon"
-													className="h-6 w-6 opacity-60 hover:opacity-100"
-												>
-													<Trash2 className="h-3 w-3" />
-												</Button>
-											</AlertDialogTrigger>
-											<AlertDialogContent>
-												<AlertDialogHeader>
-													<AlertDialogTitle>Delete chat?</AlertDialogTitle>
-													<AlertDialogDescription>
-														This will permanently delete "{chat.title}" and all
-														its messages. This action cannot be undone.
-													</AlertDialogDescription>
-												</AlertDialogHeader>
-												<AlertDialogFooter>
-													<AlertDialogCancel>Cancel</AlertDialogCancel>
-													<AlertDialogAction
-														onClick={() => handleDeleteChat(chat.id)}
-														className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+										<div className="group/item relative flex items-center">
+											<SidebarMenuButton
+												asChild
+												isActive={pathname === `/chat/${chat.id}`}
+												className="flex-1 pr-8"
+											>
+												<Link href={`/chat/${chat.id}`}>
+													<span className="truncate">{chat.title}</span>
+												</Link>
+											</SidebarMenuButton>
+											<AlertDialog>
+												<AlertDialogTrigger asChild>
+													<Button
+														variant="ghost"
+														size="icon"
+														className="absolute right-1 h-6 w-6 opacity-0 group-hover/item:opacity-60 hover:!opacity-100 transition-opacity"
 													>
-														Delete
-													</AlertDialogAction>
-												</AlertDialogFooter>
-											</AlertDialogContent>
-										</AlertDialog>
+														<Trash2 className="h-3 w-3" />
+													</Button>
+												</AlertDialogTrigger>
+												<AlertDialogContent>
+													<AlertDialogHeader>
+														<AlertDialogTitle>Delete chat?</AlertDialogTitle>
+														<AlertDialogDescription>
+															This will permanently delete "{chat.title}" and
+															all its messages. This action cannot be undone.
+														</AlertDialogDescription>
+													</AlertDialogHeader>
+													<AlertDialogFooter>
+														<AlertDialogCancel>Cancel</AlertDialogCancel>
+														<AlertDialogAction
+															onClick={() => handleDeleteChat(chat.id)}
+															className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+														>
+															Delete
+														</AlertDialogAction>
+													</AlertDialogFooter>
+												</AlertDialogContent>
+											</AlertDialog>
+										</div>
 									</SidebarMenuItem>
 								))
 							) : (

@@ -70,26 +70,24 @@ const TOOL_ICONS: Record<string, React.ReactNode> = {
 	listChecks: <ListChecks className="h-4 w-4 text-green-500" />,
 };
 
-export default function ChatPage() {
-	const params = useParams();
-	const chatId = params.id as string;
-
-	const initialDataRaw =
-		typeof window !== "undefined"
-			? sessionStorage.getItem(`chat-${chatId}-initial`)
-			: null;
-	const initialData = initialDataRaw ? JSON.parse(initialDataRaw) : null;
-
-	const { data: savedMessages, isLoading: isLoadingSavedMessages } =
-		trpc.chat.get.useQuery({ chatId }, { enabled: !initialData });
-
+function ChatInterface({
+	chatId,
+	initialMessages,
+	initialModel,
+	initialReasoning,
+	isNewChat,
+	initialPrompt,
+}: {
+	chatId: string;
+	initialMessages: UIMessage[];
+	initialModel: string;
+	initialReasoning: boolean;
+	isNewChat: boolean;
+	initialPrompt?: string;
+}) {
 	const [input, setInput] = useState("");
-	const [selectedModel, setSelectedModel] = useState(
-		initialData?.model || DEFAULT_MODEL,
-	);
-	const [enableReasoning, setEnableReasoning] = useState(
-		initialData?.reasoning || false,
-	);
+	const [selectedModel, setSelectedModel] = useState(initialModel);
+	const [enableReasoning, setEnableReasoning] = useState(initialReasoning);
 	const [showEditor, setShowEditor] = useState(false);
 	const editorRef = useRef<EditorHandle>(null);
 	const prevEditorContentRef = useRef<string | null>(null);
@@ -102,9 +100,9 @@ export default function ChatPage() {
 		},
 	});
 
-	const { messages, sendMessage, status, error, setMessages } = useChat({
+	const { messages, sendMessage, status, error } = useChat({
 		id: chatId,
-		messages: initialData ? [] : savedMessages || [],
+		messages: initialMessages,
 		transport: new DefaultChatTransport({
 			api: "/api/chat",
 		}),
@@ -117,23 +115,11 @@ export default function ChatPage() {
 		},
 	});
 
-	// Update messages when savedMessages loads (only if not initialData)
-	useEffect(() => {
-		if (!initialData && !isLoadingSavedMessages) {
-			if (savedMessages) {
-				setMessages(savedMessages);
-			} else {
-				// No saved messages found, keep empty array
-				setMessages([]);
-			}
-		}
-	}, [savedMessages, initialData, isLoadingSavedMessages, setMessages]);
-
 	const sendMessageRef = useRef(sendMessage);
 	sendMessageRef.current = sendMessage;
 
 	const autoSendPrompt = () => {
-		if (initialData?.prompt && !hasAutoSentRef.current) {
+		if (isNewChat && initialPrompt && !hasAutoSentRef.current) {
 			hasAutoSentRef.current = true;
 
 			// Optimistically add to sidebar
@@ -145,7 +131,7 @@ export default function ChatPage() {
 					{
 						id: chatId,
 						userId: "",
-						title: initialData.prompt.slice(0, 100),
+						title: initialPrompt.slice(0, 100),
 						model: selectedModel,
 						messageCount: 0,
 						storageKey: null,
@@ -158,7 +144,7 @@ export default function ChatPage() {
 
 			sendMessageRef.current(
 				{
-					text: initialData.prompt,
+					text: initialPrompt,
 				},
 				{
 					body: {
@@ -171,8 +157,7 @@ export default function ChatPage() {
 		}
 	};
 
-	const isLoading =
-		status === "submitted" || status === "streaming" || isLoadingSavedMessages;
+	const isLoading = status === "submitted" || status === "streaming";
 	const isStreaming = status === "streaming";
 	const supportsReasoning = modelSupportsReasoning(selectedModel);
 
@@ -245,11 +230,7 @@ export default function ChatPage() {
 					style={{ minHeight: 0 }}
 				>
 					<ChatContainerContent className="p-4 space-y-4 max-w-full">
-						{messages.length === 0 && isLoadingSavedMessages ? (
-							<div className="flex justify-center py-12">
-								<Loader variant="default" size="lg" />
-							</div>
-						) : messages.length === 0 ? (
+						{messages.length === 0 ? (
 							<div className="text-center text-muted-foreground py-12">
 								Start a conversation by typing a message below
 							</div>
@@ -528,5 +509,44 @@ export default function ChatPage() {
 				</div>
 			)}
 		</div>
+	);
+}
+
+export default function ChatPage() {
+	const params = useParams();
+	const chatId = params.id as string;
+
+	const initialDataRaw =
+		typeof window !== "undefined"
+			? sessionStorage.getItem(`chat-${chatId}-initial`)
+			: null;
+	const initialData = initialDataRaw ? JSON.parse(initialDataRaw) : null;
+
+	const isNewChat = !!initialData;
+
+	const { data: savedMessages, isLoading: isLoadingSavedMessages } =
+		trpc.chat.get.useQuery({ chatId }, { enabled: !isNewChat });
+
+	const isLoadingExistingChat = !isNewChat && isLoadingSavedMessages;
+
+	if (isLoadingExistingChat) {
+		return (
+			<div className="flex items-center justify-center h-[calc(100vh-4rem)]">
+				<Loader variant="default" size="lg" />
+			</div>
+		);
+	}
+
+	const initialMessages = isNewChat ? [] : savedMessages || [];
+
+	return (
+		<ChatInterface
+			chatId={chatId}
+			initialMessages={initialMessages}
+			initialModel={initialData?.model || DEFAULT_MODEL}
+			initialReasoning={initialData?.reasoning || false}
+			isNewChat={isNewChat}
+			initialPrompt={initialData?.prompt}
+		/>
 	);
 }
