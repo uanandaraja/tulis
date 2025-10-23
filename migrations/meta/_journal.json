@@ -15,6 +15,13 @@
       "when": 1761195552043,
       "tag": "0001_deep_vermin",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1761200451323,
+      "tag": "0002_tearful_mauler",
+      "breakpoints": true
     }
   ]
 }
