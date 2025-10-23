@@ -1,5 +1,6 @@
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
+import { nextCookies } from "better-auth/next-js";
 import { magicLink } from "better-auth/plugins";
 import {
 	getGoogleOAuthConfig,
@@ -28,5 +29,6 @@ export const auth = betterAuth({
 			sendMagicLink: ({ email, url }) => handleMagicLinkRequest(email, url),
 			expiresIn: 300,
 		}),
+		nextCookies(),
 	],
 });
