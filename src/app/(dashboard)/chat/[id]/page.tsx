@@ -239,179 +239,189 @@ function ChatInterface({
 								Start a conversation by typing a message below
 							</div>
 						) : (
-							messages.map((message: UIMessage, messageIndex: number) => {
-								if (message.parts.length === 0) return null;
+							<>
+								{messages.map((message: UIMessage, messageIndex: number) => {
+									if (message.parts.length === 0) return null;
 
-								const isUserMessage = message.role === "user";
+									const isUserMessage = message.role === "user";
 
-								// For user messages, just show text
-								if (isUserMessage) {
-									const textContent = message.parts
-										.filter((part) => part.type === "text")
-										.map((part) => ("text" in part ? part.text : ""))
-										.join("");
+									// For user messages, just show text
+									if (isUserMessage) {
+										const textContent = message.parts
+											.filter((part) => part.type === "text")
+											.map((part) => ("text" in part ? part.text : ""))
+											.join("");
+
+										return (
+											<div key={message.id} className="flex justify-end">
+												<MessageContent
+													markdown={false}
+													className="prose dark:prose-invert max-w-xl p-4"
+												>
+													{textContent}
+												</MessageContent>
+											</div>
+										);
+									}
+
+									// For assistant messages, render parts in chronological order
+									const webSearchParts = message.parts.filter(
+										(part): part is WebSearchToolUIPart =>
+											isToolUIPart(part) && part.type === "tool-webSearch",
+									);
+
+									const allExaSources = webSearchParts.flatMap((part) => {
+										if (
+											part.state === "output-available" &&
+											isWebSearchToolOutput(part.output)
+										) {
+											return part.output.results
+												.filter((result) => result.url && result.title)
+												.map((result) => ({
+													id: result.id,
+													url: result.url,
+													title: result.title,
+												}));
+										}
+										return [];
+									});
+
+									// Get only the latest plan steps to avoid showing outdated plans
+									const planStepsParts = message.parts.filter(
+										(part) =>
+											isToolUIPart(part) &&
+											part.type === "tool-planSteps" &&
+											part.state === "output-available",
+									);
+									const latestPlanStepsPart =
+										planStepsParts.length > 0
+											? planStepsParts[planStepsParts.length - 1]
+											: null;
 
 									return (
-										<div key={message.id} className="flex justify-end">
-											<MessageContent
-												markdown={false}
-												className="prose dark:prose-invert max-w-xl p-4"
-											>
-												{textContent}
-											</MessageContent>
+										<div key={message.id} className="flex justify-start w-full">
+											<div className="flex flex-col gap-3 w-full min-w-0">
+												{message.parts.map((part, index) => {
+													// Render reasoning
+													if (
+														part.type === "reasoning" &&
+														modelSupportsReasoning(selectedModel)
+													) {
+														const reasoningText =
+															"text" in part ? part.text : "";
+														return (
+															<Reasoning
+																key={`reasoning-${messageIndex}-${index}`}
+																open={
+																	isStreaming &&
+																	enableReasoning &&
+																	supportsReasoning
+																}
+															>
+																<ReasoningTrigger>
+																	Show reasoning
+																</ReasoningTrigger>
+																<ReasoningContent markdown>
+																	{reasoningText || "Thinking..."}
+																</ReasoningContent>
+															</Reasoning>
+														);
+													}
+
+													// Render plan steps (only the latest one)
+													if (
+														latestPlanStepsPart &&
+														part === latestPlanStepsPart
+													) {
+														const toolPart = part as any;
+														const output =
+															toolPart.output as PlanStepsToolOutput;
+														return (
+															<PlanSteps
+																key={`plan-${toolPart.toolCallId}`}
+																output={output}
+															/>
+														);
+													}
+
+													// Render write to editor artifact
+													if (
+														isToolUIPart(part) &&
+														part.type === "tool-writeToEditor" &&
+														part.state === "output-available"
+													) {
+														const output =
+															part.output as WriteToEditorToolOutput;
+														return (
+															<EditorArtifact
+																key={`editor-${part.toolCallId}`}
+																title={output.title}
+																onShowDocumentAction={() => setShowEditor(true)}
+															/>
+														);
+													}
+
+													// Render other tools
+													if (
+														isToolUIPart(part) &&
+														part.type !== "tool-planSteps" &&
+														part.type !== "tool-writeToEditor"
+													) {
+														const config = getToolConfig(part.type);
+														const icon = config.iconName
+															? TOOL_ICONS[config.iconName]
+															: null;
+														return (
+															<Tool
+																key={`tool-${part.toolCallId}`}
+																toolPart={toToolPart(part)}
+																defaultOpen={false}
+																displayName={config.displayName}
+																icon={icon}
+															/>
+														);
+													}
+
+													// Render text
+													if (
+														part.type === "text" &&
+														"text" in part &&
+														part.text.trim()
+													) {
+														const textContent = part.text;
+														const citedSourceIds = new Set(
+															(textContent.match(/\[(\d+)\]/g) || []).map(
+																(match) => parseInt(match.slice(1, -1), 10),
+															),
+														);
+														const exaSources = allExaSources.filter((source) =>
+															citedSourceIds.has(source.id),
+														);
+
+														return (
+															<MessageContent
+																key={`text-${messageIndex}-${index}`}
+																markdown={true}
+																className="prose dark:prose-invert max-w-none prose-pre:bg-muted prose-pre:border prose-pre:border-border bg-transparent p-0"
+																sources={exaSources}
+															>
+																{textContent}
+															</MessageContent>
+														);
+													}
+
+													return null;
+												})}
+											</div>
 										</div>
 									);
-								}
-
-								// For assistant messages, render parts in chronological order
-								const webSearchParts = message.parts.filter(
-									(part): part is WebSearchToolUIPart =>
-										isToolUIPart(part) && part.type === "tool-webSearch",
-								);
-
-								const allExaSources = webSearchParts.flatMap((part) => {
-									if (
-										part.state === "output-available" &&
-										isWebSearchToolOutput(part.output)
-									) {
-										return part.output.results
-											.filter((result) => result.url && result.title)
-											.map((result) => ({
-												id: result.id,
-												url: result.url,
-												title: result.title,
-											}));
-									}
-									return [];
-								});
-
-								// Get only the latest plan steps to avoid showing outdated plans
-								const planStepsParts = message.parts.filter(
-									(part) =>
-										isToolUIPart(part) &&
-										part.type === "tool-planSteps" &&
-										part.state === "output-available",
-								);
-								const latestPlanStepsPart =
-									planStepsParts.length > 0
-										? planStepsParts[planStepsParts.length - 1]
-										: null;
-
-								return (
-									<div key={message.id} className="flex justify-start w-full">
-										<div className="flex flex-col gap-3 w-full min-w-0">
-											{message.parts.map((part, index) => {
-												// Render reasoning
-												if (
-													part.type === "reasoning" &&
-													modelSupportsReasoning(selectedModel)
-												) {
-													const reasoningText = "text" in part ? part.text : "";
-													return (
-														<Reasoning
-															key={`reasoning-${messageIndex}-${index}`}
-															open={
-																isStreaming &&
-																enableReasoning &&
-																supportsReasoning
-															}
-														>
-															<ReasoningTrigger>
-																Show reasoning
-															</ReasoningTrigger>
-															<ReasoningContent markdown>
-																{reasoningText || "Thinking..."}
-															</ReasoningContent>
-														</Reasoning>
-													);
-												}
-
-												// Render plan steps (only the latest one)
-												if (
-													latestPlanStepsPart &&
-													part === latestPlanStepsPart
-												) {
-													const toolPart = part as any;
-													const output = toolPart.output as PlanStepsToolOutput;
-													return (
-														<PlanSteps
-															key={`plan-${toolPart.toolCallId}`}
-															output={output}
-														/>
-													);
-												}
-
-												// Render write to editor artifact
-												if (
-													isToolUIPart(part) &&
-													part.type === "tool-writeToEditor" &&
-													part.state === "output-available"
-												) {
-													const output = part.output as WriteToEditorToolOutput;
-													return (
-														<EditorArtifact
-															key={`editor-${part.toolCallId}`}
-															title={output.title}
-															onShowDocumentAction={() => setShowEditor(true)}
-														/>
-													);
-												}
-
-												// Render other tools
-												if (
-													isToolUIPart(part) &&
-													part.type !== "tool-planSteps" &&
-													part.type !== "tool-writeToEditor"
-												) {
-													const config = getToolConfig(part.type);
-													const icon = config.iconName
-														? TOOL_ICONS[config.iconName]
-														: null;
-													return (
-														<Tool
-															key={`tool-${part.toolCallId}`}
-															toolPart={toToolPart(part)}
-															defaultOpen={false}
-															displayName={config.displayName}
-															icon={icon}
-														/>
-													);
-												}
-
-												// Render text
-												if (
-													part.type === "text" &&
-													"text" in part &&
-													part.text.trim()
-												) {
-													const textContent = part.text;
-													const citedSourceIds = new Set(
-														(textContent.match(/\[(\d+)\]/g) || []).map(
-															(match) => parseInt(match.slice(1, -1), 10),
-														),
-													);
-													const exaSources = allExaSources.filter((source) =>
-														citedSourceIds.has(source.id),
-													);
-
-													return (
-														<MessageContent
-															key={`text-${messageIndex}-${index}`}
-															markdown={true}
-															className="prose dark:prose-invert max-w-none prose-pre:bg-muted prose-pre:border prose-pre:border-border bg-transparent p-0"
-															sources={exaSources}
-														>
-															{textContent}
-														</MessageContent>
-													);
-												}
-
-												return null;
-											})}
-										</div>
+								})}
+								{isLoading && (
+									<div className="flex justify-start">
+										<Loader variant="pulse-dot" size="sm" />
 									</div>
-								);
-							})
+								)}
+							</>
 						)}
 					</ChatContainerContent>
 					<div className="absolute right-4 bottom-4">
