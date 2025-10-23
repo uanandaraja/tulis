@@ -3,23 +3,23 @@ import { z } from "zod";
 
 export const writeToEditorTool = tool({
 	description:
-		"Write content DIRECTLY to the document editor. Use this when the user asks you to write, draft, or create long-form content like articles, essays, documents, reports, or any substantial written content. IMPORTANT: Do NOT write the content in your response - ONLY use this tool. After calling this tool, say something brief like 'Done' or 'Written to editor'.",
+		"Write content DIRECTLY to the document editor panel (separate from chat). Use this when the user asks you to write, draft, or create long-form content like articles, essays, blog posts, documents, reports, or any substantial written content. CRITICAL: Do NOT write the content in your chat response - this wastes tokens by duplicating output. Put content ONLY in this tool call. After calling this tool, respond in chat with ONLY 'Done.' - the user will see your writing in the editor panel, not in chat.",
 	inputSchema: z.object({
 		action: z
 			.enum(["set", "append", "prepend"])
 			.describe(
-				"How to add content: 'set' replaces all content, 'append' adds to end, 'prepend' adds to beginning",
+				"How to add content: 'set' replaces all editor content, 'append' adds to end of existing content, 'prepend' adds to beginning of existing content. Default: 'set'",
 			)
 			.default("set"),
 		content: z
 			.string()
 			.describe(
-				"The body content ONLY. DO NOT include the title here - it goes in the 'title' field.",
+				"The full body content in markdown format. DO NOT include the title here (it goes in 'title' field). DO NOT start with # Title. Start directly with your content paragraphs and sections. Use markdown: ## for sections, **bold**, - lists, etc.",
 			),
 		title: z
 			.string()
 			.describe(
-				"The title for the document. REQUIRED. This will be displayed as the heading.",
+				"The document title. REQUIRED. This will be displayed as the main heading in the editor.",
 			),
 	}),
 	execute: async ({ action, content, title }) => {
@@ -28,7 +28,7 @@ export const writeToEditorTool = tool({
 			action,
 			content,
 			title,
-			message: `Content ${action === "set" ? "written" : action === "append" ? "appended" : "prepended"} to editor`,
+			message: `Content ${action === "set" ? "written" : action === "append" ? "appended" : "prepended"} to editor. Respond with 'Done.' in chat.`,
 		};
 	},
 });
