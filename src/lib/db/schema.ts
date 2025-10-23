@@ -1,4 +1,10 @@
-import { boolean, pgTable, text, timestamp } from "drizzle-orm/pg-core";
+import {
+	boolean,
+	integer,
+	pgTable,
+	text,
+	timestamp,
+} from "drizzle-orm/pg-core";
 
 export const user = pgTable("user", {
 	id: text("id").primaryKey(),
@@ -50,4 +56,17 @@ export const verification = pgTable("verification", {
 	updatedAt: timestamp("updated_at"),
 });
 
-export const schema = { user, session, account, verification };
+export const chat = pgTable("chat", {
+	id: text("id").primaryKey(),
+	userId: text("user_id")
+		.notNull()
+		.references(() => user.id, { onDelete: "cascade" }),
+	title: text("title"),
+	model: text("model"),
+	messageCount: integer("message_count").default(0),
+	storageKey: text("storage_key"),
+	createdAt: timestamp("created_at").notNull().defaultNow(),
+	updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export const schema = { user, session, account, verification, chat };
