@@ -1,19 +1,24 @@
-import { desc, eq, and } from "drizzle-orm";
 import type { UIMessage } from "ai";
+import { and, desc, eq } from "drizzle-orm";
 import { z } from "zod";
 import { db } from "@/lib/db";
 import { chat } from "@/lib/db/schema";
 import { getChatStorageKey, storage } from "@/lib/storage";
-import { protectedProcedure, router } from "@/server/trpc";
 import type { StoredChatData } from "@/lib/types/chat";
+import { protectedProcedure, router } from "@/server/trpc";
 
 export const chatRouter = router({
 	list: protectedProcedure.query(async ({ ctx }) => {
-		return db.query.chat.findMany({
+		const start = performance.now();
+		const result = await db.query.chat.findMany({
 			where: eq(chat.userId, ctx.user.id),
 			orderBy: [desc(chat.updatedAt)],
 			limit: 50,
 		});
+		console.log(
+			`[chat.list] Query took ${(performance.now() - start).toFixed(0)}ms`,
+		);
+		return result;
 	}),
 
 	get: protectedProcedure

@@ -4,10 +4,19 @@ import superjson from "superjson";
 import { auth } from "@/lib/auth";
 
 export const createTRPCContext = async () => {
+	const start = performance.now();
 	const headersList = await headers();
+
+	const cookieHeader = headersList.get("cookie");
+	const hasSessionData = cookieHeader?.includes("better-auth.session_data");
+	console.log(`[tRPC] Has session_data cookie: ${hasSessionData}`);
+
 	const session = await auth.api.getSession({
 		headers: headersList,
 	});
+	console.log(
+		`[tRPC] Session lookup took ${(performance.now() - start).toFixed(0)}ms`,
+	);
 
 	return {
 		session,
