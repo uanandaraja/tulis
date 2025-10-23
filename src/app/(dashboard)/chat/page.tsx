@@ -1,9 +1,9 @@
 "use client";
 
+import { ArrowUp, Brain } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { v4 as uuidv4 } from "uuid";
-import { ArrowUp, Brain } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { PromptInput, PromptInputTextarea } from "@/components/ui/prompt-input";
 import { PromptSuggestion } from "@/components/ui/prompt-suggestion";
