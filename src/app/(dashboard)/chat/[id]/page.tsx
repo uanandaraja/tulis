@@ -247,7 +247,7 @@ export default function ChatPage() {
 					<ChatContainerContent className="p-4 space-y-4 max-w-full">
 						{messages.length === 0 && isLoadingSavedMessages ? (
 							<div className="flex justify-center py-12">
-								<Loader variant="typing" size="md" />
+								<Loader variant="default" size="lg" />
 							</div>
 						) : messages.length === 0 ? (
 							<div className="text-center text-muted-foreground py-12">
@@ -428,39 +428,6 @@ export default function ChatPage() {
 								);
 							})
 						)}
-						{isLoading &&
-							messages[messages.length - 1]?.role !== "assistant" && (
-								<div className="flex justify-start">
-									<div className="rounded-lg p-2 text-foreground bg-secondary">
-										{modelSupportsReasoning(selectedModel) ? (
-											<Loader
-												variant="text-shimmer"
-												size="md"
-												text="Thinking"
-											/>
-										) : (
-											<Loader variant="typing" size="sm" />
-										)}
-									</div>
-								</div>
-							)}
-						{isLoading &&
-							messages[messages.length - 1]?.role === "assistant" &&
-							messages[messages.length - 1]?.parts?.length === 0 && (
-								<div className="flex justify-start">
-									<div className="rounded-lg p-2 text-foreground bg-secondary">
-										{modelSupportsReasoning(selectedModel) ? (
-											<Loader
-												variant="text-shimmer"
-												size="md"
-												text="Thinking"
-											/>
-										) : (
-											<Loader variant="typing" size="sm" />
-										)}
-									</div>
-								</div>
-							)}
 					</ChatContainerContent>
 					<div className="absolute right-4 bottom-4">
 						<ScrollButton />
