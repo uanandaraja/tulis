@@ -8,6 +8,7 @@ import {
 import { cn } from "@/lib/utils"
 import { Markdown } from "./markdown"
 import { Source, SourceTrigger, SourceContent } from "./source"
+import { CodeBlock, CodeBlockCopyButton } from "@/components/ui/code-block"
 import type { Components } from "react-markdown"
 
 export type MessageProps = {
@@ -81,20 +82,39 @@ const MessageContent = ({
     ? replaceCitationsWithSources(children as string, sources)
     : (children as string)
 
-  const customComponents: Partial<Components> | undefined = markdown && sources.length > 0 ? {
-    a: ({ href, children: linkChildren }) => {
-      if (!href) return <a>{linkChildren}</a>
-      const source = sources.find(s => s.url === href)
-      if (source) {
-        return (
-          <Source href={href}>
-            <SourceTrigger showFavicon label="" className="px-1" />
-            <SourceContent title={source.title} description={href} />
-          </Source>
-        )
+  const customComponents: Partial<Components> | undefined = markdown ? {
+    code: ({ className, children: codeChildren, ...rest }) => {
+      const match = /language-(\w+)/.exec(className || '')
+      const isInline = !match
+      
+      if (isInline) {
+        return <code className={className} {...rest}>{codeChildren}</code>
       }
-      return <a href={href} target="_blank" rel="noopener noreferrer">{linkChildren}</a>
+      
+      const language = match[1]
+      const code = String(codeChildren).replace(/\n$/, '')
+      
+      return (
+        <CodeBlock code={code} language={language}>
+          <CodeBlockCopyButton />
+        </CodeBlock>
+      )
     },
+    ...(sources.length > 0 ? {
+      a: ({ href, children: linkChildren }) => {
+        if (!href) return <a>{linkChildren}</a>
+        const source = sources.find(s => s.url === href)
+        if (source) {
+          return (
+            <Source href={href}>
+              <SourceTrigger showFavicon label="" className="px-1" />
+              <SourceContent title={source.title} description={href} />
+            </Source>
+          )
+        }
+        return <a href={href} target="_blank" rel="noopener noreferrer">{linkChildren}</a>
+      },
+    } : {}),
   } : undefined
 
   return markdown ? (
