@@ -66,12 +66,17 @@ export const DocumentEditor = forwardRef<EditorHandle, DocumentEditorProps>(
 			const patterns: Array<{
 				regex: RegExp;
 				marks: Record<string, boolean>;
+				captureGroup: number;
 			}> = [
-				{ regex: /\*\*(.+?)\*\*\*/g, marks: { bold: true, italic: true } },
-				{ regex: /\*\*(.+?)\*\*/g, marks: { bold: true } },
-				{ regex: /\*(.+?)\*/g, marks: { italic: true } },
-				{ regex: /_(.+?)_/g, marks: { italic: true } },
-				{ regex: /`(.+?)`/g, marks: { code: true } },
+				{
+					regex: /\*\*\*(.+?)\*\*\*/g,
+					marks: { bold: true, italic: true },
+					captureGroup: 1,
+				},
+				{ regex: /\*\*(.+?)\*\*/g, marks: { bold: true }, captureGroup: 1 },
+				{ regex: /\*(.+?)\*/g, marks: { italic: true }, captureGroup: 1 },
+				{ regex: /_(.+?)_/g, marks: { italic: true }, captureGroup: 1 },
+				{ regex: /`(.+?)`/g, marks: { code: true }, captureGroup: 1 },
 			];
 
 			const _matchIndex = 0;
@@ -92,18 +97,31 @@ export const DocumentEditor = forwardRef<EditorHandle, DocumentEditorProps>(
 					matches.push({
 						start: match.index,
 						end: match.index + match[0].length,
-						text: match[1],
+						text: match[pattern.captureGroup],
 						marks: pattern.marks,
 					});
 				}
 			}
 
-			// Sort by start position and remove overlaps
-			matches.sort((a, b) => a.start - b.start);
-			const filtered = matches.filter((match, i) => {
-				if (i === 0) return true;
-				return match.start >= matches[i - 1].end;
+			// Sort by start position, then by length (longer matches first) and remove overlaps
+			matches.sort((a, b) => {
+				if (a.start !== b.start) return a.start - b.start;
+				return b.end - b.start - (a.end - a.start);
 			});
+
+			const filtered: typeof matches = [];
+			for (const match of matches) {
+				let overlaps = false;
+				for (const kept of filtered) {
+					if (match.start < kept.end && match.end > kept.start) {
+						overlaps = true;
+						break;
+					}
+				}
+				if (!overlaps) {
+					filtered.push(match);
+				}
+			}
 
 			// Build children array
 			let buildIndex = 0;
@@ -115,7 +133,7 @@ export const DocumentEditor = forwardRef<EditorHandle, DocumentEditorProps>(
 				}
 				children.push({
 					text: match.text,
-					marks: match.marks,
+					...match.marks,
 				});
 				buildIndex = match.end;
 			}
@@ -160,14 +178,14 @@ export const DocumentEditor = forwardRef<EditorHandle, DocumentEditorProps>(
 						blockType = "Blockquote";
 						elementType = "blockquote";
 						text = line.replace(/^> /, "");
-					} else if (line.match(/^\d+\. /)) {
+					} else if (line.match(/^\d+\.\s+/)) {
 						blockType = "NumberedList";
 						elementType = "numbered-list";
-						text = line.replace(/^\d+\. /, "");
+						text = line.replace(/^\d+\.\s+/, "");
 					} else if (line.startsWith("- ") || line.startsWith("* ")) {
 						blockType = "BulletedList";
 						elementType = "bulleted-list";
-						text = line.replace(/^[-*] /, "");
+						text = line.replace(/^[-*]\s+/, "");
 					}
 
 					// Parse inline markdown
@@ -228,29 +246,31 @@ export const DocumentEditor = forwardRef<EditorHandle, DocumentEditorProps>(
 				ref={selectionRef}
 			>
 				<div className="flex-1 w-full overflow-y-auto px-16 py-12">
-					<YooptaEditor
-						editor={editor}
-						className="w-full max-w-none"
-						style={{ width: "100%" }}
-						plugins={plugins}
-						marks={marks}
-						tools={{
-							ActionMenu: {
-								render: DefaultActionMenuRender,
-								tool: ActionMenuList,
-							},
-							Toolbar: {
-								render: DefaultToolbarRender,
-								tool: Toolbar,
-							},
-							LinkTool: {
-								render: DefaultLinkToolRender,
-								tool: LinkTool,
-							},
-						}}
-						placeholder={placeholder}
-						selectionBoxRoot={selectionRef}
-					/>
+					<div className="max-w-3xl mx-auto px-8">
+						<YooptaEditor
+							editor={editor}
+							className="w-full max-w-none"
+							style={{ width: "100%" }}
+							plugins={plugins}
+							marks={marks}
+							tools={{
+								ActionMenu: {
+									render: DefaultActionMenuRender,
+									tool: ActionMenuList,
+								},
+								Toolbar: {
+									render: DefaultToolbarRender,
+									tool: Toolbar,
+								},
+								LinkTool: {
+									render: DefaultLinkToolRender,
+									tool: LinkTool,
+								},
+							}}
+							placeholder={placeholder}
+							selectionBoxRoot={selectionRef}
+						/>
+					</div>
 				</div>
 			</div>
 		);

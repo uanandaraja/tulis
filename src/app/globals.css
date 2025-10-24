@@ -381,3 +381,10 @@
 	font-size: 0.875rem !important;
 	line-height: 1.5 !important;
 }
+
+.yoopta-bulleted-list,
+.yoopta-numbered-list {
+	font-size: 0.875rem !important;
+	line-height: 1.5 !important;
+	margin-top: 0.5rem !important;
+}
