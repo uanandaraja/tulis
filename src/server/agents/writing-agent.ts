@@ -1,7 +1,7 @@
-import { ToolLoopAgent, stepCountIs, type InferAgentUIMessage } from "ai";
 import { createOpenRouter } from "@openrouter/ai-sdk-provider";
-import { tools } from "@/server/tools";
+import { type InferAgentUIMessage, stepCountIs, ToolLoopAgent } from "ai";
 import { SYSTEM_PROMPT } from "@/lib/prompts";
+import { tools } from "@/server/tools";
 
 const openrouter = createOpenRouter({
 	apiKey: process.env.OPENROUTER_API_KEY,

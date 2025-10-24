@@ -2,8 +2,7 @@
 
 import { useChat } from "@ai-sdk/react";
 import type { UIMessage } from "ai";
-import { isToolUIPart, DefaultChatTransport } from "ai";
-import type { WritingAgentUIMessage } from "@/server/agents/writing-agent";
+import { DefaultChatTransport, isToolUIPart } from "ai";
 import { ArrowUp, Brain, Link, Search, X } from "lucide-react";
 import { useParams } from "next/navigation";
 import { useRef, useState } from "react";
@@ -66,6 +65,7 @@ import {
 	type WebSearchToolUIPart,
 	type WriteToEditorToolOutput,
 } from "@/lib/types/ai";
+import type { WritingAgentUIMessage } from "@/server/agents/writing-agent";
 
 function ChatInterface({
 	chatId,
