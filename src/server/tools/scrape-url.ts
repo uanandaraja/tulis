@@ -4,7 +4,7 @@ import { firecrawl } from "@/lib/firecrawl";
 
 export const scrapeUrlTool = tool({
 	description:
-		"Scrape and extract content from a specific URL. Use this to get the full text content of a webpage, including articles, documentation, and other text-based content.",
+		"Extract full content from a specific URL including articles, documentation, and text-based content.",
 	inputSchema: z.object({
 		url: z.string().url().describe("The URL to scrape"),
 	}),

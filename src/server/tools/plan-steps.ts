@@ -3,7 +3,7 @@ import { z } from "zod";
 
 export const planStepsTool = tool({
 	description:
-		"Create or update your work plan with steps for completing a complex task. MANDATORY for long-form writing tasks (articles, essays, reports). Call this tool MULTIPLE times to show progress: (1) Create initial plan with all steps 'pending', (2) Before starting each step, update it to 'in_progress', (3) After completing each step, update it to 'completed', (4) After final Write to Editor call, update ALL steps to 'completed'. This is how users track your real-time progress. Typical writing workflow: Research → Outline → Write Draft → Finalize.",
+		"Create or update a work plan for complex tasks. Call multiple times to update progress as steps are completed.",
 	inputSchema: z.object({
 		steps: z
 			.array(
@@ -34,6 +34,11 @@ export const planStepsTool = tool({
 		const inProgress = steps.filter((s) => s.status === "in_progress").length;
 		const completed = steps.filter((s) => s.status === "completed").length;
 
+		const allComplete = completed === steps.length;
+		const reminder = allComplete
+			? "All steps complete. If you called Write to Editor, respond with ONLY 'Done.'"
+			: "Remember to update this plan after completing each step.";
+
 		return {
 			success: true,
 			steps,
@@ -43,7 +48,7 @@ export const planStepsTool = tool({
 				inProgress,
 				completed,
 			},
-			message: `Plan updated: ${completed}/${steps.length} steps completed${inProgress > 0 ? `, ${inProgress} in progress` : ""}`,
+			message: `Plan updated: ${completed}/${steps.length} steps completed${inProgress > 0 ? `, ${inProgress} in progress` : ""}. ${reminder}`,
 		};
 	},
 });
