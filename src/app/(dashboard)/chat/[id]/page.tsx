@@ -6,7 +6,7 @@ import { isToolUIPart, DefaultChatTransport } from "ai";
 import type { WritingAgentUIMessage } from "@/server/agents/writing-agent";
 import { ArrowUp, Brain, Link, Search, X } from "lucide-react";
 import { useParams } from "next/navigation";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
 	Task,
 	TaskContent,
@@ -93,7 +93,7 @@ function ChatInterface({
 		},
 	});
 
-	const { messages, sendMessage, status, error } =
+	const { messages, sendMessage, status, error, setMessages } =
 		useChat<WritingAgentUIMessage>({
 			id: chatId,
 			transport: new DefaultChatTransport({
@@ -113,6 +113,16 @@ function ChatInterface({
 		});
 
 	const supportsReasoning = modelSupportsReasoning(selectedModel);
+
+	useEffect(() => {
+		if (
+			initialMessages &&
+			initialMessages.length > 0 &&
+			messages.length === 0
+		) {
+			setMessages(initialMessages as WritingAgentUIMessage[]);
+		}
+	}, [initialMessages, messages.length, setMessages]);
 
 	const {
 		editorContent,
