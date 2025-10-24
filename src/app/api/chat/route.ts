@@ -1,4 +1,4 @@
-import { createAgentUIStreamResponse, convertToModelMessages } from "ai";
+import { createAgentUIStreamResponse } from "ai";
 import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
 import { DEFAULT_MODEL } from "@/lib/constants/models";
@@ -21,6 +21,6 @@ export async function POST(req: Request) {
 
 	return createAgentUIStreamResponse({
 		agent,
-		messages: convertToModelMessages(messages),
+		messages,
 	});
 }
