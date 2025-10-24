@@ -11,6 +11,7 @@ import LinkTool, { DefaultLinkToolRender } from "@yoopta/link-tool";
 import { BulletedList, NumberedList } from "@yoopta/lists";
 import { Bold, Italic, Strike, Underline } from "@yoopta/marks";
 import Paragraph from "@yoopta/paragraph";
+import Table from "@yoopta/table";
 import Toolbar, { DefaultToolbarRender } from "@yoopta/toolbar";
 import {
 	forwardRef,
@@ -44,6 +45,7 @@ const plugins = [
 	HeadingThree,
 	Blockquote,
 	Code,
+	Table as any,
 	NumberedList,
 	BulletedList,
 ];
@@ -59,12 +61,16 @@ export const DocumentEditor = forwardRef<EditorHandle, DocumentEditorProps>(
 		const selectionRef = useRef(null);
 		const isInitialized = useRef(false);
 		const [wordCount, setWordCount] = useState(0);
+		const [isMounted, setIsMounted] = useState(false);
 
 		const parseInlineMarkdown = useCallback((text: string) => {
+			if (!text || typeof text !== "string") {
+				return [{ text: "" }];
+			}
+
 			const children: Array<{ text: string; marks?: Record<string, boolean> }> =
 				[];
 
-			// Simple regex-based parsing for bold, italic, code
 			const patterns: Array<{
 				regex: RegExp;
 				marks: Record<string, boolean>;
@@ -81,7 +87,6 @@ export const DocumentEditor = forwardRef<EditorHandle, DocumentEditorProps>(
 				{ regex: /`(.+?)`/g, marks: { code: true }, captureGroup: 1 },
 			];
 
-			const _matchIndex = 0;
 			const matches: Array<{
 				start: number;
 				end: number;
@@ -89,7 +94,6 @@ export const DocumentEditor = forwardRef<EditorHandle, DocumentEditorProps>(
 				marks: Record<string, boolean>;
 			}> = [];
 
-			// Find all matches
 			for (const pattern of patterns) {
 				const regex = new RegExp(pattern.regex.source, "g");
 				let match: RegExpExecArray | null;
@@ -105,7 +109,6 @@ export const DocumentEditor = forwardRef<EditorHandle, DocumentEditorProps>(
 				}
 			}
 
-			// Sort by start position, then by length (longer matches first) and remove overlaps
 			matches.sort((a, b) => {
 				if (a.start !== b.start) return a.start - b.start;
 				return b.end - b.start - (a.end - a.start);
@@ -125,7 +128,6 @@ export const DocumentEditor = forwardRef<EditorHandle, DocumentEditorProps>(
 				}
 			}
 
-			// Build children array
 			let buildIndex = 0;
 			for (const match of filtered) {
 				if (match.start > buildIndex) {
@@ -146,7 +148,7 @@ export const DocumentEditor = forwardRef<EditorHandle, DocumentEditorProps>(
 				});
 			}
 
-			return children.length > 0 ? children : [{ text }];
+			return children.length > 0 ? children : [{ text: "" }];
 		}, []);
 
 		const parseMarkdownToYoopta = useCallback(
@@ -154,16 +156,102 @@ export const DocumentEditor = forwardRef<EditorHandle, DocumentEditorProps>(
 				const lines = markdown.split("\n");
 				const blocks: any = {};
 				let order = 0;
+				let i = 0;
 
-				for (const line of lines) {
-					if (!line.trim()) continue;
+				while (i < lines.length) {
+					const line = lines[i];
+
+					if (!line.trim()) {
+						i++;
+						continue;
+					}
+
+					if (line.includes("|")) {
+						const tableLines: string[] = [];
+						let j = i;
+
+						while (j < lines.length && lines[j].includes("|")) {
+							tableLines.push(lines[j]);
+							j++;
+						}
+
+						if (tableLines.length >= 2) {
+							const blockId = crypto.randomUUID();
+							const rows: any[] = [];
+
+							for (let k = 0; k < tableLines.length; k++) {
+								const tableLine = tableLines[k];
+
+								if (k === 1 && /^\|[\s\-:|]+\|$/.test(tableLine.trim())) {
+									continue;
+								}
+
+								const cells = tableLine
+									.split("|")
+									.slice(1, -1)
+									.map((cell) => cell.trim());
+
+								if (cells.length === 0) {
+									continue;
+								}
+
+								const rowId = crypto.randomUUID();
+								const dataCells: any[] = [];
+
+								for (const cellText of cells) {
+									const cellId = crypto.randomUUID();
+									const children = parseInlineMarkdown(cellText || "");
+
+									dataCells.push({
+										id: cellId,
+										type: "table-data-cell",
+										children: [
+											{
+												id: crypto.randomUUID(),
+												type: "paragraph",
+												children,
+											},
+										],
+									});
+								}
+
+								if (dataCells.length > 0) {
+									rows.push({
+										id: rowId,
+										type: "table-row",
+										children: dataCells,
+									});
+								}
+							}
+
+							if (rows.length > 0) {
+								blocks[blockId] = {
+									id: blockId,
+									type: "Table",
+									value: [
+										{
+											id: crypto.randomUUID(),
+											type: "table",
+											children: rows,
+										},
+									],
+									meta: {
+										order: order++,
+										depth: 0,
+									},
+								};
+							}
+
+							i = j;
+							continue;
+						}
+					}
 
 					const blockId = crypto.randomUUID();
 					let blockType = "Paragraph";
 					let elementType = "paragraph";
 					let text = line;
 
-					// Parse markdown syntax
 					if (line.startsWith("### ")) {
 						blockType = "HeadingThree";
 						elementType = "heading-three";
@@ -190,21 +278,28 @@ export const DocumentEditor = forwardRef<EditorHandle, DocumentEditorProps>(
 						text = line.replace(/^[-*]\s+/, "");
 					}
 
-					// Parse inline markdown
-					const children = parseInlineMarkdown(text);
+					const children = parseInlineMarkdown(text || "");
 
-					blocks[blockId] = {
-						id: blockId,
-						type: blockType,
-						value: [
-							{
-								id: crypto.randomUUID(),
-								type: elementType,
-								children,
-							},
-						],
-						meta: { order: order++, depth: 0 },
-					};
+					if (
+						children &&
+						children.length > 0 &&
+						children.some((child) => child.text !== "")
+					) {
+						blocks[blockId] = {
+							id: blockId,
+							type: blockType,
+							value: [
+								{
+									id: crypto.randomUUID(),
+									type: elementType,
+									children,
+								},
+							],
+							meta: { order: order++, depth: 0 },
+						};
+					}
+
+					i++;
 				}
 
 				return blocks;
@@ -255,13 +350,31 @@ export const DocumentEditor = forwardRef<EditorHandle, DocumentEditorProps>(
 		}, [editor]);
 
 		useEffect(() => {
-			if (initialContent && !isInitialized.current) {
-				const value = parseMarkdownToYoopta(initialContent);
-				editor.setEditorValue(value);
-				isInitialized.current = true;
-				calculateWordCount();
+			setIsMounted(true);
+		}, []);
+
+		useEffect(() => {
+			if (initialContent && !isInitialized.current && isMounted) {
+				setTimeout(() => {
+					try {
+						const value = parseMarkdownToYoopta(initialContent);
+						if (value && Object.keys(value).length > 0) {
+							editor.setEditorValue(value);
+							isInitialized.current = true;
+							calculateWordCount();
+						}
+					} catch (error) {
+						console.error("Error parsing markdown:", error);
+					}
+				}, 100);
 			}
-		}, [initialContent, editor, parseMarkdownToYoopta, calculateWordCount]);
+		}, [
+			initialContent,
+			editor,
+			parseMarkdownToYoopta,
+			calculateWordCount,
+			isMounted,
+		]);
 
 		useEffect(() => {
 			const handleChange = () => {
@@ -274,6 +387,10 @@ export const DocumentEditor = forwardRef<EditorHandle, DocumentEditorProps>(
 				editor.off("change", handleChange);
 			};
 		}, [editor, calculateWordCount]);
+
+		if (!isMounted) {
+			return null;
+		}
 
 		return (
 			<div
