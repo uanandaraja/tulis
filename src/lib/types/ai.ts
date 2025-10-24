@@ -88,9 +88,17 @@ export function getToolConfig(toolType: string): ToolConfig {
 }
 
 export function toToolPart(toolUIPart: ToolUIPart): ToolPart {
+	const state = toolUIPart.state;
+	const mappedState =
+		state === "approval-requested" ||
+		state === "approval-responded" ||
+		state === "output-denied"
+			? "input-available"
+			: state;
+
 	return {
 		type: toolUIPart.type,
-		state: toolUIPart.state,
+		state: mappedState,
 		input: toolUIPart.input as Record<string, unknown>,
 		output: toolUIPart.output as Record<string, unknown>,
 		toolCallId: toolUIPart.toolCallId,

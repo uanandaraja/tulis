@@ -31,13 +31,17 @@ export const PlanSteps = ({ output, className }: PlanStepsProps) => {
 	const completedCount = output.steps.filter((s) => s.status === "completed").length;
 	const totalCount = output.steps.length;
 	const allCompleted = completedCount === totalCount;
-	const hasInProgress = output.steps.some((s) => s.status === "in_progress");
-	
-	const overallStatus = allCompleted ? "completed" : hasInProgress ? "in_progress" : "pending";
+
+	const getTriggerIcon = () => {
+		if (allCompleted) {
+			return <CheckCircle2 className="h-4 w-4 text-green-500" />;
+		}
+		return <Circle className="h-4 w-4 text-muted-foreground" />;
+	};
 
 	return (
 		<Steps defaultOpen={false} className={cn("mt-3", className)}>
-			<StepsTrigger leftIcon={getStatusIcon(overallStatus)}>
+			<StepsTrigger leftIcon={getTriggerIcon()}>
 				Plan ({completedCount}/{totalCount} completed)
 			</StepsTrigger>
 			<StepsContent>

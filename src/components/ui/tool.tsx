@@ -1,7 +1,7 @@
 "use client"
 
 import { Button } from "@/components/ui/button"
-import { CodeBlock, CodeBlockCode } from "@/components/ui/code-block"
+import { CodeBlock, CodeBlockCopyButton } from "@/components/ui/code-block"
 import {
   Collapsible,
   CollapsibleContent,
@@ -181,12 +181,12 @@ const Tool = ({ toolPart, defaultOpen = false, className, displayName, icon }: T
                   Output
                 </h4>
                 <div className="max-h-60 overflow-auto max-w-full">
-                  <CodeBlock className="min-w-0">
-                    <CodeBlockCode
-                      code={formatValue(output)}
-                      language="json"
-                      theme="github-light"
-                    />
+                  <CodeBlock 
+                    code={formatValue(output)}
+                    language="json"
+                    className="min-w-0"
+                  >
+                    <CodeBlockCopyButton />
                   </CodeBlock>
                 </div>
               </div>
