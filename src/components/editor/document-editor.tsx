@@ -5,7 +5,10 @@ import ActionMenuList, {
 } from "@yoopta/action-menu-list";
 import Blockquote from "@yoopta/blockquote";
 import Code from "@yoopta/code";
-import YooptaEditor, { createYooptaEditor } from "@yoopta/editor";
+import YooptaEditor, {
+	createYooptaEditor,
+	type YooptaContentValue,
+} from "@yoopta/editor";
 import { HeadingOne, HeadingThree, HeadingTwo } from "@yoopta/headings";
 import LinkTool, { DefaultLinkToolRender } from "@yoopta/link-tool";
 import { BulletedList, NumberedList } from "@yoopta/lists";
@@ -45,7 +48,8 @@ const plugins = [
 	HeadingThree,
 	Blockquote,
 	Code,
-	Table as any,
+	// @ts-expect-error - Table plugin has type incompatibility with other plugins
+	Table,
 	NumberedList,
 	BulletedList,
 ];
@@ -180,9 +184,9 @@ export const DocumentEditor = forwardRef<EditorHandle, DocumentEditorProps>(
 		}, []);
 
 		const parseMarkdownToYoopta = useCallback(
-			(markdown: string): any => {
+			(markdown: string): YooptaContentValue => {
 				const lines = markdown.split("\n");
-				const blocks: any = {};
+				const blocks: YooptaContentValue = {};
 				let order = 0;
 				let i = 0;
 
@@ -205,7 +209,26 @@ export const DocumentEditor = forwardRef<EditorHandle, DocumentEditorProps>(
 
 						if (tableLines.length >= 2) {
 							const blockId = crypto.randomUUID();
-							const rows: any[] = [];
+							const rows: Array<{
+								id: string;
+								type: string;
+								children: Array<{
+									id: string;
+									type: string;
+									children: Array<{
+										id: string;
+										type: string;
+										children: Array<{
+											text: string;
+											bold?: boolean;
+											italic?: boolean;
+											code?: boolean;
+											underline?: boolean;
+											strike?: boolean;
+										}>;
+									}>;
+								}>;
+							}> = [];
 
 							for (let k = 0; k < tableLines.length; k++) {
 								const tableLine = tableLines[k];
@@ -224,7 +247,7 @@ export const DocumentEditor = forwardRef<EditorHandle, DocumentEditorProps>(
 								}
 
 								const rowId = crypto.randomUUID();
-								const dataCells: any[] = [];
+								const dataCells: (typeof rows)[0]["children"] = [];
 
 								for (const cellText of cells) {
 									const cellId = crypto.randomUUID();
