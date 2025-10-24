@@ -19,6 +19,7 @@ import {
 	useImperativeHandle,
 	useMemo,
 	useRef,
+	useState,
 } from "react";
 import { cn } from "@/lib/utils";
 
@@ -57,6 +58,7 @@ export const DocumentEditor = forwardRef<EditorHandle, DocumentEditorProps>(
 		const editor = useMemo(() => createYooptaEditor(), []);
 		const selectionRef = useRef(null);
 		const isInitialized = useRef(false);
+		const [wordCount, setWordCount] = useState(0);
 
 		const parseInlineMarkdown = useCallback((text: string) => {
 			const children: Array<{ text: string; marks?: Record<string, boolean> }> =
@@ -229,18 +231,54 @@ export const DocumentEditor = forwardRef<EditorHandle, DocumentEditorProps>(
 			},
 		}));
 
+		const calculateWordCount = useCallback(() => {
+			const value = editor.getEditorValue();
+			let totalWords = 0;
+
+			for (const blockId in value) {
+				const block = value[blockId];
+				if (block.value && Array.isArray(block.value)) {
+					for (const element of block.value) {
+						if ("children" in element && Array.isArray(element.children)) {
+							for (const child of element.children) {
+								if ("text" in child && typeof child.text === "string") {
+									const words = child.text.trim().split(/\s+/).filter(Boolean);
+									totalWords += words.length;
+								}
+							}
+						}
+					}
+				}
+			}
+
+			setWordCount(totalWords);
+		}, [editor]);
+
 		useEffect(() => {
 			if (initialContent && !isInitialized.current) {
 				const value = parseMarkdownToYoopta(initialContent);
 				editor.setEditorValue(value);
 				isInitialized.current = true;
+				calculateWordCount();
 			}
-		}, [initialContent, editor, parseMarkdownToYoopta]);
+		}, [initialContent, editor, parseMarkdownToYoopta, calculateWordCount]);
+
+		useEffect(() => {
+			const handleChange = () => {
+				calculateWordCount();
+			};
+
+			editor.on("change", handleChange);
+
+			return () => {
+				editor.off("change", handleChange);
+			};
+		}, [editor, calculateWordCount]);
 
 		return (
 			<div
 				className={cn(
-					"flex flex-col h-full w-full overflow-hidden bg-background",
+					"flex flex-col h-full w-full overflow-hidden bg-background relative",
 					className,
 				)}
 				ref={selectionRef}
@@ -271,6 +309,9 @@ export const DocumentEditor = forwardRef<EditorHandle, DocumentEditorProps>(
 							selectionBoxRoot={selectionRef}
 						/>
 					</div>
+				</div>
+				<div className="absolute bottom-4 right-4 px-3 py-1.5 rounded-md bg-muted border border-border text-xs text-muted-foreground z-10">
+					{wordCount} {wordCount === 1 ? "word" : "words"}
 				</div>
 			</div>
 		);
