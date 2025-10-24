@@ -73,10 +73,10 @@ export function AppSidebar() {
 								<Button
 									asChild
 									variant="outline"
-									className="w-full justify-start"
+									className="w-full justify-center"
 								>
 									<Link href="/chat">
-										<Plus className="h-4 w-4 mr-2" />
+										<Plus className="h-4 w-4" />
 										New Chat
 									</Link>
 								</Button>
