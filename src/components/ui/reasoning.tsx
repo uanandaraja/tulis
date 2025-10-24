@@ -76,7 +76,7 @@ function Reasoning({
         onOpenChange: handleOpenChange,
       }}
     >
-      <div className={className}>{children}</div>
+      <div className={cn("mt-3", className)}>{children}</div>
     </ReasoningContext.Provider>
   )
 }

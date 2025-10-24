@@ -42,7 +42,11 @@ export const Task = ({
 	className,
 	...props
 }: TaskProps) => (
-	<Collapsible className={cn(className)} defaultOpen={defaultOpen} {...props} />
+	<Collapsible
+		className={cn("mt-3", className)}
+		defaultOpen={defaultOpen}
+		{...props}
+	/>
 );
 
 export type TaskTriggerProps = ComponentProps<typeof CollapsibleTrigger> & {

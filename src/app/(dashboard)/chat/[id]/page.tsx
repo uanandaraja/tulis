@@ -3,24 +3,13 @@
 import { useChat } from "@ai-sdk-tools/store";
 import type { UIMessage } from "ai";
 import { DefaultChatTransport, isToolUIPart } from "ai";
-import {
-	ArrowUp,
-	Brain,
-	FileEdit,
-	FileText,
-	Globe,
-	Link,
-	ListChecks,
-	Search,
-	X,
-} from "lucide-react";
+import { ArrowUp, Brain, Link, Search, X } from "lucide-react";
 import { useParams } from "next/navigation";
 import { useRef, useState } from "react";
 import {
 	Task,
 	TaskContent,
 	TaskItem,
-	TaskItemFile,
 	TaskTrigger,
 } from "@/components/ai-elements/task";
 import {
@@ -60,6 +49,9 @@ import {
 	TooltipProvider,
 	TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { useAutoSend } from "@/hooks/use-auto-send";
+import { useEditorState } from "@/hooks/use-editor-state";
+import { usePlanStepsState } from "@/hooks/use-plan-steps-state";
 import {
 	AI_MODELS,
 	DEFAULT_MODEL,
@@ -67,20 +59,11 @@ import {
 } from "@/lib/constants/models";
 import { trpc } from "@/lib/trpc/react";
 import {
-	getToolConfig,
 	isWebSearchToolOutput,
-	type PlanStepsToolOutput,
 	type ScrapeUrlToolOutput,
 	type WebSearchToolUIPart,
 	type WriteToEditorToolOutput,
 } from "@/lib/types/ai";
-
-const TOOL_ICONS: Record<string, React.ReactNode> = {
-	globe: <Globe className="h-4 w-4 text-blue-500" />,
-	fileText: <FileText className="h-4 w-4 text-amber-500" />,
-	fileEdit: <FileEdit className="h-4 w-4 text-purple-500" />,
-	listChecks: <ListChecks className="h-4 w-4 text-green-500" />,
-};
 
 function ChatInterface({
 	chatId,
@@ -100,10 +83,7 @@ function ChatInterface({
 	const [input, setInput] = useState("");
 	const [selectedModel, setSelectedModel] = useState(initialModel);
 	const [enableReasoning, setEnableReasoning] = useState(initialReasoning);
-	const [showEditor, setShowEditor] = useState(false);
 	const editorRef = useRef<EditorHandle>(null);
-	const prevEditorContentRef = useRef<string | null>(null);
-	const hasAutoSentRef = useRef(false);
 
 	const utils = trpc.useUtils();
 	const saveChatMutation = trpc.chat.save.useMutation({
@@ -127,14 +107,24 @@ function ChatInterface({
 		},
 	});
 
-	const sendMessageRef = useRef(sendMessage);
-	sendMessageRef.current = sendMessage;
+	const supportsReasoning = modelSupportsReasoning(selectedModel);
 
-	const autoSendPrompt = () => {
-		if (isNewChat && initialPrompt && !hasAutoSentRef.current) {
-			hasAutoSentRef.current = true;
+	const {
+		editorContent,
+		hasContent: hasEditorContent,
+		isOpen: showEditor,
+		close: closeEditor,
+	} = useEditorState(messages);
+	const { allPlanSteps } = usePlanStepsState(messages);
 
-			// Optimistically add to sidebar
+	useAutoSend({
+		isNewChat,
+		initialPrompt,
+		sendMessage,
+		selectedModel,
+		enableReasoning,
+		supportsReasoning,
+		onBeforeSend: () => {
 			utils.chat.list.setData(undefined, (old) => {
 				if (!old) return old;
 				const exists = old.some((c) => c.id === chatId);
@@ -153,69 +143,11 @@ function ChatInterface({
 					...old,
 				];
 			});
-
-			sendMessageRef.current(
-				{
-					text: initialPrompt,
-				},
-				{
-					body: {
-						selectedModel,
-						enableReasoning: enableReasoning && supportsReasoning,
-					},
-				},
-			);
-			sessionStorage.removeItem(`chat-${chatId}-initial`);
-		}
-	};
+		},
+	});
 
 	const isLoading = status === "submitted" || status === "streaming";
 	const isStreaming = status === "streaming";
-	const supportsReasoning = modelSupportsReasoning(selectedModel);
-
-	const getEditorContent = () => {
-		for (const message of [...messages].reverse()) {
-			if (message.role !== "assistant") continue;
-
-			const writeToEditorParts = message.parts.filter(
-				(part) =>
-					isToolUIPart(part) &&
-					part.type === "tool-writeToEditor" &&
-					part.state === "output-available",
-			);
-
-			for (const part of writeToEditorParts) {
-				if (!isToolUIPart(part)) continue;
-				const output = part.output as WriteToEditorToolOutput;
-
-				if (output.success) {
-					let fullContent = output.content;
-					if (output.title) {
-						fullContent = `# ${output.title}\n\n${output.content}`;
-					}
-					return fullContent;
-				}
-			}
-		}
-		return null;
-	};
-
-	const editorContent = getEditorContent();
-	const hasEditorContent = editorContent !== null;
-
-	if (editorContent && editorContent !== prevEditorContentRef.current) {
-		prevEditorContentRef.current = editorContent;
-		if (!showEditor) {
-			setShowEditor(true);
-		}
-	}
-
-	if (!editorContent && prevEditorContentRef.current !== null) {
-		prevEditorContentRef.current = null;
-		if (showEditor) {
-			setShowEditor(false);
-		}
-	}
 
 	const handleSubmit = () => {
 		if (input.trim() && !isLoading) {
@@ -236,9 +168,6 @@ function ChatInterface({
 
 	return (
 		<div
-			ref={(el) => {
-				if (el) autoSendPrompt();
-			}}
 			className={`flex h-screen gap-4 px-4 w-full ${showEditor ? "max-w-none" : "max-w-2xl mx-auto"}`}
 		>
 			<div
@@ -301,17 +230,7 @@ function ChatInterface({
 										return [];
 									});
 
-									// Get only the latest plan steps to avoid showing outdated plans
-									const planStepsParts = message.parts.filter(
-										(part) =>
-											isToolUIPart(part) &&
-											part.type === "tool-planSteps" &&
-											part.state === "output-available",
-									);
-									const latestPlanStepsPart =
-										planStepsParts.length > 0
-											? planStepsParts[planStepsParts.length - 1]
-											: null;
+									const renderedPlanIds = new Set<string>();
 
 									return (
 										<div key={message.id} className="flex justify-start w-full">
@@ -343,20 +262,25 @@ function ChatInterface({
 														);
 													}
 
-													// Render plan steps (only the latest one)
+													// Render plan steps (show all updates in order)
 													if (
-														latestPlanStepsPart &&
-														part === latestPlanStepsPart
+														isToolUIPart(part) &&
+														part.type === "tool-planSteps" &&
+														part.state === "output-available" &&
+														!renderedPlanIds.has(part.toolCallId)
 													) {
-														const toolPart = part as any;
-														const output =
-															toolPart.output as PlanStepsToolOutput;
-														return (
-															<PlanSteps
-																key={`plan-${toolPart.toolCallId}`}
-																output={output}
-															/>
+														renderedPlanIds.add(part.toolCallId);
+														const planData = allPlanSteps.find(
+															(p) => p.toolCallId === part.toolCallId,
 														);
+														if (planData) {
+															return (
+																<PlanSteps
+																	key={`plan-${part.toolCallId}`}
+																	output={planData.output}
+																/>
+															);
+														}
 													}
 
 													// Render write to editor artifact
@@ -371,7 +295,7 @@ function ChatInterface({
 															<EditorArtifact
 																key={`editor-${part.toolCallId}`}
 																title={output.title}
-																onShowDocumentAction={() => setShowEditor(true)}
+																onShowDocumentAction={() => {}}
 															/>
 														);
 													}
@@ -382,7 +306,7 @@ function ChatInterface({
 														part.type === "tool-webSearch" &&
 														part.state === "output-available"
 													) {
-														const output = part.output as any;
+														const output = part.output;
 														if (isWebSearchToolOutput(output)) {
 															return (
 																<Task
@@ -612,7 +536,7 @@ function ChatInterface({
 					<Button
 						variant="ghost"
 						size="icon"
-						onClick={() => setShowEditor(false)}
+						onClick={closeEditor}
 						className="absolute top-2 right-2 z-10 h-8 w-8 rounded-full hover:bg-muted"
 					>
 						<X className="h-4 w-4" />

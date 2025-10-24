@@ -36,7 +36,7 @@ export const PlanSteps = ({ output, className }: PlanStepsProps) => {
 	const overallStatus = allCompleted ? "completed" : hasInProgress ? "in_progress" : "pending";
 
 	return (
-		<Steps defaultOpen={true} className={cn("mt-3", className)}>
+		<Steps defaultOpen={false} className={cn("mt-3", className)}>
 			<StepsTrigger leftIcon={getStatusIcon(overallStatus)}>
 				Plan ({completedCount}/{totalCount} completed)
 			</StepsTrigger>
