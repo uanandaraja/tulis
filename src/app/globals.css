@@ -376,3 +376,8 @@
 .yoopta-heading-three {
 	font-size: 1.1rem !important;
 }
+
+.yoopta-paragraph {
+	font-size: 0.875rem !important;
+	line-height: 1.5 !important;
+}
