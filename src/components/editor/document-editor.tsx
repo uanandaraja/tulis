@@ -68,8 +68,28 @@ export const DocumentEditor = forwardRef<EditorHandle, DocumentEditorProps>(
 				return [{ text: "" }];
 			}
 
-			const children: Array<{ text: string; marks?: Record<string, boolean> }> =
-				[];
+			let processedText = text;
+			let headingBold = false;
+
+			if (processedText.startsWith("### ")) {
+				processedText = processedText.replace(/^### /, "");
+				headingBold = true;
+			} else if (processedText.startsWith("## ")) {
+				processedText = processedText.replace(/^## /, "");
+				headingBold = true;
+			} else if (processedText.startsWith("# ")) {
+				processedText = processedText.replace(/^# /, "");
+				headingBold = true;
+			}
+
+			const children: Array<{
+				text: string;
+				bold?: boolean;
+				italic?: boolean;
+				code?: boolean;
+				underline?: boolean;
+				strike?: boolean;
+			}> = [];
 
 			const patterns: Array<{
 				regex: RegExp;
@@ -98,7 +118,7 @@ export const DocumentEditor = forwardRef<EditorHandle, DocumentEditorProps>(
 				const regex = new RegExp(pattern.regex.source, "g");
 				let match: RegExpExecArray | null;
 				while (true) {
-					match = regex.exec(text);
+					match = regex.exec(processedText);
 					if (match === null) break;
 					matches.push({
 						start: match.index,
@@ -131,8 +151,10 @@ export const DocumentEditor = forwardRef<EditorHandle, DocumentEditorProps>(
 			let buildIndex = 0;
 			for (const match of filtered) {
 				if (match.start > buildIndex) {
+					const textSegment = processedText.slice(buildIndex, match.start);
 					children.push({
-						text: text.slice(buildIndex, match.start),
+						text: textSegment,
+						...(headingBold ? { bold: true } : {}),
 					});
 				}
 				children.push({
@@ -142,10 +164,16 @@ export const DocumentEditor = forwardRef<EditorHandle, DocumentEditorProps>(
 				buildIndex = match.end;
 			}
 
-			if (buildIndex < text.length) {
+			if (buildIndex < processedText.length) {
+				const textSegment = processedText.slice(buildIndex);
 				children.push({
-					text: text.slice(buildIndex),
+					text: textSegment,
+					...(headingBold ? { bold: true } : {}),
 				});
+			}
+
+			if (children.length === 0 && headingBold) {
+				children.push({ text: processedText, bold: true });
 			}
 
 			return children.length > 0 ? children : [{ text: "" }];
@@ -251,31 +279,47 @@ export const DocumentEditor = forwardRef<EditorHandle, DocumentEditorProps>(
 					let blockType = "Paragraph";
 					let elementType = "paragraph";
 					let text = line;
+					let depth = 0;
 
-					if (line.startsWith("### ")) {
+					const indentMatch = line.match(/^(\s+)/);
+					if (indentMatch) {
+						const spaces = indentMatch[1].length;
+						depth = Math.floor(spaces / 4);
+					}
+
+					if (line.trim().startsWith("### ")) {
 						blockType = "HeadingThree";
 						elementType = "heading-three";
-						text = line.replace(/^### /, "");
-					} else if (line.startsWith("## ")) {
+						text = line.trim().replace(/^### /, "");
+						depth = 0;
+					} else if (line.trim().startsWith("## ")) {
 						blockType = "HeadingTwo";
 						elementType = "heading-two";
-						text = line.replace(/^## /, "");
-					} else if (line.startsWith("# ")) {
+						text = line.trim().replace(/^## /, "");
+						depth = 0;
+					} else if (line.trim().startsWith("# ")) {
 						blockType = "HeadingOne";
 						elementType = "heading-one";
-						text = line.replace(/^# /, "");
-					} else if (line.startsWith("> ")) {
+						text = line.trim().replace(/^# /, "");
+						depth = 0;
+					} else if (line.trim().startsWith("> ")) {
 						blockType = "Blockquote";
 						elementType = "blockquote";
-						text = line.replace(/^> /, "");
-					} else if (line.match(/^\d+\.\s+/)) {
+						text = line.trim().replace(/^> /, "");
+						depth = 0;
+					} else if (line.trim().match(/^\d+\.\s+/)) {
 						blockType = "NumberedList";
 						elementType = "numbered-list";
-						text = line.replace(/^\d+\.\s+/, "");
-					} else if (line.startsWith("- ") || line.startsWith("* ")) {
+						text = line.trim().replace(/^\d+\.\s+/, "");
+					} else if (
+						line.trim().startsWith("- ") ||
+						line.trim().startsWith("* ")
+					) {
 						blockType = "BulletedList";
 						elementType = "bulleted-list";
-						text = line.replace(/^[-*]\s+/, "");
+						text = line.trim().replace(/^[-*]\s+/, "");
+					} else {
+						depth = 0;
 					}
 
 					const children = parseInlineMarkdown(text || "");
@@ -295,7 +339,7 @@ export const DocumentEditor = forwardRef<EditorHandle, DocumentEditorProps>(
 									children,
 								},
 							],
-							meta: { order: order++, depth: 0 },
+							meta: { order: order++, depth },
 						};
 					}
 
