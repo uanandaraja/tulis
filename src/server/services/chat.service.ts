@@ -114,7 +114,7 @@ export async function deleteChat(chatId: string, userId: string) {
 	if (chatData.storageKey) {
 		try {
 			await storage.file(chatData.storageKey).delete();
-		} catch (error) {
+		} catch (_error) {
 			// Storage deletion failed, but continue with DB deletion
 		}
 	}

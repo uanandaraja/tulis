@@ -19,5 +19,5 @@ export function useInitialMessages<T extends UIMessage>(
 			initialized.current = true;
 			setMessages(initialMessages);
 		}
-	}, []);
+	}, [initialMessages, currentMessages.length, setMessages]);
 }

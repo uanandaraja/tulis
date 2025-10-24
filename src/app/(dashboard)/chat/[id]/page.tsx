@@ -185,7 +185,7 @@ function ChatInterface({
 							</div>
 						) : (
 							<>
-								{messages.map((message: UIMessage, messageIndex: number) => {
+								{messages.map((message: UIMessage) => {
 									if (message.parts.length === 0) return null;
 
 									const isUserMessage = message.role === "user";
@@ -236,7 +236,7 @@ function ChatInterface({
 									return (
 										<div key={message.id} className="flex justify-start w-full">
 											<div className="flex flex-col gap-3 w-full min-w-0">
-												{message.parts.map((part, index) => {
+												{message.parts.map((part) => {
 													// Render reasoning
 													if (
 														part.type === "reasoning" &&
@@ -244,9 +244,13 @@ function ChatInterface({
 													) {
 														const reasoningText =
 															"text" in part ? part.text : "";
+														const partKey =
+															"toolCallId" in part && part.toolCallId
+																? `reasoning-${part.toolCallId}`
+																: `reasoning-${message.id}-${reasoningText.slice(0, 20)}`;
 														return (
 															<Reasoning
-																key={`reasoning-${messageIndex}-${index}`}
+																key={partKey}
 																open={
 																	isStreaming &&
 																	enableReasoning &&
@@ -427,10 +431,11 @@ function ChatInterface({
 														const exaSources = allExaSources.filter((source) =>
 															citedSourceIds.has(source.id),
 														);
+														const textKey = `text-${message.id}-${textContent.slice(0, 30).replace(/\s/g, "-")}`;
 
 														return (
 															<MessageContent
-																key={`text-${messageIndex}-${index}`}
+																key={textKey}
 																markdown={true}
 																className="prose dark:prose-invert max-w-none prose-pre:bg-muted prose-pre:border prose-pre:border-border bg-transparent p-0"
 																sources={exaSources}
