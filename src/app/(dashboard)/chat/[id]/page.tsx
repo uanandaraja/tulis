@@ -6,7 +6,7 @@ import { isToolUIPart, DefaultChatTransport } from "ai";
 import type { WritingAgentUIMessage } from "@/server/agents/writing-agent";
 import { ArrowUp, Brain, Link, Search, X } from "lucide-react";
 import { useParams } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import {
 	Task,
 	TaskContent,
@@ -52,6 +52,7 @@ import {
 } from "@/components/ui/tooltip";
 import { useAutoSend } from "@/hooks/use-auto-send";
 import { useEditorState } from "@/hooks/use-editor-state";
+import { useInitialMessages } from "@/hooks/use-initial-messages";
 import { usePlanStepsState } from "@/hooks/use-plan-steps-state";
 import {
 	AI_MODELS,
@@ -114,15 +115,11 @@ function ChatInterface({
 
 	const supportsReasoning = modelSupportsReasoning(selectedModel);
 
-	useEffect(() => {
-		if (
-			initialMessages &&
-			initialMessages.length > 0 &&
-			messages.length === 0
-		) {
-			setMessages(initialMessages as WritingAgentUIMessage[]);
-		}
-	}, [initialMessages, messages.length, setMessages]);
+	useInitialMessages(
+		messages,
+		initialMessages as WritingAgentUIMessage[],
+		setMessages,
+	);
 
 	const {
 		editorContent,
