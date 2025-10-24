@@ -17,6 +17,13 @@ import {
 import { useParams } from "next/navigation";
 import { useRef, useState } from "react";
 import {
+	Task,
+	TaskContent,
+	TaskItem,
+	TaskItemFile,
+	TaskTrigger,
+} from "@/components/ai-elements/task";
+import {
 	DocumentEditor,
 	type EditorHandle,
 } from "@/components/editor/document-editor";
@@ -31,8 +38,8 @@ import { MessageContent } from "@/components/ui/message";
 import { PlanSteps } from "@/components/ui/plan-steps";
 import {
 	PromptInput,
-	PromptInputTextarea,
 	PromptInputActions,
+	PromptInputTextarea,
 } from "@/components/ui/prompt-input";
 import {
 	Reasoning,
@@ -47,13 +54,6 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select";
-import {
-	Task,
-	TaskContent,
-	TaskItem,
-	TaskItemFile,
-	TaskTrigger,
-} from "@/components/ai-elements/task";
 import {
 	Tooltip,
 	TooltipContent,
@@ -232,7 +232,7 @@ function ChatInterface({
 			ref={(el) => {
 				if (el) autoSendPrompt();
 			}}
-			className={`flex h-screen gap-4 px-4 w-full ${showEditor ? "max-w-none" : "max-w-4xl mx-auto"}`}
+			className={`flex h-screen gap-4 px-4 w-full ${showEditor ? "max-w-none" : "max-w-2xl mx-auto"}`}
 		>
 			<div
 				className={`flex flex-col min-h-0 min-w-0 ${showEditor ? "w-[600px]" : "flex-1"}`}

@@ -4,7 +4,6 @@ import { PanelLeft, Plus, Trash2 } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { UserMenu } from "@/components/features/dashboard/user-menu";
-import { Button } from "@/components/ui/button";
 import {
 	AlertDialog,
 	AlertDialogAction,
@@ -16,6 +15,7 @@ import {
 	AlertDialogTitle,
 	AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { Button } from "@/components/ui/button";
 import {
 	Sidebar,
 	SidebarContent,

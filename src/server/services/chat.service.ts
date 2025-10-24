@@ -1,9 +1,9 @@
 import { openrouter } from "@openrouter/ai-sdk-provider";
 import { generateText, type UIMessage } from "ai";
 import { and, desc, eq } from "drizzle-orm";
+import { DEFAULT_MODEL } from "@/lib/constants/models";
 import { db } from "@/lib/db";
 import { chat } from "@/lib/db/schema";
-import { DEFAULT_MODEL } from "@/lib/constants/models";
 import { TITLE_GENERATION_PROMPT } from "@/lib/prompts";
 import { getChatStorageKey, storage } from "@/lib/storage";
 import type { StoredChatData } from "@/lib/types/chat";
