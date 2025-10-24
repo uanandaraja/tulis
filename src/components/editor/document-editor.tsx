@@ -48,11 +48,11 @@ const plugins = [
 	HeadingThree,
 	Blockquote,
 	Code,
-	// @ts-expect-error - Table plugin has type incompatibility with other plugins
 	Table,
 	NumberedList,
 	BulletedList,
-];
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+] as any;
 
 const marks = [Bold, Italic, Strike, Underline];
 
