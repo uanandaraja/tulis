@@ -16,13 +16,15 @@ export const TOOLS_INSTRUCTIONS = `=== YOUR AVAILABLE TOOLS ===
    - Returns: Full markdown content
    - Do NOT cite scraped content
 
-4. Write to Editor - FINAL STEP for long-form writing
-   - CRITICAL: This is WHERE you compose the draft, not AFTER you've shown it in chat
-   - Do NOT write "Draft Content:" in chat then copy to this tool
-   - Compose the article DIRECTLY in the tool's content parameter
-   - After calling: Update Plan Steps (all complete), then respond "Done."
-   - Parameters: title, content (markdown)
-   - NO previews, NO drafts in chat, NO "here's what I wrote"
+ 4. Write to Editor - FINAL STEP for long-form writing
+    - CRITICAL: This is WHERE you compose the draft, not AFTER you've shown it in chat
+    - Do NOT write "Draft Content:" in chat then copy to this tool
+    - Compose the article DIRECTLY in the tool's content parameter
+    - CONTENT RULE: Start with FIRST PARAGRAPH immediately - NO title repetition, NO headings that repeat title
+    - Title goes in separate 'title' parameter - do NOT put it in content
+    - After calling: Update Plan Steps (all complete), then respond "Done."
+    - Parameters: title (separate), content (start with first paragraph, no title)
+    - NO previews, NO drafts in chat, NO "here's what I wrote"
 
 === STRICT WORKFLOW FOR WRITING ===
 Step 1: Plan Steps (create)

@@ -14,9 +14,31 @@ export const writeToEditorTool = tool({
 		content: z
 			.string()
 			.describe(
-				"Full markdown body content. Start with paragraphs/sections (## for headings). Do NOT include title (separate field). If using citations [1] [2], add '## References' section at end",
+				"Full markdown body content. START IMMEDIATELY with first paragraph - NO title, NO heading that repeats title, NO introduction that mentions title. First sentence should be compelling hook, not title repetition. If using citations [1] [2], add '## References' section at end",
+			)
+			.refine(
+				(content) => {
+					// Check if content starts with title-like patterns
+					const titleLikePatterns = [
+						/^#\s+/, // Starts with # heading
+						/^##\s+/, // Starts with ## heading
+						/^The\s+\w+.*?:/, // Starts with "The [Word]:"
+						/^[A-Z][^.]{10,}:/, // Starts with long capitalized phrase ending in colon
+					];
+					return !titleLikePatterns.some((pattern) =>
+						pattern.test(content.trim()),
+					);
+				},
+				{
+					message:
+						"Content must NOT start with title, headings, or title-like phrases. Start directly with first paragraph.",
+				},
 			),
-		title: z.string().describe("Document title (required)"),
+		title: z
+			.string()
+			.describe(
+				"Document title (required) - this will be displayed separately, do NOT include in content",
+			),
 	}),
 	execute: async ({ action, content, title }) => {
 		return {
@@ -24,7 +46,7 @@ export const writeToEditorTool = tool({
 			action,
 			content,
 			title,
-			message: `Content ${action === "set" ? "written" : action === "append" ? "appended" : "prepended"} to editor. You MUST now: (1) Call Plan Steps to mark all steps completed, (2) Respond with ONLY "Done."`,
+			message: `Content ${action === "set" ? "written" : action === "append" ? "appended" : "prepended"} to editor. You MUST now: (1) Call Plan Steps to mark all steps completed, (2) Respond with ONLY "Done.",`,
 		};
 	},
 });
