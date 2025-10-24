@@ -1,3 +1,4 @@
+import { Provider } from "@ai-sdk-tools/store";
 import type { Metadata } from "next";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
@@ -24,9 +25,11 @@ export default async function DashboardGroupLayout({
 	}
 
 	return (
-		<SidebarProvider>
-			<AppSidebar />
-			<DashboardLayout>{children}</DashboardLayout>
-		</SidebarProvider>
+		<Provider>
+			<SidebarProvider>
+				<AppSidebar />
+				<DashboardLayout>{children}</DashboardLayout>
+			</SidebarProvider>
+		</Provider>
 	);
 }

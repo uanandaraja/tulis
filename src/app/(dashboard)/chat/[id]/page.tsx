@@ -1,6 +1,6 @@
 "use client";
 
-import { useChat } from "@ai-sdk/react";
+import { useChat } from "@ai-sdk-tools/store";
 import type { UIMessage } from "ai";
 import { DefaultChatTransport, isToolUIPart } from "ai";
 import {
@@ -207,6 +207,13 @@ function ChatInterface({
 		prevEditorContentRef.current = editorContent;
 		if (!showEditor) {
 			setShowEditor(true);
+		}
+	}
+
+	if (!editorContent && prevEditorContentRef.current !== null) {
+		prevEditorContentRef.current = null;
+		if (showEditor) {
+			setShowEditor(false);
 		}
 	}
 
