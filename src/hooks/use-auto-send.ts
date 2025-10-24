@@ -3,15 +3,7 @@ import { useEffect, useRef } from "react";
 interface UseAutoSendOptions {
 	isNewChat: boolean;
 	initialPrompt?: string;
-	sendMessage: (
-		options: {
-			text: string;
-		},
-		body?: { body: Record<string, unknown> },
-	) => void;
-	selectedModel: string;
-	enableReasoning: boolean;
-	supportsReasoning: boolean;
+	sendMessage: (message: { text: string }) => void;
 	onBeforeSend?: () => void;
 }
 
@@ -19,9 +11,6 @@ export function useAutoSend({
 	isNewChat,
 	initialPrompt,
 	sendMessage,
-	selectedModel,
-	enableReasoning,
-	supportsReasoning,
 	onBeforeSend,
 }: UseAutoSendOptions) {
 	const hasAutoSentRef = useRef(false);
@@ -32,17 +21,9 @@ export function useAutoSend({
 
 			onBeforeSend?.();
 
-			sendMessage(
-				{
-					text: initialPrompt,
-				},
-				{
-					body: {
-						selectedModel,
-						enableReasoning: enableReasoning && supportsReasoning,
-					},
-				},
-			);
+			sendMessage({
+				text: initialPrompt,
+			});
 
 			if (typeof window !== "undefined") {
 				const chatId = window.location.pathname.split("/").pop();
@@ -51,13 +32,5 @@ export function useAutoSend({
 				}
 			}
 		}
-	}, [
-		isNewChat,
-		initialPrompt,
-		sendMessage,
-		selectedModel,
-		enableReasoning,
-		supportsReasoning,
-		onBeforeSend,
-	]);
+	}, [isNewChat, initialPrompt, sendMessage, onBeforeSend]);
 }

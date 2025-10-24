@@ -1,0 +1,34 @@
+import { ToolLoopAgent, stepCountIs, type InferAgentUIMessage } from "ai";
+import { createOpenRouter } from "@openrouter/ai-sdk-provider";
+import { tools } from "@/server/tools";
+import { SYSTEM_PROMPT } from "@/lib/prompts";
+
+const openrouter = createOpenRouter({
+	apiKey: process.env.OPENROUTER_API_KEY,
+});
+
+export function createWritingAgent(model: string, enableReasoning?: boolean) {
+	return new ToolLoopAgent({
+		model: openrouter.chat(model),
+		instructions: SYSTEM_PROMPT,
+		tools,
+		stopWhen: stepCountIs(20),
+		providerOptions: enableReasoning
+			? {
+					openrouter: {
+						reasoning: {
+							max_tokens: 5000,
+						},
+					},
+				}
+			: undefined,
+	});
+}
+
+export const defaultWritingAgent = createWritingAgent(
+	"google/gemini-2.5-flash-lite-preview-09-2025",
+);
+
+export type WritingAgentUIMessage = InferAgentUIMessage<
+	typeof defaultWritingAgent
+>;

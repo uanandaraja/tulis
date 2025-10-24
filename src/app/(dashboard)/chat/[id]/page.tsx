@@ -1,8 +1,9 @@
 "use client";
 
-import { useChat } from "@ai-sdk-tools/store";
+import { useChat } from "@ai-sdk/react";
 import type { UIMessage } from "ai";
-import { DefaultChatTransport, isToolUIPart } from "ai";
+import { isToolUIPart, DefaultChatTransport } from "ai";
+import type { WritingAgentUIMessage } from "@/server/agents/writing-agent";
 import { ArrowUp, Brain, Link, Search, X } from "lucide-react";
 import { useParams } from "next/navigation";
 import { useRef, useState } from "react";
@@ -92,20 +93,24 @@ function ChatInterface({
 		},
 	});
 
-	const { messages, sendMessage, status, error } = useChat({
-		id: chatId,
-		messages: initialMessages,
-		transport: new DefaultChatTransport({
-			api: "/api/chat",
-		}),
-		onFinish: ({ messages: allMessages }) => {
-			saveChatMutation.mutate({
-				chatId,
-				messages: allMessages,
-				model: selectedModel,
-			});
-		},
-	});
+	const { messages, sendMessage, status, error } =
+		useChat<WritingAgentUIMessage>({
+			id: chatId,
+			transport: new DefaultChatTransport({
+				api: "/api/chat",
+				body: () => ({
+					selectedModel,
+					enableReasoning: enableReasoning && supportsReasoning,
+				}),
+			}),
+			onFinish: ({ messages: allMessages }) => {
+				saveChatMutation.mutate({
+					chatId,
+					messages: allMessages,
+					model: selectedModel,
+				});
+			},
+		});
 
 	const supportsReasoning = modelSupportsReasoning(selectedModel);
 
@@ -121,9 +126,6 @@ function ChatInterface({
 		isNewChat,
 		initialPrompt,
 		sendMessage,
-		selectedModel,
-		enableReasoning,
-		supportsReasoning,
 		onBeforeSend: () => {
 			utils.chat.list.setData(undefined, (old) => {
 				if (!old) return old;
@@ -151,17 +153,9 @@ function ChatInterface({
 
 	const handleSubmit = () => {
 		if (input.trim() && !isLoading) {
-			sendMessage(
-				{
-					text: input,
-				},
-				{
-					body: {
-						selectedModel,
-						enableReasoning: enableReasoning && supportsReasoning,
-					},
-				},
-			);
+			sendMessage({
+				text: input,
+			});
 			setInput("");
 		}
 	};
@@ -544,8 +538,8 @@ function ChatInterface({
 					<div className="flex-1 overflow-auto">
 						<DocumentEditor
 							ref={editorRef}
-							initialContent={editorContent}
-							key={editorContent}
+							initialContent={editorContent ?? ""}
+							key={editorContent ?? ""}
 						/>
 					</div>
 				</div>
