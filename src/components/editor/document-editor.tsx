@@ -5,10 +5,7 @@ import ActionMenuList, {
 } from "@yoopta/action-menu-list";
 import Blockquote from "@yoopta/blockquote";
 import Code from "@yoopta/code";
-import YooptaEditor, {
-	createYooptaEditor,
-	type YooptaContentValue,
-} from "@yoopta/editor";
+import YooptaEditor, { createYooptaEditor } from "@yoopta/editor";
 import { HeadingOne, HeadingThree, HeadingTwo } from "@yoopta/headings";
 import LinkTool, { DefaultLinkToolRender } from "@yoopta/link-tool";
 import { BulletedList, NumberedList } from "@yoopta/lists";
@@ -129,12 +126,7 @@ export const DocumentEditor = forwardRef<EditorHandle, DocumentEditorProps>(
 					}
 				}, 100);
 			}
-		}, [
-			initialContent,
-			editor,
-			calculateWordCount,
-			isMounted,
-		]);
+		}, [initialContent, editor, calculateWordCount, isMounted]);
 
 		useEffect(() => {
 			const handleChange = () => {
