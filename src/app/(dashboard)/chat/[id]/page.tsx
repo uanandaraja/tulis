@@ -45,7 +45,13 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select";
-import { Tool } from "@/components/ui/tool";
+import {
+	Task,
+	TaskContent,
+	TaskItem,
+	TaskItemFile,
+	TaskTrigger,
+} from "@/components/ai-elements/task";
 import {
 	Tooltip,
 	TooltipContent,
@@ -62,7 +68,7 @@ import {
 	getToolConfig,
 	isWebSearchToolOutput,
 	type PlanStepsToolOutput,
-	toToolPart,
+	type ScrapeUrlToolOutput,
 	type WebSearchToolUIPart,
 	type WriteToEditorToolOutput,
 } from "@/lib/types/ai";
@@ -361,24 +367,108 @@ function ChatInterface({
 														);
 													}
 
-													// Render other tools
+													// Render web search tool
 													if (
 														isToolUIPart(part) &&
-														part.type !== "tool-planSteps" &&
-														part.type !== "tool-writeToEditor"
+														part.type === "tool-webSearch" &&
+														part.state === "output-available"
 													) {
-														const config = getToolConfig(part.type);
-														const icon = config.iconName
-															? TOOL_ICONS[config.iconName]
-															: null;
+														const output = part.output as any;
+														if (isWebSearchToolOutput(output)) {
+															return (
+																<Task
+																	key={`tool-${part.toolCallId}`}
+																	defaultOpen={false}
+																>
+																	<TaskTrigger title="Searching the web" />
+																	<TaskContent>
+																		{output.results.map((result) => {
+																			const url = new URL(result.url);
+																			const faviconUrl = `https://www.google.com/s2/favicons?domain=${url.hostname}&sz=32`;
+																			return (
+																				<TaskItem key={result.id}>
+																					<div className="flex items-start gap-2">
+																						<img
+																							src={faviconUrl}
+																							alt=""
+																							className="w-4 h-4 mt-0.5 flex-shrink-0"
+																						/>
+																						<div className="flex flex-col gap-0.5 min-w-0 flex-1">
+																							<a
+																								href={result.url}
+																								target="_blank"
+																								rel="noopener noreferrer"
+																								className="text-foreground hover:underline font-medium text-sm truncate block"
+																								title={result.title}
+																							>
+																								{result.title}
+																							</a>
+																							<a
+																								href={result.url}
+																								target="_blank"
+																								rel="noopener noreferrer"
+																								className="text-blue-600 dark:text-blue-400 hover:underline text-xs truncate block max-w-[300px]"
+																								title={result.url}
+																							>
+																								{result.url}
+																							</a>
+																						</div>
+																					</div>
+																				</TaskItem>
+																			);
+																		})}
+																	</TaskContent>
+																</Task>
+															);
+														}
+													}
+
+													// Render scrape URL tool
+													if (
+														isToolUIPart(part) &&
+														part.type === "tool-scrapeUrl" &&
+														part.state === "output-available"
+													) {
+														const output = part.output as ScrapeUrlToolOutput;
+														const url = new URL(output.url);
+														const faviconUrl = `https://www.google.com/s2/favicons?domain=${url.hostname}&sz=32`;
 														return (
-															<Tool
+															<Task
 																key={`tool-${part.toolCallId}`}
-																toolPart={toToolPart(part)}
 																defaultOpen={false}
-																displayName={config.displayName}
-																icon={icon}
-															/>
+															>
+																<TaskTrigger title="Scraping URL" />
+																<TaskContent>
+																	<TaskItem>
+																		<div className="flex items-start gap-2">
+																			<img
+																				src={faviconUrl}
+																				alt=""
+																				className="w-4 h-4 mt-0.5 flex-shrink-0"
+																			/>
+																			<div className="flex flex-col gap-0.5 min-w-0 flex-1">
+																				{output.metadata?.title && (
+																					<span
+																						className="text-foreground font-medium text-sm truncate block"
+																						title={output.metadata.title}
+																					>
+																						{output.metadata.title}
+																					</span>
+																				)}
+																				<a
+																					href={output.url}
+																					target="_blank"
+																					rel="noopener noreferrer"
+																					className="text-blue-600 dark:text-blue-400 hover:underline text-xs truncate block max-w-[300px]"
+																					title={output.url}
+																				>
+																					{output.url}
+																				</a>
+																			</div>
+																		</div>
+																	</TaskItem>
+																</TaskContent>
+															</Task>
 														);
 													}
 
