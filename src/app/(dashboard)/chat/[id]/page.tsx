@@ -9,7 +9,9 @@ import {
 	FileEdit,
 	FileText,
 	Globe,
+	Link,
 	ListChecks,
+	Search,
 	X,
 } from "lucide-react";
 import { useParams } from "next/navigation";
@@ -380,7 +382,10 @@ function ChatInterface({
 																	key={`tool-${part.toolCallId}`}
 																	defaultOpen={false}
 																>
-																	<TaskTrigger title="Searching the web" />
+																	<TaskTrigger
+																		title="Searching the web"
+																		icon={<Search className="size-4" />}
+																	/>
 																	<TaskContent>
 																		{output.results.map((result) => {
 																			const url = new URL(result.url);
@@ -437,7 +442,10 @@ function ChatInterface({
 																key={`tool-${part.toolCallId}`}
 																defaultOpen={false}
 															>
-																<TaskTrigger title="Scraping URL" />
+																<TaskTrigger
+																	title="Scraping URL"
+																	icon={<Link className="size-4" />}
+																/>
 																<TaskContent>
 																	<TaskItem>
 																		<div className="flex items-start gap-2">
