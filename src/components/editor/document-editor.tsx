@@ -64,7 +64,12 @@ export const DocumentEditor = forwardRef<EditorHandle, DocumentEditorProps>(
 		const selectionRef = useRef(null);
 		const isInitialized = useRef(false);
 		const [wordCount, setWordCount] = useState(0);
-		const [isMounted, setIsMounted] = useState(false);
+
+		const updateWordCount = useCallback(() => {
+			const value = editor.getEditorValue();
+			const count = calculateWordCount(value);
+			setWordCount(count);
+		}, [editor]);
 
 		useImperativeHandle(ref, () => ({
 			setContent: (_content: string) => {
@@ -85,34 +90,22 @@ export const DocumentEditor = forwardRef<EditorHandle, DocumentEditorProps>(
 			},
 		}));
 
-		const updateWordCount = useCallback(() => {
-			const value = editor.getEditorValue();
-			const count = calculateWordCount(value);
-			setWordCount(count);
-		}, [editor]);
-
 		useEffect(() => {
-			setIsMounted(true);
-		}, []);
-
-		useEffect(() => {
-			if (initialContent && !isInitialized.current && isMounted) {
-				setTimeout(() => {
-					try {
-						const value = parseMarkdownToYoopta(initialContent);
-						if (value && Object.keys(value).length > 0) {
-							editor.setEditorValue(value);
-							isInitialized.current = true;
-							updateWordCount();
-						}
-					} catch (error) {
-						console.error("Error parsing markdown:", error);
+			// Initialize editor with initial content
+			if (initialContent && !isInitialized.current) {
+				try {
+					const value = parseMarkdownToYoopta(initialContent);
+					if (value && Object.keys(value).length > 0) {
+						editor.setEditorValue(value);
+						isInitialized.current = true;
+						updateWordCount();
 					}
-				}, 100);
+				} catch (error) {
+					console.error("Error parsing markdown:", error);
+				}
 			}
-		}, [initialContent, editor, updateWordCount, isMounted]);
 
-		useEffect(() => {
+			// Listen for editor changes to update word count
 			const handleChange = () => {
 				updateWordCount();
 			};
@@ -122,11 +115,7 @@ export const DocumentEditor = forwardRef<EditorHandle, DocumentEditorProps>(
 			return () => {
 				editor.off("change", handleChange);
 			};
-		}, [editor, updateWordCount]);
-
-		if (!isMounted) {
-			return null;
-		}
+		}, [initialContent, editor, updateWordCount]);
 
 		return (
 			<div
