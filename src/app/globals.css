@@ -389,3 +389,40 @@
 	line-height: 1.5 !important;
 	margin-top: 0.5rem !important;
 }
+
+/* Custom scrollbar */
+* {
+	scrollbar-width: thin;
+	scrollbar-color: transparent transparent;
+}
+
+.scrolling {
+	scrollbar-color: oklch(0.556 0 0 / 0.2) transparent !important;
+}
+
+.dark .scrolling {
+	scrollbar-color: oklch(0.7 0 0 / 0.2) transparent !important;
+}
+
+*::-webkit-scrollbar {
+	width: 4px;
+	height: 4px;
+}
+
+*::-webkit-scrollbar-track {
+	background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+	background-color: transparent;
+	border-radius: 3px;
+	transition: background-color 0.3s ease;
+}
+
+.scrolling::-webkit-scrollbar-thumb {
+	background-color: oklch(0.556 0 0 / 0.2);
+}
+
+.dark .scrolling::-webkit-scrollbar-thumb {
+	background-color: oklch(0.7 0 0 / 0.2);
+}
