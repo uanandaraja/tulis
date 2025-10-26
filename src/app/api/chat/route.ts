@@ -14,10 +14,15 @@ export async function POST(req: Request) {
 		return new Response("Unauthorized", { status: 401 });
 	}
 
-	const { messages, selectedModel, enableReasoning } = await req.json();
+	const { messages, selectedModel, enableReasoning, chatId, documentId } =
+		await req.json();
 
 	const model = selectedModel || DEFAULT_MODEL;
-	const agent = createWritingAgent(model, enableReasoning);
+	const agent = createWritingAgent(model, enableReasoning, {
+		userId: session.user.id,
+		chatId: chatId || null,
+		documentId: documentId || null,
+	});
 
 	return createAgentUIStreamResponse({
 		agent,
