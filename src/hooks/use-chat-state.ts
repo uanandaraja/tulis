@@ -1,6 +1,7 @@
 import { useChat } from "@ai-sdk/react";
 import type { UIMessage } from "ai";
-import { DefaultChatTransport } from "ai";
+import { isToolUIPart, DefaultChatTransport } from "ai";
+import { useEffect, useRef, useState } from "react";
 import { trpc } from "@/lib/trpc/react";
 import type { WritingAgentUIMessage } from "@/server/agents/writing-agent";
 
@@ -20,6 +21,9 @@ export function useChatState({
 	supportsReasoning,
 }: UseChatStateProps) {
 	const utils = trpc.useUtils();
+	const [documentId, setDocumentId] = useState<string | null>(null);
+	const documentIdRef = useRef<string | null>(null);
+
 	const saveChatMutation = trpc.chat.save.useMutation({
 		onSuccess: () => {
 			utils.chat.list.invalidate();
@@ -35,6 +39,8 @@ export function useChatState({
 				body: () => ({
 					selectedModel,
 					enableReasoning: enableReasoning && supportsReasoning,
+					chatId,
+					documentId: documentIdRef.current,
 				}),
 			}),
 			onFinish: ({ messages: allMessages }) => {
@@ -45,6 +51,34 @@ export function useChatState({
 				});
 			},
 		});
+
+	// Extract documentId from writeToEditor tool results
+	useEffect(() => {
+		for (const message of [...messages].reverse()) {
+			if (message.role !== "assistant") continue;
+
+			const writeToEditorParts = message.parts.filter(
+				(part) =>
+					isToolUIPart(part) &&
+					part.type === "tool-writeToEditor" &&
+					part.state === "output-available",
+			);
+
+			for (const part of writeToEditorParts) {
+				if (!isToolUIPart(part)) continue;
+				const output = part.output as {
+					success: boolean;
+					documentId?: string;
+				};
+
+				if (output.success && output.documentId) {
+					documentIdRef.current = output.documentId;
+					setDocumentId(output.documentId);
+					return;
+				}
+			}
+		}
+	}, [messages]);
 
 	const isLoading = status === "submitted" || status === "streaming";
 	const isStreaming = status === "streaming";
@@ -57,5 +91,6 @@ export function useChatState({
 		isLoading,
 		isStreaming,
 		utils,
+		documentId,
 	};
 }

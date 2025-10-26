@@ -36,14 +36,21 @@ export function ChatInterface({
 
 	const supportsReasoning = modelSupportsReasoning(selectedModel);
 
-	const { messages, sendMessage, error, isLoading, isStreaming, utils } =
-		useChatState({
-			chatId,
-			initialMessages,
-			selectedModel,
-			enableReasoning,
-			supportsReasoning,
-		});
+	const {
+		messages,
+		sendMessage,
+		error,
+		isLoading,
+		isStreaming,
+		utils,
+		documentId,
+	} = useChatState({
+		chatId,
+		initialMessages,
+		selectedModel,
+		enableReasoning,
+		supportsReasoning,
+	});
 
 	const {
 		editorContent,
@@ -129,6 +136,7 @@ export function ChatInterface({
 					ref={editorRef}
 					editorContent={editorContent ?? ""}
 					onClose={closeEditor}
+					documentId={documentId}
 				/>
 			)}
 		</div>
