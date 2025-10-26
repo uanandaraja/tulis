@@ -56,6 +56,7 @@ export function ChatInterface({
 		editorContent,
 		hasContent: hasEditorContent,
 		isOpen: showEditor,
+		open: openEditor,
 		close: closeEditor,
 	} = useEditorState(messages);
 
@@ -110,6 +111,7 @@ export function ChatInterface({
 					isStreaming={isStreaming}
 					enableReasoning={enableReasoning}
 					allPlanSteps={allPlanSteps}
+					onShowDocument={openEditor}
 				/>
 
 				{error && (

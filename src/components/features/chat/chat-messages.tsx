@@ -21,6 +21,7 @@ interface ChatMessagesProps {
 	isStreaming: boolean;
 	enableReasoning: boolean;
 	allPlanSteps: PlanStepData[];
+	onShowDocument?: () => void;
 }
 
 export function ChatMessages({
@@ -30,6 +31,7 @@ export function ChatMessages({
 	isStreaming,
 	enableReasoning,
 	allPlanSteps,
+	onShowDocument,
 }: ChatMessagesProps) {
 	return (
 		<ChatContainerRoot
@@ -51,6 +53,7 @@ export function ChatMessages({
 								isStreaming={isStreaming}
 								enableReasoning={enableReasoning}
 								allPlanSteps={allPlanSteps}
+								onShowDocument={onShowDocument}
 							/>
 						))}
 						{isLoading && (

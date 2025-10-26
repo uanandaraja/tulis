@@ -32,6 +32,7 @@ interface MessageRendererProps {
 	isStreaming: boolean;
 	enableReasoning: boolean;
 	allPlanSteps: PlanStepData[];
+	onShowDocument?: () => void;
 }
 
 export function MessageRenderer({
@@ -40,6 +41,7 @@ export function MessageRenderer({
 	isStreaming,
 	enableReasoning,
 	allPlanSteps,
+	onShowDocument,
 }: MessageRendererProps) {
 	if (message.parts.length === 0) return null;
 
@@ -145,7 +147,7 @@ export function MessageRenderer({
 							<EditorArtifact
 								key={`editor-${part.toolCallId}`}
 								title={output.title}
-								onShowDocumentAction={() => {}}
+								onShowDocumentAction={onShowDocument}
 							/>
 						);
 					}
