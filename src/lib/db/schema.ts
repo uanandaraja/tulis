@@ -81,4 +81,62 @@ export const chat = pgTable(
 	}),
 );
 
-export const schema = { user, session, account, verification, chat };
+export const document = pgTable(
+	"document",
+	{
+		id: text("id").primaryKey(),
+		chatId: text("chat_id").references(() => chat.id, { onDelete: "set null" }),
+		userId: text("user_id")
+			.notNull()
+			.references(() => user.id, { onDelete: "cascade" }),
+		title: text("title").notNull(),
+		currentVersionId: text("current_version_id"),
+		storageKey: text("storage_key").notNull(),
+		contentPreview: text("content_preview"),
+		wordCount: integer("word_count").default(0),
+		createdAt: timestamp("created_at").notNull().defaultNow(),
+		updatedAt: timestamp("updated_at").notNull().defaultNow(),
+	},
+	(table) => ({
+		userIdIdx: index("document_user_id_idx").on(table.userId),
+		chatIdIdx: index("document_chat_id_idx").on(table.chatId),
+		updatedAtIdx: index("document_updated_at_idx").on(table.updatedAt),
+	}),
+);
+
+export const documentVersion = pgTable(
+	"document_version",
+	{
+		id: text("id").primaryKey(),
+		documentId: text("document_id")
+			.notNull()
+			.references(() => document.id, { onDelete: "cascade" }),
+		versionNumber: integer("version_number").notNull(),
+		storageKey: text("storage_key").notNull(),
+		contentPreview: text("content_preview"),
+		changeDescription: text("change_description"),
+		wordCount: integer("word_count").default(0),
+		createdBy: text("created_by").notNull(), // 'user' | 'assistant'
+		createdAt: timestamp("created_at").notNull().defaultNow(),
+	},
+	(table) => ({
+		documentIdIdx: index("document_version_document_id_idx").on(
+			table.documentId,
+		),
+		createdAtIdx: index("document_version_created_at_idx").on(table.createdAt),
+		uniqueVersionNumber: index("document_version_unique_idx").on(
+			table.documentId,
+			table.versionNumber,
+		),
+	}),
+);
+
+export const schema = {
+	user,
+	session,
+	account,
+	verification,
+	chat,
+	document,
+	documentVersion,
+};

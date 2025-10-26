@@ -41,6 +41,8 @@ export const writeToEditorTool = tool({
 			),
 	}),
 	execute: async ({ action, content, title }) => {
+		// For now, just return the content. The frontend will handle document persistence
+		// via the chat save mechanism, which we'll enhance later
 		return {
 			success: true,
 			action,
