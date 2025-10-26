@@ -51,7 +51,6 @@ import {
 } from "@/components/ui/tooltip";
 import { useAutoSend } from "@/hooks/use-auto-send";
 import { useEditorState } from "@/hooks/use-editor-state";
-import { useInitialMessages } from "@/hooks/use-initial-messages";
 import { usePlanStepsState } from "@/hooks/use-plan-steps-state";
 import {
 	AI_MODELS,
@@ -94,9 +93,10 @@ function ChatInterface({
 		},
 	});
 
-	const { messages, sendMessage, status, error, setMessages } =
+	const { messages, sendMessage, status, error } =
 		useChat<WritingAgentUIMessage>({
 			id: chatId,
+			messages: initialMessages as WritingAgentUIMessage[],
 			transport: new DefaultChatTransport({
 				api: "/api/chat",
 				body: () => ({
@@ -114,12 +114,6 @@ function ChatInterface({
 		});
 
 	const supportsReasoning = modelSupportsReasoning(selectedModel);
-
-	useInitialMessages(
-		messages,
-		initialMessages as WritingAgentUIMessage[],
-		setMessages,
-	);
 
 	const {
 		editorContent,
