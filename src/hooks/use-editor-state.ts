@@ -1,5 +1,5 @@
 import { isToolUIPart, type UIMessage } from "ai";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { trpc } from "@/lib/trpc/react";
 import type { WriteToEditorToolOutput } from "@/lib/types/ai";
 
@@ -45,15 +45,17 @@ export function useEditorState(
 		return null;
 	}, [messages, currentDocument]);
 
-	const [isOpen, setIsOpen] = useState(false);
+	const hasContent = editorContent !== null;
+	const [isOpen, setIsOpen] = useState(hasContent);
 
-	useEffect(() => {
-		setIsOpen(editorContent !== null);
-	}, [editorContent]);
+	// Update open state when content changes
+	if (hasContent !== isOpen) {
+		setIsOpen(hasContent);
+	}
 
 	return {
 		editorContent,
-		hasContent: editorContent !== null,
+		hasContent,
 		isOpen,
 		open: () => setIsOpen(true),
 		close: () => setIsOpen(false),

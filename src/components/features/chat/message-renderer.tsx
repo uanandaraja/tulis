@@ -134,34 +134,6 @@ export function MessageRenderer({
 						}
 					}
 
-					// Render document editing tools artifact (scalable approach)
-					if (
-						isToolUIPart(part) &&
-						part.type !== "tool-writeToEditor" && // Handle separately below
-						part.state === "output-available" &&
-						shouldShowEditorArtifact(
-							part.type,
-							part.output as { success?: boolean; documentId?: string },
-						)
-					) {
-						const output = part.output as {
-							success: boolean;
-							documentId?: string;
-							versionId?: string;
-							versionNumber?: number;
-							message?: string;
-						};
-
-						return (
-							<EditorArtifact
-								key={`editor-${part.toolCallId}`}
-								title="Document Updated"
-								documentId={output.documentId}
-								onShowDocumentAction={onShowDocument}
-							/>
-						);
-					}
-
 					// Render write to editor artifact
 					if (
 						isToolUIPart(part) &&
