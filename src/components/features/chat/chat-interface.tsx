@@ -58,7 +58,7 @@ export function ChatInterface({
 		isOpen: showEditor,
 		open: openEditor,
 		close: closeEditor,
-	} = useEditorState(messages);
+	} = useEditorState(messages, documentId);
 
 	const { allPlanSteps } = usePlanStepsState(messages);
 
@@ -100,6 +100,7 @@ export function ChatInterface({
 	const handleDocumentUpdate = () => {
 		// Refresh the editor content when document is restored
 		utils.chat.invalidate();
+		utils.document.get.invalidate({ documentId: documentId! });
 	};
 
 	return (

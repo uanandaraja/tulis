@@ -1,5 +1,5 @@
 import { formatDistanceToNow } from "date-fns";
-import { Clock, RotateCcw } from "lucide-react";
+import { Clock, Eye, RotateCcw } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -22,6 +22,7 @@ export function VersionHistoryPopover({
 	children,
 }: VersionHistoryPopoverProps) {
 	const [open, setOpen] = useState(false);
+	const [expandedVersion, setExpandedVersion] = useState<string | null>(null);
 	
 	const { data: versions, isLoading } = trpc.document.listVersions.useQuery(
 		{ documentId, limit: 10 },
@@ -37,6 +38,10 @@ export function VersionHistoryPopover({
 
 	const handleRestore = (versionId: string) => {
 		restoreMutation.mutate({ versionId });
+	};
+
+	const toggleDiff = (versionId: string) => {
+		setExpandedVersion(expandedVersion === versionId ? null : versionId);
 	};
 
 	return (
@@ -84,6 +89,27 @@ export function VersionHistoryPopover({
 										<div className="text-xs text-muted-foreground mb-2">
 											{version.changeDescription || "No description"}
 										</div>
+										{version.diff && (
+											<div className="mb-2">
+												<Button
+													variant="ghost"
+													size="sm"
+													onClick={() => toggleDiff(version.id)}
+													className="h-6 px-2 text-xs"
+												>
+													<Eye className="h-3 w-3 mr-1" />
+													{expandedVersion === version.id ? "Hide" : "Show"} Changes
+												</Button>
+											</div>
+										)}
+										{expandedVersion === version.id && version.diff && (
+											<div className="mb-2 p-2 bg-muted rounded text-xs">
+												<div 
+													className="prose prose-xs max-w-none"
+													dangerouslySetInnerHTML={{ __html: version.diff }}
+												/>
+											</div>
+										)}
 										<div className="flex items-center justify-between">
 											<span className="text-xs text-muted-foreground">
 												{version.wordCount} words

@@ -1,9 +1,28 @@
 import { isToolUIPart, type UIMessage } from "ai";
 import { useEffect, useMemo, useState } from "react";
+import { trpc } from "@/lib/trpc/react";
 import type { WriteToEditorToolOutput } from "@/lib/types/ai";
 
-export function useEditorState(messages: UIMessage[]) {
+export function useEditorState(
+	messages: UIMessage[],
+	documentId?: string | null,
+) {
+	// Fetch current document content when documentId is available
+	const { data: currentDocument } = trpc.document.get.useQuery(
+		{ documentId: documentId! },
+		{
+			enabled: !!documentId,
+			staleTime: 0, // Always fetch fresh data
+		},
+	);
+
 	const editorContent = useMemo(() => {
+		// If we have a current document from the database, use its content
+		if (currentDocument?.content) {
+			return currentDocument.content;
+		}
+
+		// Otherwise, fall back to the last writeToEditor tool result
 		for (const message of [...messages].reverse()) {
 			if (message.role !== "assistant") continue;
 
@@ -19,16 +38,12 @@ export function useEditorState(messages: UIMessage[]) {
 				const output = part.output as WriteToEditorToolOutput;
 
 				if (output.success) {
-					let fullContent = output.content;
-					if (output.title) {
-						fullContent = `# ${output.title}\n\n${output.content}`;
-					}
-					return fullContent;
+					return output.content;
 				}
 			}
 		}
 		return null;
-	}, [messages]);
+	}, [messages, currentDocument]);
 
 	const [isOpen, setIsOpen] = useState(false);
 

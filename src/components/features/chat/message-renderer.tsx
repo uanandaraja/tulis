@@ -143,10 +143,13 @@ export function MessageRenderer({
 						part.state === "output-available"
 					) {
 						const output = part.output as WriteToEditorToolOutput;
+						// Extract title from first h1 heading in content
+						const titleMatch = output.content.match(/^#\s+(.+)$/m);
+						const title = titleMatch ? titleMatch[1].trim() : "Document";
 						return (
 							<EditorArtifact
 								key={`editor-${part.toolCallId}`}
-								title={output.title}
+								title={title}
 								onShowDocumentAction={onShowDocument}
 							/>
 						);

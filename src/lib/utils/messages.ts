@@ -9,7 +9,7 @@ export function cleanMessages(messages: UIMessage[]): UIMessage[] {
 	return messages.map((message) => ({
 		...message,
 		parts: message.parts
-			.filter((part: any) => {
+			.filter((part) => {
 				// Filter out tool parts that have undefined output
 				if ("output" in part && part.output === undefined) {
 					return false;
@@ -28,7 +28,7 @@ export function cleanMessages(messages: UIMessage[]): UIMessage[] {
 				}
 				return true;
 			})
-			.map((part: any) => {
+			.map((part) => {
 				// Clean tool parts to remove undefined values from within the output object
 				if (
 					"output" in part &&

@@ -71,10 +71,43 @@ export const DocumentEditor = forwardRef<EditorHandle, DocumentEditorProps>(
 			setWordCount(count);
 		}, [editor]);
 
+		useEffect(() => {
+			// Initialize editor with initial content
+			if (initialContent && !isInitialized.current) {
+				try {
+					const value = parseMarkdownToYoopta(initialContent);
+					if (value && Object.keys(value).length > 0) {
+						editor.setEditorValue(value);
+						isInitialized.current = true;
+						updateWordCount();
+					}
+				} catch (error) {
+					console.error("Error parsing markdown:", error);
+				}
+			}
+
+			// Update content when it changes (after initialization)
+			if (initialContent && isInitialized.current) {
+				try {
+					const value = parseMarkdownToYoopta(initialContent);
+					if (value && Object.keys(value).length > 0) {
+						editor.setEditorValue(value);
+						updateWordCount();
+					}
+				} catch (error) {
+					console.error("Error updating markdown:", error);
+				}
+			}
+		}, [initialContent, editor, updateWordCount]);
+
 		useImperativeHandle(ref, () => ({
 			setContent: (_content: string) => {
-				const value = parseMarkdownToYoopta(_content);
-				editor.setEditorValue(value);
+				try {
+					const value = parseMarkdownToYoopta(_content);
+					editor.setEditorValue(value);
+				} catch (error) {
+					console.error("Error parsing markdown in setContent:", error);
+				}
 			},
 			appendContent: (_content: string) => {
 				console.log("Append not yet implemented for Yoopta");
@@ -91,31 +124,13 @@ export const DocumentEditor = forwardRef<EditorHandle, DocumentEditorProps>(
 		}));
 
 		useEffect(() => {
-			// Initialize editor with initial content
-			if (initialContent && !isInitialized.current) {
-				try {
-					const value = parseMarkdownToYoopta(initialContent);
-					if (value && Object.keys(value).length > 0) {
-						editor.setEditorValue(value);
-						isInitialized.current = true;
-						updateWordCount();
-					}
-				} catch (error) {
-					console.error("Error parsing markdown:", error);
-				}
-			}
-
-			// Listen for editor changes to update word count
-			const handleChange = () => {
-				updateWordCount();
-			};
-
-			editor.on("change", handleChange);
+			// Set up change listener
+			editor.on("change", updateWordCount);
 
 			return () => {
-				editor.off("change", handleChange);
+				editor.off("change", updateWordCount);
 			};
-		}, [initialContent, editor, updateWordCount]);
+		}, [editor, updateWordCount]);
 
 		return (
 			<div

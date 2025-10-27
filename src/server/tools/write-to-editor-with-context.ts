@@ -1,24 +1,12 @@
 import { tool } from "ai";
 import { z } from "zod";
+import type { DocumentWithContent } from "@/lib/types/document";
 import {
 	createDocument,
 	getDocument,
 	updateDocument,
 } from "@/server/services/document.service";
 import type { ToolContext } from "./create-tools";
-
-/**
- * Strips leading markdown headings (# or ##) from content.
- * This allows the LLM to naturally include headings, which we then remove.
- */
-function stripLeadingHeading(content: string): string {
-	const lines = content.trim().split("\n");
-	// Remove first line if it's a markdown heading (# or ##)
-	if (lines[0] && /^#{1,2}\s+/.test(lines[0])) {
-		return lines.slice(1).join("\n").trim();
-	}
-	return content;
-}
 
 export function createWriteToEditorTool(context: ToolContext) {
 	return tool({
@@ -34,7 +22,7 @@ export function createWriteToEditorTool(context: ToolContext) {
 			content: z
 				.string()
 				.describe(
-					"Full markdown body content. If using citations [1] [2], add '## References' section at end. You can include a heading at the start if you want, but it will be automatically removed since the title is passed separately.",
+					"Full markdown content including title and body. Include title as h1 heading (# Title) at the top, followed by body content. If using citations [1] [2], add '## References' section at end",
 				),
 			title: z
 				.string()
@@ -42,13 +30,20 @@ export function createWriteToEditorTool(context: ToolContext) {
 					"Document title (required) - this will be displayed separately from the content",
 				),
 		}),
-		execute: async ({ action, content, title }) => {
+		execute: async ({ action, content }) => {
 			const { userId, chatId, documentId } = context;
 
 			try {
-				// Strip any leading heading from content since title is separate
-				let finalContent = stripLeadingHeading(content);
-				let document;
+				// Extract title from first h1 heading in content
+				let title = "Untitled Document";
+				let finalContent = content;
+
+				const titleMatch = content.match(/^#\s+(.+)$/m);
+				if (titleMatch) {
+					title = titleMatch[1].trim();
+				}
+
+				let document: DocumentWithContent;
 				let changeDescription = `${action === "set" ? "Created" : action === "append" ? "Appended to" : "Prepended to"} document`;
 
 				// If documentId exists, we're updating an existing document
@@ -101,7 +96,6 @@ export function createWriteToEditorTool(context: ToolContext) {
 					success: true,
 					action,
 					content: finalContent,
-					title,
 					documentId: document.id,
 					message: `Content ${action === "set" ? "written" : action === "append" ? "appended" : "prepended"} to editor. Document saved with version history. You MUST now: (1) Call Plan Steps to mark all steps completed, (2) Respond with ONLY "Done.",`,
 				};
@@ -111,7 +105,6 @@ export function createWriteToEditorTool(context: ToolContext) {
 					success: false,
 					action,
 					content,
-					title,
 					message: `Failed to save document: ${error instanceof Error ? error.message : "Unknown error"}`,
 				};
 			}

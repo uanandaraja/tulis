@@ -115,6 +115,7 @@ export const documentVersion = pgTable(
 		storageKey: text("storage_key").notNull(),
 		contentPreview: text("content_preview"),
 		changeDescription: text("change_description"),
+		diff: text("diff"),
 		wordCount: integer("word_count").default(0),
 		createdBy: text("created_by").notNull(), // 'user' | 'assistant'
 		createdAt: timestamp("created_at").notNull().defaultNow(),
@@ -123,8 +124,7 @@ export const documentVersion = pgTable(
 		documentIdIdx: index("document_version_document_id_idx").on(
 			table.documentId,
 		),
-		createdAtIdx: index("document_version_created_at_idx").on(table.createdAt),
-		uniqueVersionNumber: index("document_version_unique_idx").on(
+		versionNumberIdx: index("document_version_version_number_idx").on(
 			table.documentId,
 			table.versionNumber,
 		),

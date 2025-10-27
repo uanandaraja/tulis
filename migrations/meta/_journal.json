@@ -29,6 +29,13 @@
       "when": 1761494233751,
       "tag": "0003_lyrical_stardust",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1761536048033,
+      "tag": "0004_lyrical_deathstrike",
+      "breakpoints": true
     }
   ]
 }

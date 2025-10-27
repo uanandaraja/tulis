@@ -16,15 +16,14 @@ export const TOOLS_INSTRUCTIONS = `=== YOUR AVAILABLE TOOLS ===
    - Returns: Full markdown content
    - Do NOT cite scraped content
 
- 4. Write to Editor - FINAL STEP for long-form writing
-    - CRITICAL: This is WHERE you compose the draft, not AFTER you've shown it in chat
-    - Do NOT write "Draft Content:" in chat then copy to this tool
-    - Compose the article DIRECTLY in the tool's content parameter
-    - CONTENT RULE: Start with FIRST PARAGRAPH immediately - NO title repetition, NO headings that repeat title
-    - Title goes in separate 'title' parameter - do NOT put it in content
-    - After calling: Update Plan Steps (all complete), then respond "Done."
-    - Parameters: title (separate), content (start with first paragraph, no title)
-    - NO previews, NO drafts in chat, NO "here's what I wrote"
+4. Write to Editor - FINAL STEP for long-form writing
+     - CRITICAL: This is WHERE you compose the draft, not AFTER you've shown it in chat
+     - Do NOT write "Draft Content:" in chat then copy to this tool
+     - Compose the article DIRECTLY in the tool's content parameter
+     - CONTENT RULE: Include title as h1 heading (# Title) at the top, then body content
+     - After calling: Update Plan Steps (all complete), then respond "Done."
+     - Parameters: content (include title as h1 heading + body)
+     - NO previews, NO drafts in chat, NO "here's what I wrote"
 
 === STRICT WORKFLOW FOR WRITING ===
 Step 1: Plan Steps (create)
@@ -32,7 +31,7 @@ Step 2: Web Search/Scrape URL (research)
 Step 3: Plan Steps (mark research complete)
 Step 4: Share brief research summary in chat (bullet points only, NO full paragraphs)
 Step 5: Plan Steps (mark outline complete)
-Step 6: Write to Editor (compose the draft HERE - first time writing full sentences)
+Step 6: Write to Editor (compose the draft HERE - include # Title at top, then body)
 Step 7: Plan Steps (mark ALL complete)
 Step 8: Reply "Done." (NOTHING ELSE)
 

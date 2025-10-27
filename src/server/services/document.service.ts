@@ -1,3 +1,4 @@
+import { diff_match_patch } from "diff-match-patch";
 import { and, desc, eq } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { document, documentVersion } from "@/lib/db/schema";
@@ -11,6 +12,8 @@ import type {
 	StoredDocumentContent,
 	StoredVersionContent,
 } from "@/lib/types/document";
+
+const dmp = new diff_match_patch();
 
 function generateId(): string {
 	return `${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
@@ -112,6 +115,7 @@ export async function updateDocument(
 	content: string,
 	createdBy: "user" | "assistant" = "user",
 	changeDescription?: string,
+	diff?: string,
 ): Promise<DocumentWithContent> {
 	// Get existing document
 	const existingDoc = await db.query.document.findFirst({
@@ -122,7 +126,7 @@ export async function updateDocument(
 		throw new Error("Document not found");
 	}
 
-	// Get latest version number
+	// Get latest version number and content
 	const latestVersion = await db.query.documentVersion.findFirst({
 		where: eq(documentVersion.documentId, documentId),
 		orderBy: [desc(documentVersion.versionNumber)],
@@ -137,6 +141,21 @@ export async function updateDocument(
 		documentId,
 		newVersionNumber,
 	);
+
+	// Generate diff if not provided
+	let generatedDiff = diff;
+	if (!generatedDiff && latestVersion) {
+		try {
+			const oldContent = await getDocumentVersion(latestVersion.id, userId);
+			if (oldContent) {
+				const diffs = dmp.diff_main(oldContent.content, content);
+				dmp.diff_cleanupSemantic(diffs);
+				generatedDiff = dmp.diff_prettyHtml(diffs);
+			}
+		} catch (error) {
+			console.error("Failed to generate diff:", error);
+		}
+	}
 
 	// Store updated content in S3
 	const documentData: StoredDocumentContent = {
@@ -158,6 +177,7 @@ export async function updateDocument(
 		versionNumber: newVersionNumber,
 		content,
 		changeDescription,
+		diff: generatedDiff,
 		wordCount,
 		createdBy,
 		createdAt: new Date().toISOString(),
@@ -185,6 +205,7 @@ export async function updateDocument(
 		storageKey: versionStorageKey,
 		contentPreview: extractPreview(content, 200),
 		changeDescription,
+		diff: generatedDiff,
 		wordCount,
 		createdBy,
 		createdAt: new Date(),

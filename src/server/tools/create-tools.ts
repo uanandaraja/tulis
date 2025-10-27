@@ -1,4 +1,5 @@
 import type { ToolSet } from "ai";
+import { createBatchEditTool } from "./batch-edit";
 import { createEditContentTool } from "./edit-content";
 import { createGetDocumentStructureTool } from "./get-document-structure";
 import { createInsertContentTool } from "./insert-content";
@@ -18,6 +19,7 @@ export function createToolsWithContext(context: ToolContext): ToolSet {
 		webSearch: webSearchTool,
 		scrapeUrl: scrapeUrlTool,
 		writeToEditor: createWriteToEditorTool(context),
+		batchEdit: createBatchEditTool(context),
 		editContent: createEditContentTool(context),
 		insertContent: createInsertContentTool(context),
 		getDocumentStructure: createGetDocumentStructureTool(context),

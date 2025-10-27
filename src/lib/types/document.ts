@@ -14,6 +14,7 @@ export interface StoredVersionContent {
 	versionNumber: number;
 	content: string;
 	changeDescription?: string;
+	diff?: string;
 	wordCount: number;
 	createdBy: "user" | "assistant";
 	createdAt: string;
@@ -39,6 +40,7 @@ export interface DocumentVersionMetadata {
 	storageKey: string;
 	contentPreview: string | null;
 	changeDescription: string | null;
+	diff: string | null;
 	wordCount: number;
 	createdBy: string;
 	createdAt: Date;

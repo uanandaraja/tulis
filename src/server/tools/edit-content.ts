@@ -170,10 +170,10 @@ export function createEditContentTool(context: ToolContext) {
 				if (selectionMode === "search" && searchText) {
 					// Find and replace/delete text
 					if (operation === "replace" && newContent) {
-						updatedContent = updatedContent.replace(searchText, newContent);
+						updatedContent = updatedContent.replaceAll(searchText, newContent);
 						changeDescription = `Replaced text matching "${searchText.slice(0, 50)}"`;
 					} else if (operation === "delete") {
-						updatedContent = updatedContent.replace(searchText, "");
+						updatedContent = updatedContent.replaceAll(searchText, "");
 						changeDescription = `Deleted text matching "${searchText.slice(0, 50)}"`;
 					}
 				} else if (selectionMode === "section" && sectionTitle) {
