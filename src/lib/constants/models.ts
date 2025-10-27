@@ -62,6 +62,8 @@ export const AI_MODELS = [
 ] as const;
 
 export const DEFAULT_MODEL = "minimax/minimax-m2:free";
+export const CHAT_TITLE_GENERATION_MODEL =
+	"google/gemini-2.5-flash-lite-preview-09-2025";
 
 export function modelSupportsReasoning(modelValue: string): boolean {
 	return (

@@ -1,7 +1,7 @@
 import { openrouter } from "@openrouter/ai-sdk-provider";
 import { generateText, type UIMessage } from "ai";
 import { and, desc, eq } from "drizzle-orm";
-import { DEFAULT_MODEL } from "@/lib/constants/models";
+import { CHAT_TITLE_GENERATION_MODEL } from "@/lib/constants/models";
 import { db } from "@/lib/db";
 import { chat } from "@/lib/db/schema";
 import { TITLE_GENERATION_PROMPT } from "@/lib/prompts";
@@ -162,7 +162,7 @@ export async function initializeChat(
 export async function generateChatTitle(userPrompt: string): Promise<string> {
 	try {
 		const { text } = await generateText({
-			model: openrouter(DEFAULT_MODEL),
+			model: openrouter(CHAT_TITLE_GENERATION_MODEL),
 			prompt: `${TITLE_GENERATION_PROMPT}\n\nUser message: ${userPrompt}`,
 		});
 
