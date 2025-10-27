@@ -92,7 +92,7 @@ export function MessageRenderer({
 	return (
 		<div className="flex justify-start w-full">
 			<div className="flex flex-col gap-1.5 w-full min-w-0">
-				{message.parts.map((part) => {
+				{message.parts.map((part, partIndex) => {
 					// Render reasoning
 					if (part.type === "reasoning" && supportsReasoning) {
 						const reasoningText = "text" in part ? part.text : "";
@@ -244,10 +244,10 @@ export function MessageRenderer({
 						const exaSources = allExaSources.filter((source) =>
 							citedSourceIds.has(source.id),
 						);
-						const textKey = `text-${message.id}-${textContent.slice(0, 30).replace(/\s/g, "-")}`;
+						const textKey = `text-${message.id}-${partIndex}`;
 
 						return (
-							<div key={textKey} className="flex flex-col gap-1.5">
+							<Fragment key={textKey}>
 								{reasoningText && supportsReasoning && (
 									<Reasoning
 										key={`reasoning-${textKey}`}
@@ -260,16 +260,17 @@ export function MessageRenderer({
 									</Reasoning>
 								)}
 								{textContent && (
-									<MessageContent
-										key={`content-${textKey}`}
-										markdown={true}
-										className="prose dark:prose-invert max-w-none prose-pre:bg-muted prose-pre:border prose-pre:border-border bg-transparent p-0"
-										sources={exaSources}
-									>
-										{textContent}
-									</MessageContent>
+									<div key={`content-${textKey}`} className="mt-3">
+										<MessageContent
+											markdown={true}
+											className="prose dark:prose-invert max-w-none prose-pre:bg-muted prose-pre:border prose-pre:border-border bg-transparent p-0"
+											sources={exaSources}
+										>
+											{textContent}
+										</MessageContent>
+									</div>
 								)}
-							</div>
+							</Fragment>
 						);
 					}
 

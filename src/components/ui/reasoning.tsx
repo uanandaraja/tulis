@@ -1,7 +1,7 @@
 "use client"
 
 import { cn } from "@/lib/utils"
-import { ChevronDownIcon } from "lucide-react"
+import { Brain, ChevronDownIcon } from "lucide-react"
 import React, {
   createContext,
   useContext,
@@ -95,11 +95,12 @@ function ReasoningTrigger({
 
   return (
     <button
-      className={cn("flex cursor-pointer items-center gap-2 text-sm", className)}
+      className={cn("flex cursor-pointer items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-foreground", className)}
       onClick={() => onOpenChange(!isOpen)}
       {...props}
     >
-      <span className="text-primary">{children}</span>
+      <Brain className="size-3.5" />
+      <span>{children}</span>
       <div
         className={cn(
           "transform transition-transform",
