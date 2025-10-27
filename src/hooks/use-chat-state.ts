@@ -117,6 +117,7 @@ export function useChatState({
 		// This ensures UI updates even when editing the same document
 		if (newDocumentId) {
 			utils.document.get.invalidate({ documentId: newDocumentId });
+			utils.document.listVersions.invalidate({ documentId: newDocumentId });
 		}
 	}, [messages, utils]);
 

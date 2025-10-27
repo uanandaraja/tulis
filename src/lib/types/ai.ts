@@ -61,6 +61,7 @@ export interface ToolConfig {
 // Define tool categories for scalable handling
 export const DOCUMENT_EDITING_TOOLS = [
 	"tool-writeToEditor",
+	"tool-applyDiff",
 	"tool-editContent",
 	"tool-batchEdit",
 	"tool-insertContent",

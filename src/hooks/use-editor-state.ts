@@ -1,5 +1,5 @@
 import { isToolUIPart, type UIMessage } from "ai";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { trpc } from "@/lib/trpc/react";
 import type { WriteToEditorToolOutput } from "@/lib/types/ai";
 
@@ -48,10 +48,12 @@ export function useEditorState(
 	const hasContent = editorContent !== null;
 	const [isOpen, setIsOpen] = useState(hasContent);
 
-	// Update open state when content changes
-	if (hasContent !== isOpen) {
-		setIsOpen(hasContent);
-	}
+	// Only auto-open when new content appears (not when closing)
+	useEffect(() => {
+		if (hasContent && !isOpen) {
+			setIsOpen(true);
+		}
+	}, [hasContent]);
 
 	return {
 		editorContent,

@@ -32,7 +32,7 @@ export const EditorPanel = forwardRef<EditorHandle, EditorPanelProps>(
 		const currentVersion = versions?.[0];
 
 		return (
-			<div className="flex flex-col flex-1 min-h-0 border-l relative">
+			<div className="flex flex-col flex-1 min-h-0 min-w-0 border-l relative">
 				<div className="flex items-center justify-between px-4 py-2 border-b bg-muted/30">
 					<div className="flex items-center gap-2">
 						{documentId ? (

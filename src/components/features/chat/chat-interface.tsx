@@ -79,6 +79,7 @@ export function ChatInterface({
 						model: selectedModel,
 						messageCount: 0,
 						storageKey: null,
+						deletedAt: null,
 						createdAt: new Date(),
 						updatedAt: new Date(),
 					},
@@ -105,10 +106,10 @@ export function ChatInterface({
 
 	return (
 		<div
-			className={`flex h-screen gap-4 px-4 w-full ${showEditor ? "max-w-none" : "max-w-2xl mx-auto"}`}
+			className={`flex h-screen gap-4 px-4 w-full overflow-x-hidden ${showEditor ? "max-w-none" : "max-w-2xl mx-auto"}`}
 		>
 			<div
-				className={`flex flex-col min-h-0 min-w-0 ${showEditor ? "w-[600px]" : "flex-1"}`}
+				className={`flex flex-col min-h-0 min-w-0 flex-shrink-0 ${showEditor ? "w-[600px]" : "flex-1"}`}
 			>
 				<ChatMessages
 					messages={messages}
