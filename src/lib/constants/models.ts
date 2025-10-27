@@ -35,6 +35,11 @@ export const AI_MODELS = [
 		supportsReasoning: false,
 	},
 	{
+		value: "minimax/minimax-m2:free",
+		label: "MiniMax M2",
+		supportsReasoning: true,
+	},
+	{
 		value: "deepseek/deepseek-r1-0528",
 		label: "DeepSeek R1",
 		supportsReasoning: true,
