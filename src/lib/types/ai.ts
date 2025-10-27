@@ -62,10 +62,6 @@ export interface ToolConfig {
 export const DOCUMENT_EDITING_TOOLS = [
 	"tool-writeToEditor",
 	"tool-applyDiff",
-	"tool-editContent",
-	"tool-batchEdit",
-	"tool-insertContent",
-	"tool-removeCitations",
 ] as const;
 
 const TOOL_CONFIGS: Record<string, ToolConfig> = {
