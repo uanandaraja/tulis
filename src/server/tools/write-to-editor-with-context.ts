@@ -7,6 +7,19 @@ import {
 } from "@/server/services/document.service";
 import type { ToolContext } from "./create-tools";
 
+/**
+ * Strips leading markdown headings (# or ##) from content.
+ * This allows the LLM to naturally include headings, which we then remove.
+ */
+function stripLeadingHeading(content: string): string {
+	const lines = content.trim().split("\n");
+	// Remove first line if it's a markdown heading (# or ##)
+	if (lines[0] && /^#{1,2}\s+/.test(lines[0])) {
+		return lines.slice(1).join("\n").trim();
+	}
+	return content;
+}
+
 export function createWriteToEditorTool(context: ToolContext) {
 	return tool({
 		description:
@@ -21,37 +34,20 @@ export function createWriteToEditorTool(context: ToolContext) {
 			content: z
 				.string()
 				.describe(
-					"Full markdown body content. START IMMEDIATELY with first paragraph - NO title, NO heading that repeats title, NO introduction that mentions title. First sentence should be compelling hook, not title repetition. If using citations [1] [2], add '## References' section at end",
-				)
-				.refine(
-					(content) => {
-						// Check if content starts with title-like patterns
-						const titleLikePatterns = [
-							/^#\s+/, // Starts with # heading
-							/^##\s+/, // Starts with ## heading
-							/^The\s+\w+.*?:/, // Starts with "The [Word]:"
-							/^[A-Z][^.]{10,}:/, // Starts with long capitalized phrase ending in colon
-						];
-						return !titleLikePatterns.some((pattern) =>
-							pattern.test(content.trim()),
-						);
-					},
-					{
-						message:
-							"Content must NOT start with title, headings, or title-like phrases. Start directly with first paragraph.",
-					},
+					"Full markdown body content. If using citations [1] [2], add '## References' section at end. You can include a heading at the start if you want, but it will be automatically removed since the title is passed separately.",
 				),
 			title: z
 				.string()
 				.describe(
-					"Document title (required) - this will be displayed separately, do NOT include in content",
+					"Document title (required) - this will be displayed separately from the content",
 				),
 		}),
 		execute: async ({ action, content, title }) => {
 			const { userId, chatId, documentId } = context;
 
 			try {
-				let finalContent = content;
+				// Strip any leading heading from content since title is separate
+				let finalContent = stripLeadingHeading(content);
 				let document;
 				let changeDescription = `${action === "set" ? "Created" : action === "append" ? "Appended to" : "Prepended to"} document`;
 

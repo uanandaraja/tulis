@@ -1,5 +1,7 @@
 import { tool } from "ai";
 import { z } from "zod";
+import { getDocument } from "@/server/services/document.service";
+import type { ToolContext } from "./create-tools";
 
 interface Section {
 	level: number;
@@ -65,38 +67,67 @@ function parseDocumentStructure(
 	return { sections, wordCount, title };
 }
 
-export const getDocumentStructureTool = tool({
-	description:
-		"Get the structure of the current document including sections, headings, and word count. Useful for understanding document layout before making edits.",
-	inputSchema: z.object({
-		includeContent: z
-			.boolean()
-			.optional()
-			.default(false)
-			.describe(
-				"Whether to include the full content of each section in the response",
-			),
-	}),
-	execute: async ({ includeContent }) => {
-		try {
-			// Note: In real implementation, we'd get the actual document content
-			// For now, return a placeholder structure
-			// The frontend will provide the actual document content
+export function createGetDocumentStructureTool(context: ToolContext) {
+	return tool({
+		description:
+			"Get the structure of the current document including sections, headings, and word count. Useful for understanding document layout before making edits.",
+		inputSchema: z.object({
+			includeContent: z
+				.boolean()
+				.optional()
+				.default(false)
+				.describe(
+					"Whether to include the full content of each section in the response",
+				),
+		}),
+		execute: async ({ includeContent }) => {
+			const { userId, documentId } = context;
 
-			return {
-				success: true,
-				message:
-					"Document structure request received. Frontend will provide actual structure.",
-				includeContent,
-				// Placeholder data
-				sections: [],
-				wordCount: 0,
-			};
-		} catch (error) {
-			return {
-				success: false,
-				message: `Failed to get document structure: ${error instanceof Error ? error.message : "Unknown error"}`,
-			};
-		}
-	},
-});
+			try {
+				// Need document to analyze
+				if (!documentId) {
+					return {
+						success: false,
+						message:
+							"No document found in current chat. Please create a document first using writeToEditor.",
+						sections: [],
+						wordCount: 0,
+					};
+				}
+
+				// Get current document
+				const currentDoc = await getDocument(documentId, userId);
+				if (!currentDoc) {
+					return {
+						success: false,
+						message: "Document not found",
+						sections: [],
+						wordCount: 0,
+					};
+				}
+
+				// Parse the document structure
+				const structure = parseDocumentStructure(
+					currentDoc.content,
+					includeContent || false,
+				);
+
+				return {
+					success: true,
+					title: structure.title,
+					sections: structure.sections,
+					wordCount: structure.wordCount,
+					message: `Document has ${structure.sections.length} sections and ${structure.wordCount} words`,
+				};
+			} catch (error) {
+				console.error("Error in getDocumentStructure:", error);
+				return {
+					success: false,
+					message: `Failed to get document structure: ${error instanceof Error ? error.message : "Unknown error"}`,
+					sections: [],
+					wordCount: 0,
+				};
+			}
+		},
+	});
+}

@@ -1,5 +1,10 @@
 import { tool } from "ai";
 import { z } from "zod";
+import {
+	getDocument,
+	updateDocument,
+} from "@/server/services/document.service";
+import type { ToolContext } from "./create-tools";
 
 function findSectionBoundaries(
 	content: string,
@@ -45,112 +50,201 @@ function replaceLineRange(
 	content: string,
 	startLine: number,
 	endLine: number,
-	newContent: string,
+	newContent: string | null,
 ): string {
 	const lines = content.split("\n");
 	const before = lines.slice(0, startLine);
 	const after = lines.slice(endLine);
 
+	if (newContent === null) {
+		// Delete operation
+		return [...before, ...after].join("\n");
+	}
+
 	return [...before, newContent, ...after].join("\n");
 }
 
-export const editContentTool = tool({
-	description:
-		"Edit specific parts of the document content. Use this to modify existing content without rewriting the entire document.",
-	inputSchema: z.object({
-		selectionMode: z
-			.enum(["search", "section", "range"])
-			.describe(
-				"How to select content: 'search' finds text, 'section' finds by heading, 'range' uses line numbers",
-			),
-		searchText: z
-			.string()
-			.optional()
-			.describe("Text to search for (required when selectionMode='search')"),
-		sectionTitle: z
-			.string()
-			.optional()
-			.describe(
-				"Section heading to find (required when selectionMode='section')",
-			),
-		startLine: z
-			.number()
-			.optional()
-			.describe("Start line number (required when selectionMode='range')"),
-		endLine: z
-			.number()
-			.optional()
-			.describe("End line number (required when selectionMode='range')"),
-		operation: z
-			.enum(["replace", "delete"])
-			.describe("What to do with selected content"),
-		newContent: z
-			.string()
-			.optional()
-			.describe("New content (required when operation='replace')"),
-	}),
-	execute: async ({
-		selectionMode,
-		searchText,
-		sectionTitle,
-		startLine,
-		endLine,
-		operation,
-		newContent,
-	}) => {
-		try {
-			// Note: In real implementation, we'd need to get the current document content
-			// For now, this returns metadata about what would be changed
-			// The frontend will apply these changes
+export function createEditContentTool(context: ToolContext) {
+	return tool({
+		description:
+			"Edit specific parts of the document content. Use this to modify existing content without rewriting the entire document.",
+		inputSchema: z.object({
+			selectionMode: z
+				.enum(["search", "section", "range"])
+				.describe(
+					"How to select content: 'search' finds text, 'section' finds by heading, 'range' uses line numbers",
+				),
+			searchText: z
+				.string()
+				.optional()
+				.describe("Text to search for (required when selectionMode='search')"),
+			sectionTitle: z
+				.string()
+				.optional()
+				.describe(
+					"Section heading to find (required when selectionMode='section')",
+				),
+			startLine: z
+				.number()
+				.optional()
+				.describe("Start line number (required when selectionMode='range')"),
+			endLine: z
+				.number()
+				.optional()
+				.describe("End line number (required when selectionMode='range')"),
+			operation: z
+				.enum(["replace", "delete"])
+				.describe("What to do with selected content"),
+			newContent: z
+				.string()
+				.optional()
+				.describe("New content (required when operation='replace')"),
+		}),
+		execute: async ({
+			selectionMode,
+			searchText,
+			sectionTitle,
+			startLine,
+			endLine,
+			operation,
+			newContent,
+		}) => {
+			const { userId, documentId } = context;
 
-			if (selectionMode === "search" && !searchText) {
+			try {
+				// Validate inputs
+				if (selectionMode === "search" && !searchText) {
+					return {
+						success: false,
+						message: "searchText is required when selectionMode='search'",
+					};
+				}
+
+				if (selectionMode === "section" && !sectionTitle) {
+					return {
+						success: false,
+						message: "sectionTitle is required when selectionMode='section'",
+					};
+				}
+
+				if (
+					selectionMode === "range" &&
+					(startLine === undefined || endLine === undefined)
+				) {
+					return {
+						success: false,
+						message:
+							"startLine and endLine are required when selectionMode='range'",
+					};
+				}
+
+				if (operation === "replace" && !newContent) {
+					return {
+						success: false,
+						message: "newContent is required when operation='replace'",
+					};
+				}
+
+				// Need document to edit
+				if (!documentId) {
+					return {
+						success: false,
+						message:
+							"No document found in current chat. Please create a document first using writeToEditor.",
+					};
+				}
+
+				// Get current document
+				const currentDoc = await getDocument(documentId, userId);
+				if (!currentDoc) {
+					return {
+						success: false,
+						message: "Document not found",
+					};
+				}
+
+				let updatedContent = currentDoc.content;
+				let changeDescription = "";
+
+				// Perform the edit based on selection mode
+				if (selectionMode === "search" && searchText) {
+					// Find and replace/delete text
+					if (operation === "replace" && newContent) {
+						updatedContent = updatedContent.replace(searchText, newContent);
+						changeDescription = `Replaced text matching "${searchText.slice(0, 50)}"`;
+					} else if (operation === "delete") {
+						updatedContent = updatedContent.replace(searchText, "");
+						changeDescription = `Deleted text matching "${searchText.slice(0, 50)}"`;
+					}
+				} else if (selectionMode === "section" && sectionTitle) {
+					// Find section and replace/delete it
+					const bounds = findSectionBoundaries(updatedContent, sectionTitle);
+					if (!bounds) {
+						return {
+							success: false,
+							message: `Section "${sectionTitle}" not found in document`,
+						};
+					}
+
+					updatedContent = replaceLineRange(
+						updatedContent,
+						bounds.start,
+						bounds.end,
+						operation === "replace" && newContent ? newContent : null,
+					);
+					changeDescription = `${operation === "replace" ? "Replaced" : "Deleted"} section "${sectionTitle}"`;
+				} else if (
+					selectionMode === "range" &&
+					startLine !== undefined &&
+					endLine !== undefined
+				) {
+					// Replace/delete line range
+					updatedContent = replaceLineRange(
+						updatedContent,
+						startLine,
+						endLine,
+						operation === "replace" && newContent ? newContent : null,
+					);
+					changeDescription = `${operation === "replace" ? "Replaced" : "Deleted"} lines ${startLine}-${endLine}`;
+				} else {
+					// No valid selection mode was provided
+					return {
+						success: false,
+						message: "Invalid selection mode or missing required parameters",
+					};
+				}
+
+				// If no change was made, return early
+				if (!changeDescription) {
+					return {
+						success: false,
+						message: "No changes were made to the document",
+					};
+				}
+
+				// Update document with new content
+				const updatedDoc = await updateDocument(
+					documentId,
+					userId,
+					updatedContent,
+					"assistant",
+					changeDescription,
+				);
+
+				return {
+					success: true,
+					operation,
+					selectionMode,
+					documentId: updatedDoc.id,
+					message: `Successfully ${operation === "replace" ? "replaced" : "deleted"} content. ${changeDescription}`,
+				};
+			} catch (error) {
+				console.error("Error in editContent:", error);
 				return {
 					success: false,
-					message: "searchText is required when selectionMode='search'",
+					message: `Failed to edit content: ${error instanceof Error ? error.message : "Unknown error"}`,
 				};
 			}
-
-			if (selectionMode === "section" && !sectionTitle) {
-				return {
-					success: false,
-					message: "sectionTitle is required when selectionMode='section'",
-				};
-			}
-
-			if (
-				selectionMode === "range" &&
-				(startLine === undefined || endLine === undefined)
-			) {
-				return {
-					success: false,
-					message:
-						"startLine and endLine are required when selectionMode='range'",
-				};
-			}
-
-			if (operation === "replace" && !newContent) {
-				return {
-					success: false,
-					message: "newContent is required when operation='replace'",
-				};
-			}
-
-			return {
-				success: true,
-				selectionMode,
-				operation,
-				searchText,
-				sectionTitle,
-				startLine,
-				endLine,
-				newContent,
-				message: `Will ${operation} content selected by ${selectionMode}`,
-			};
-		} catch (error) {
-			return {
-				success: false,
-				message: `Failed to edit content: ${error instanceof Error ? error.message : "Unknown error"}`,
-			};
-		}
-	},
-});
+		},
+	});
+}

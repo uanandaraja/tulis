@@ -1,7 +1,7 @@
 import type { ToolSet } from "ai";
-import { editContentTool } from "./edit-content";
-import { getDocumentStructureTool } from "./get-document-structure";
-import { insertContentTool } from "./insert-content";
+import { createEditContentTool } from "./edit-content";
+import { createGetDocumentStructureTool } from "./get-document-structure";
+import { createInsertContentTool } from "./insert-content";
 import { planStepsTool } from "./plan-steps";
 import { scrapeUrlTool } from "./scrape-url";
 import { webSearchTool } from "./web-search";
@@ -18,9 +18,9 @@ export function createToolsWithContext(context: ToolContext): ToolSet {
 		webSearch: webSearchTool,
 		scrapeUrl: scrapeUrlTool,
 		writeToEditor: createWriteToEditorTool(context),
-		editContent: editContentTool,
-		insertContent: insertContentTool,
-		getDocumentStructure: getDocumentStructureTool,
+		editContent: createEditContentTool(context),
+		insertContent: createInsertContentTool(context),
+		getDocumentStructure: createGetDocumentStructureTool(context),
 		planSteps: planStepsTool,
 	} as const;
 }

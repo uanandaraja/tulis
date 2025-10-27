@@ -2,6 +2,7 @@ import { createAgentUIStreamResponse } from "ai";
 import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
 import { DEFAULT_MODEL } from "@/lib/constants/models";
+import { cleanMessages } from "@/lib/utils/messages";
 import { createWritingAgent } from "@/server/agents/writing-agent";
 
 export async function POST(req: Request) {
@@ -24,8 +25,17 @@ export async function POST(req: Request) {
 		documentId: documentId || null,
 	});
 
-	return createAgentUIStreamResponse({
-		agent,
-		messages,
-	});
+	try {
+		// Clean messages to remove undefined values that cause validation errors
+		const cleanedMessages = cleanMessages(messages);
+
+		const response = await createAgentUIStreamResponse({
+			agent,
+			messages: cleanedMessages,
+		});
+		return response;
+	} catch (error) {
+		console.error("[Chat API] Error:", error);
+		throw error;
+	}
 }
