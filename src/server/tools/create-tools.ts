@@ -1,10 +1,7 @@
 import type { ToolSet } from "ai";
-import { createBatchEditTool } from "./batch-edit";
-import { createEditContentTool } from "./edit-content";
+import { createApplyDiffTool } from "./apply-diff";
 import { createGetDocumentStructureTool } from "./get-document-structure";
-import { createInsertContentTool } from "./insert-content";
 import { planStepsTool } from "./plan-steps";
-import { createRemoveCitationsTool } from "./remove-citations";
 import { scrapeUrlTool } from "./scrape-url";
 import { webSearchTool } from "./web-search";
 import { createWriteToEditorTool } from "./write-to-editor-with-context";
@@ -19,12 +16,9 @@ export function createToolsWithContext(context: ToolContext): ToolSet {
 	return {
 		webSearch: webSearchTool,
 		scrapeUrl: scrapeUrlTool,
-		writeToEditor: createWriteToEditorTool(context),
-		batchEdit: createBatchEditTool(context),
-		editContent: createEditContentTool(context),
-		insertContent: createInsertContentTool(context),
-		getDocumentStructure: createGetDocumentStructureTool(context),
-		removeCitations: createRemoveCitationsTool(context),
 		planSteps: planStepsTool,
+		writeToEditor: createWriteToEditorTool(context),
+		applyDiff: createApplyDiffTool(context),
+		getDocumentStructure: createGetDocumentStructureTool(context),
 	} as const;
 }

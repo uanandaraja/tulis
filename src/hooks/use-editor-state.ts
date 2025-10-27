@@ -1,5 +1,5 @@
 import { isToolUIPart, type UIMessage } from "ai";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { trpc } from "@/lib/trpc/react";
 import type { WriteToEditorToolOutput } from "@/lib/types/ai";
 

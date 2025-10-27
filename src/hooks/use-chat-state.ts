@@ -80,7 +80,6 @@ export function useChatState({
 	// Extract documentId from writeToEditor tool results and invalidate cache
 	useEffect(() => {
 		let newDocumentId: string | null = null;
-		let latestVersionNumber: number | undefined;
 
 		for (const message of [...messages].reverse()) {
 			if (message.role !== "assistant") continue;
@@ -90,10 +89,7 @@ export function useChatState({
 				(part) =>
 					isToolUIPart(part) &&
 					(part.type === "tool-writeToEditor" ||
-						part.type === "tool-batchEdit" ||
-						part.type === "tool-editContent" ||
-						part.type === "tool-insertContent" ||
-						part.type === "tool-removeCitations") &&
+						part.type === "tool-applyDiff") &&
 					part.state === "output-available",
 			);
 
@@ -102,12 +98,10 @@ export function useChatState({
 				const output = part.output as {
 					success: boolean;
 					documentId?: string;
-					versionNumber?: number;
 				};
 
 				if (output.success && output.documentId) {
 					newDocumentId = output.documentId;
-					latestVersionNumber = output.versionNumber;
 					break;
 				}
 			}
