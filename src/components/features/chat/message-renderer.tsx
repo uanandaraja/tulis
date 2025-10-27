@@ -1,5 +1,6 @@
 import type { UIMessage } from "ai";
 import { isToolUIPart } from "ai";
+import { Fragment } from "react";
 import { EditorArtifact } from "@/components/ui/editor-artifact";
 import { MessageContent } from "@/components/ui/message";
 import { PlanSteps } from "@/components/ui/plan-steps";
@@ -90,7 +91,7 @@ export function MessageRenderer({
 
 	return (
 		<div className="flex justify-start w-full">
-			<div className="flex flex-col gap-3 w-full min-w-0">
+			<div className="flex flex-col gap-1.5 w-full min-w-0">
 				{message.parts.map((part) => {
 					// Render reasoning
 					if (part.type === "reasoning" && supportsReasoning) {
@@ -221,7 +222,20 @@ export function MessageRenderer({
 
 					// Render text
 					if (part.type === "text" && "text" in part && part.text.trim()) {
-						const textContent = part.text;
+						const fullText = part.text;
+						
+						// Extract <think> tags (OpenRouter embeds reasoning in text)
+						// Match both complete <think>...</think> and incomplete <think>... (streaming)
+						const completeMatch = fullText.match(/<think>([\s\S]*?)<\/think>/);
+						const incompleteMatch = fullText.match(/<think>([\s\S]*?)$/);
+						const reasoningText = completeMatch 
+							? completeMatch[1].trim() 
+							: (incompleteMatch ? incompleteMatch[1].trim() : null);
+						const textContent = fullText
+							.replace(/<think>[\s\S]*?<\/think>/g, '')
+							.replace(/<think>[\s\S]*$/g, '')
+							.trim();
+						
 						const citedSourceIds = new Set(
 							(textContent.match(/\[(\d+)\]/g) || []).map((match) =>
 								parseInt(match.slice(1, -1), 10),
@@ -233,14 +247,29 @@ export function MessageRenderer({
 						const textKey = `text-${message.id}-${textContent.slice(0, 30).replace(/\s/g, "-")}`;
 
 						return (
-							<MessageContent
-								key={textKey}
-								markdown={true}
-								className="prose dark:prose-invert max-w-none prose-pre:bg-muted prose-pre:border prose-pre:border-border bg-transparent p-0"
-								sources={exaSources}
-							>
-								{textContent}
-							</MessageContent>
+							<div key={textKey} className="flex flex-col gap-1.5">
+								{reasoningText && supportsReasoning && (
+									<Reasoning
+										key={`reasoning-${textKey}`}
+										isStreaming={isStreaming && enableReasoning}
+									>
+										<ReasoningTrigger>Show reasoning</ReasoningTrigger>
+										<ReasoningContent markdown>
+											{reasoningText}
+										</ReasoningContent>
+									</Reasoning>
+								)}
+								{textContent && (
+									<MessageContent
+										key={`content-${textKey}`}
+										markdown={true}
+										className="prose dark:prose-invert max-w-none prose-pre:bg-muted prose-pre:border prose-pre:border-border bg-transparent p-0"
+										sources={exaSources}
+									>
+										{textContent}
+									</MessageContent>
+								)}
+							</div>
 						);
 					}
 
