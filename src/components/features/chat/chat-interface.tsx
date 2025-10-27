@@ -97,6 +97,11 @@ export function ChatInterface({
 		}
 	};
 
+	const handleDocumentUpdate = () => {
+		// Refresh the editor content when document is restored
+		utils.chat.invalidate();
+	};
+
 	return (
 		<div
 			className={`flex h-screen gap-4 px-4 w-full ${showEditor ? "max-w-none" : "max-w-2xl mx-auto"}`}
@@ -139,6 +144,7 @@ export function ChatInterface({
 					editorContent={editorContent ?? ""}
 					onClose={closeEditor}
 					documentId={documentId}
+					onDocumentUpdate={handleDocumentUpdate}
 				/>
 			)}
 		</div>

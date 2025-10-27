@@ -1,5 +1,5 @@
 import { Clock, X } from "lucide-react";
-import { forwardRef, useState } from "react";
+import { forwardRef } from "react";
 import {
 	DocumentEditor,
 	type EditorHandle,
@@ -11,17 +11,17 @@ import {
 	TooltipProvider,
 	TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { VersionHistoryPopover } from "@/components/ui/version-history-modal";
 
 interface EditorPanelProps {
 	editorContent: string;
 	onClose: () => void;
 	documentId?: string | null;
+	onDocumentUpdate?: () => void;
 }
 
 export const EditorPanel = forwardRef<EditorHandle, EditorPanelProps>(
-	({ editorContent, onClose, documentId }, ref) => {
-		const [showVersions] = useState(false);
-
+	({ editorContent, onClose, documentId, onDocumentUpdate }, ref) => {
 		return (
 			<div className="flex flex-col flex-1 min-h-0 border-l relative">
 				<div className="flex items-center justify-between px-4 py-2 border-b bg-muted/30">
@@ -46,17 +46,28 @@ export const EditorPanel = forwardRef<EditorHandle, EditorPanelProps>(
 						<TooltipProvider>
 							<Tooltip>
 								<TooltipTrigger asChild>
-									<Button
-										variant="ghost"
-										size="icon"
-										className="h-8 w-8"
-										disabled={!documentId}
-									>
-										<Clock className="h-4 w-4" />
-									</Button>
+									{documentId ? (
+										<VersionHistoryPopover
+											documentId={documentId}
+											onRestore={onDocumentUpdate}
+										>
+											<Button variant="ghost" size="icon" className="h-8 w-8">
+												<Clock className="h-4 w-4" />
+											</Button>
+										</VersionHistoryPopover>
+									) : (
+										<Button
+											variant="ghost"
+											size="icon"
+											className="h-8 w-8"
+											disabled
+										>
+											<Clock className="h-4 w-4" />
+										</Button>
+									)}
 								</TooltipTrigger>
 								<TooltipContent>
-									<p>Version History (Coming Soon)</p>
+									<p>Version History</p>
 								</TooltipContent>
 							</Tooltip>
 						</TooltipProvider>
