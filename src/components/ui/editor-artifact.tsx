@@ -7,6 +7,7 @@ import { FileEdit } from "lucide-react";
 export type EditorArtifactProps = {
 	title?: string;
 	documentId?: string;
+	versionId?: string;
 	versionNumber?: number;
 	onShowDocumentAction?: () => void;
 	className?: string;

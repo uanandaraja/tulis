@@ -2,27 +2,19 @@ import type { UIMessage } from "ai";
 import { isToolUIPart } from "ai";
 import { EditorArtifact } from "@/components/ui/editor-artifact";
 import { MessageContent } from "@/components/ui/message";
-import { PlanSteps } from "@/components/ui/plan-steps";
 import {
 	Reasoning,
 	ReasoningContent,
 	ReasoningTrigger,
 } from "@/components/ui/reasoning";
 import { modelSupportsReasoning } from "@/lib/constants/models";
-import type { PlanStepsToolOutput } from "@/lib/types/ai";
 import {
-	shouldShowEditorArtifact,
 	isWebSearchToolOutput,
 	type ScrapeUrlToolOutput,
+	shouldShowEditorArtifact,
 	type WebSearchToolUIPart,
 	type WriteToEditorToolOutput,
 } from "@/lib/types/ai";
-
-interface PlanStepData {
-	messageId: string;
-	toolCallId: string;
-	output: PlanStepsToolOutput;
-}
 
 import { ScrapeUrlRenderer } from "./tool-renderers/scrape-url-renderer";
 import { WebSearchRenderer } from "./tool-renderers/web-search-renderer";
@@ -32,7 +24,6 @@ interface MessageRendererProps {
 	selectedModel: string;
 	isStreaming: boolean;
 	enableReasoning: boolean;
-	allPlanSteps: PlanStepData[];
 	onShowDocument?: () => void;
 }
 
@@ -41,7 +32,6 @@ export function MessageRenderer({
 	selectedModel,
 	isStreaming,
 	enableReasoning,
-	allPlanSteps,
 	onShowDocument,
 }: MessageRendererProps) {
 	if (message.parts.length === 0) return null;
@@ -90,8 +80,6 @@ export function MessageRenderer({
 		return [];
 	});
 
-	const renderedPlanIds = new Set<string>();
-
 	return (
 		<div className="flex justify-start w-full">
 			<div className="flex flex-col gap-3 w-full min-w-0">
@@ -121,11 +109,16 @@ export function MessageRenderer({
 						isToolUIPart(part) &&
 						part.type !== "tool-writeToEditor" && // Handle separately below
 						part.state === "output-available" &&
-						shouldShowEditorArtifact(part.type, part.output)
+						shouldShowEditorArtifact(
+							part.type,
+							part.output as { success?: boolean; documentId?: string },
+						)
 					) {
 						const output = part.output as {
 							success: boolean;
 							documentId?: string;
+							versionId?: string;
+							versionNumber?: number;
 							message?: string;
 						};
 
@@ -166,7 +159,10 @@ export function MessageRenderer({
 						isToolUIPart(part) &&
 						part.type !== "tool-writeToEditor" && // Handle separately above
 						part.state === "output-available" &&
-						shouldShowEditorArtifact(part.type, part.output)
+						shouldShowEditorArtifact(
+							part.type,
+							part.output as { success?: boolean; documentId?: string },
+						)
 					) {
 						const output = part.output as {
 							success: boolean;

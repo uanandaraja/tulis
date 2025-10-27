@@ -115,18 +115,20 @@ export function getToolConfig(toolType: string): ToolConfig {
 }
 
 export function isDocumentEditingTool(toolType: string): boolean {
-	return DOCUMENT_EDITING_TOOLS.includes(toolType as any);
+	return DOCUMENT_EDITING_TOOLS.includes(
+		toolType as (typeof DOCUMENT_EDITING_TOOLS)[number],
+	);
 }
 
 export function shouldShowEditorArtifact(
 	toolType: string,
-	output: any,
+	output: { success?: boolean; documentId?: string },
 ): boolean {
 	// Show editor artifact for document editing tools that succeed and return a documentId
 	return (
 		isDocumentEditingTool(toolType) &&
 		output?.success === true &&
-		output?.documentId
+		!!output?.documentId
 	);
 }
 
