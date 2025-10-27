@@ -15,20 +15,23 @@ export function createWritingAgent(
 	enableReasoning?: boolean,
 	context?: ToolContext,
 ) {
+	const baseModel = openrouter.chat(model, {
+		// Enable reasoning for OpenRouter
+		// https://openrouter.ai/docs/use-cases/reasoning-tokens
+		reasoning: enableReasoning
+			? {
+					enabled: true,
+					exclude: false, // Don't exclude reasoning from response
+					max_tokens: 5000,
+				}
+			: undefined,
+	});
+
 	return new ToolLoopAgent({
-		model: openrouter.chat(model),
+		model: baseModel,
 		instructions: SYSTEM_PROMPT,
 		tools: context ? createToolsWithContext(context) : {},
 		stopWhen: stepCountIs(20),
-		providerOptions: enableReasoning
-			? {
-					openrouter: {
-						reasoning: {
-							max_tokens: 5000,
-						},
-					},
-				}
-			: undefined,
 	});
 }
 
