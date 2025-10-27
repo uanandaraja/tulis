@@ -37,6 +37,8 @@ export type WriteToEditorToolOutput = {
 	action: "set" | "append" | "prepend";
 	content: string;
 	documentId?: string;
+	versionId?: string;
+	versionNumber?: number;
 	message: string;
 };
 

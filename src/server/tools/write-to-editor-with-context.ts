@@ -1,5 +1,8 @@
 import { tool } from "ai";
+import { desc, eq } from "drizzle-orm";
 import { z } from "zod";
+import { db } from "@/lib/db";
+import { documentVersion } from "@/lib/db/schema";
 import type { DocumentWithContent } from "@/lib/types/document";
 import {
 	createDocument,
@@ -92,11 +95,22 @@ export function createWriteToEditorTool(context: ToolContext) {
 					);
 				}
 
+				// Get the version info from the document that was just created/updated
+				const latestVersion = await db.query.documentVersion.findFirst({
+					where: eq(documentVersion.documentId, document.id),
+					orderBy: [desc(documentVersion.versionNumber)],
+				});
+
+				const versionId = latestVersion?.id;
+				const versionNumber = latestVersion?.versionNumber;
+
 				return {
 					success: true,
 					action,
 					content: finalContent,
 					documentId: document.id,
+					versionId,
+					versionNumber,
 					message: `Content ${action === "set" ? "written" : action === "append" ? "appended" : "prepended"} to editor. Document saved with version history. You MUST now: (1) Call Plan Steps to mark all steps completed, (2) Respond with ONLY "Done.",`,
 				};
 			} catch (error) {

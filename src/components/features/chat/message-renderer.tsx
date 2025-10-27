@@ -146,10 +146,13 @@ export function MessageRenderer({
 						// Extract title from first h1 heading in content
 						const titleMatch = output.content.match(/^#\s+(.+)$/m);
 						const title = titleMatch ? titleMatch[1].trim() : "Document";
+
 						return (
 							<EditorArtifact
 								key={`editor-${part.toolCallId}`}
 								title={title}
+								documentId={output.documentId}
+								versionNumber={output.versionNumber}
 								onShowDocumentAction={onShowDocument}
 							/>
 						);
