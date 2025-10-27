@@ -77,19 +77,26 @@ export function useChatState({
 		return originalSendMessage(message);
 	};
 
-	// Extract documentId from writeToEditor tool results
+	// Extract documentId from writeToEditor tool results and invalidate cache
 	useEffect(() => {
+		let newDocumentId: string | null = null;
+
 		for (const message of [...messages].reverse()) {
 			if (message.role !== "assistant") continue;
 
-			const writeToEditorParts = message.parts.filter(
+			// Check for any document editing tool that creates/updates documents
+			const documentToolParts = message.parts.filter(
 				(part) =>
 					isToolUIPart(part) &&
-					part.type === "tool-writeToEditor" &&
+					(part.type === "tool-writeToEditor" ||
+						part.type === "tool-batchEdit" ||
+						part.type === "tool-editContent" ||
+						part.type === "tool-insertContent" ||
+						part.type === "tool-removeCitations") &&
 					part.state === "output-available",
 			);
 
-			for (const part of writeToEditorParts) {
+			for (const part of documentToolParts) {
 				if (!isToolUIPart(part)) continue;
 				const output = part.output as {
 					success: boolean;
@@ -97,13 +104,20 @@ export function useChatState({
 				};
 
 				if (output.success && output.documentId) {
-					documentIdRef.current = output.documentId;
-					setDocumentId(output.documentId);
-					return;
+					newDocumentId = output.documentId;
+					break;
 				}
 			}
 		}
-	}, [messages]);
+
+		// Update documentId state and invalidate cache if changed
+		if (newDocumentId && newDocumentId !== documentIdRef.current) {
+			documentIdRef.current = newDocumentId;
+			setDocumentId(newDocumentId);
+			// Invalidate document cache to force fresh data
+			utils.document.get.invalidate({ documentId: newDocumentId });
+		}
+	}, [messages, utils, documentId]);
 
 	const isLoading = status === "submitted" || status === "streaming";
 	const isStreaming = status === "streaming";

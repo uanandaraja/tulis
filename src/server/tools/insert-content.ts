@@ -1,5 +1,8 @@
 import { tool } from "ai";
+import { desc, eq } from "drizzle-orm";
 import { z } from "zod";
+import { db } from "@/lib/db";
+import { documentVersion } from "@/lib/db/schema";
 import {
 	getDocument,
 	updateDocument,
@@ -155,10 +158,21 @@ export function createInsertContentTool(context: ToolContext) {
 					changeDescription,
 				);
 
+				// Get version info from the document that was just updated
+				const latestVersion = await db.query.documentVersion.findFirst({
+					where: eq(documentVersion.documentId, updatedDoc.id),
+					orderBy: [desc(documentVersion.versionNumber)],
+				});
+
+				const versionId = latestVersion?.id;
+				const versionNumber = latestVersion?.versionNumber;
+
 				return {
 					success: true,
 					position,
 					documentId: updatedDoc.id,
+					versionId,
+					versionNumber,
 					message: `Successfully inserted content. ${changeDescription}`,
 				};
 			} catch (error) {

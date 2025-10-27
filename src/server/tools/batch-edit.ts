@@ -1,6 +1,9 @@
 import { tool } from "ai";
 import { diff_match_patch } from "diff-match-patch";
+import { desc, eq } from "drizzle-orm";
 import { z } from "zod";
+import { db } from "@/lib/db";
+import { documentVersion } from "@/lib/db/schema";
 import {
 	getDocument,
 	updateDocument,
@@ -267,9 +270,20 @@ export function createBatchEditTool(context: ToolContext) {
 					diff,
 				);
 
+				// Get version info from the document that was just updated
+				const latestVersion = await db.query.documentVersion.findFirst({
+					where: eq(documentVersion.documentId, updatedDoc.id),
+					orderBy: [desc(documentVersion.versionNumber)],
+				});
+
+				const versionId = latestVersion?.id;
+				const versionNumber = latestVersion?.versionNumber;
+
 				return {
 					success: true,
 					documentId: updatedDoc.id,
+					versionId,
+					versionNumber,
 					summary,
 					appliedEdits,
 					failedEdits,
