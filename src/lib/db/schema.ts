@@ -70,6 +70,7 @@ export const chat = pgTable(
 		storageKey: text("storage_key"),
 		createdAt: timestamp("created_at").notNull().defaultNow(),
 		updatedAt: timestamp("updated_at").notNull().defaultNow(),
+		deletedAt: timestamp("deleted_at"),
 	},
 	(table) => ({
 		userIdIdx: index("chat_user_id_idx").on(table.userId),
@@ -78,6 +79,7 @@ export const chat = pgTable(
 			table.userId,
 			table.updatedAt,
 		),
+		deletedAtIdx: index("chat_deleted_at_idx").on(table.deletedAt),
 	}),
 );
 

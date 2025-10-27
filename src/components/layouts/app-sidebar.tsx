@@ -38,9 +38,9 @@ export function AppSidebar() {
 	const { state, toggleSidebar } = useSidebar();
 	const { data: chats, isLoading, refetch } = trpc.chat.list.useQuery();
 	const deleteChat = trpc.chat.delete.useMutation({
-		onSuccess: () => {
+		onSuccess: (_, variables) => {
 			refetch();
-			if (pathname.startsWith("/chat/") && pathname !== "/chat") {
+			if (pathname === `/chat/${variables.chatId}`) {
 				router.push("/chat");
 			}
 		},

@@ -1,6 +1,6 @@
 import { openrouter } from "@openrouter/ai-sdk-provider";
 import { generateText, type UIMessage } from "ai";
-import { and, desc, eq } from "drizzle-orm";
+import { and, desc, eq, isNull } from "drizzle-orm";
 import { CHAT_TITLE_GENERATION_MODEL } from "@/lib/constants/models";
 import { db } from "@/lib/db";
 import { chat } from "@/lib/db/schema";
@@ -10,7 +10,7 @@ import type { StoredChatData } from "@/lib/types/chat";
 
 export async function listChats(userId: string) {
 	return db.query.chat.findMany({
-		where: eq(chat.userId, userId),
+		where: and(eq(chat.userId, userId), isNull(chat.deletedAt)),
 		orderBy: [desc(chat.updatedAt)],
 		limit: 50,
 	});
@@ -18,7 +18,11 @@ export async function listChats(userId: string) {
 
 export async function getChat(chatId: string, userId: string) {
 	const chatData = await db.query.chat.findFirst({
-		where: and(eq(chat.id, chatId), eq(chat.userId, userId)),
+		where: and(
+			eq(chat.id, chatId),
+			eq(chat.userId, userId),
+			isNull(chat.deletedAt),
+		),
 	});
 
 	if (!chatData || !chatData.storageKey) {
@@ -104,28 +108,16 @@ export async function saveChat(
 }
 
 export async function deleteChat(chatId: string, userId: string) {
-	// Get chat data to find storage key
-	const chatData = await db.query.chat.findFirst({
-		where: and(eq(chat.id, chatId), eq(chat.userId, userId)),
-	});
+	// Soft delete by setting deletedAt timestamp
+	const result = await db
+		.update(chat)
+		.set({ deletedAt: new Date() })
+		.where(and(eq(chat.id, chatId), eq(chat.userId, userId)))
+		.returning({ storageKey: chat.storageKey });
 
-	if (!chatData) {
+	if (result.length === 0) {
 		throw new Error("Chat not found");
 	}
-
-	// Delete from storage if storage key exists
-	if (chatData.storageKey) {
-		try {
-			await storage.file(chatData.storageKey).delete();
-		} catch (_error) {
-			// Storage deletion failed, but continue with DB deletion
-		}
-	}
-
-	// Delete from database
-	await db
-		.delete(chat)
-		.where(and(eq(chat.id, chatId), eq(chat.userId, userId)));
 
 	return { success: true };
 }
