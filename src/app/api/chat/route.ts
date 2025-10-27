@@ -32,6 +32,7 @@ export async function POST(req: Request) {
 		const response = await createAgentUIStreamResponse({
 			agent,
 			messages: cleanedMessages,
+			sendReasoning: true, // Forward reasoning tokens to the client
 		});
 		return response;
 	} catch (error) {
