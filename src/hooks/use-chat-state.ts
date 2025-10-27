@@ -80,6 +80,7 @@ export function useChatState({
 	// Extract documentId from writeToEditor tool results and invalidate cache
 	useEffect(() => {
 		let newDocumentId: string | null = null;
+		let latestVersionNumber: number | undefined;
 
 		for (const message of [...messages].reverse()) {
 			if (message.role !== "assistant") continue;
@@ -101,23 +102,29 @@ export function useChatState({
 				const output = part.output as {
 					success: boolean;
 					documentId?: string;
+					versionNumber?: number;
 				};
 
 				if (output.success && output.documentId) {
 					newDocumentId = output.documentId;
+					latestVersionNumber = output.versionNumber;
 					break;
 				}
 			}
 		}
 
-		// Update documentId state and invalidate cache if changed
+		// Update documentId state if it changed
 		if (newDocumentId && newDocumentId !== documentIdRef.current) {
 			documentIdRef.current = newDocumentId;
 			setDocumentId(newDocumentId);
-			// Invalidate document cache to force fresh data
+		}
+
+		// Always invalidate cache when we find a successful document tool
+		// This ensures UI updates even when editing the same document
+		if (newDocumentId) {
 			utils.document.get.invalidate({ documentId: newDocumentId });
 		}
-	}, [messages, utils, documentId]);
+	}, [messages, utils]);
 
 	const isLoading = status === "submitted" || status === "streaming";
 	const isStreaming = status === "streaming";
