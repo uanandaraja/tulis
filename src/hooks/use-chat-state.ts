@@ -23,6 +23,9 @@ export function useChatState({
 	const utils = trpc.useUtils();
 	const [documentId, setDocumentId] = useState<string | null>(null);
 	const documentIdRef = useRef<string | null>(null);
+	const chatInitializedRef = useRef(false);
+
+	const initializeChatMutation = trpc.chat.initialize.useMutation();
 
 	const saveChatMutation = trpc.chat.save.useMutation({
 		onSuccess: () => {
@@ -30,27 +33,49 @@ export function useChatState({
 		},
 	});
 
-	const { messages, sendMessage, status, error } =
-		useChat<WritingAgentUIMessage>({
-			id: chatId,
-			messages: initialMessages as WritingAgentUIMessage[],
-			transport: new DefaultChatTransport({
-				api: "/api/chat",
-				body: () => ({
-					selectedModel,
-					enableReasoning: enableReasoning && supportsReasoning,
-					chatId,
-					documentId: documentIdRef.current,
-				}),
+	const {
+		messages,
+		sendMessage: originalSendMessage,
+		status,
+		error,
+	} = useChat<WritingAgentUIMessage>({
+		id: chatId,
+		messages: initialMessages as WritingAgentUIMessage[],
+		transport: new DefaultChatTransport({
+			api: "/api/chat",
+			body: () => ({
+				selectedModel,
+				enableReasoning: enableReasoning && supportsReasoning,
+				chatId,
+				documentId: documentIdRef.current,
 			}),
-			onFinish: ({ messages: allMessages }) => {
-				saveChatMutation.mutate({
+		}),
+		onFinish: ({ messages: allMessages }) => {
+			saveChatMutation.mutate({
+				chatId,
+				messages: allMessages,
+				model: selectedModel,
+			});
+		},
+	});
+
+	// Wrapper for sendMessage that initializes chat first
+	const sendMessage: typeof originalSendMessage = async (message) => {
+		// Initialize chat in DB before first message
+		if (!chatInitializedRef.current) {
+			try {
+				await initializeChatMutation.mutateAsync({
 					chatId,
-					messages: allMessages,
 					model: selectedModel,
 				});
-			},
-		});
+				chatInitializedRef.current = true;
+			} catch (error) {
+				console.error("Failed to initialize chat:", error);
+				// Continue anyway - chat might already exist
+			}
+		}
+		return originalSendMessage(message);
+	};
 
 	// Extract documentId from writeToEditor tool results
 	useEffect(() => {

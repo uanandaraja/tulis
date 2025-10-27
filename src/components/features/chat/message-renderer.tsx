@@ -95,10 +95,6 @@ export function MessageRenderer({
 		<div className="flex justify-start w-full">
 			<div className="flex flex-col gap-3 w-full min-w-0">
 				{message.parts.map((part) => {
-					// Debug: log all tool parts
-					if (isToolUIPart(part)) {
-						console.log("Tool part:", part.type, part.state, part);
-					}
 					// Render reasoning
 					if (part.type === "reasoning" && supportsReasoning) {
 						const reasoningText = "text" in part ? part.text : "";

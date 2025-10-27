@@ -63,9 +63,10 @@ export async function saveChat(
 		where: eq(chat.id, chatId),
 	});
 
-	let title = "New Chat";
+	let title = existingChat?.title || "New Chat";
 
-	if (!existingChat) {
+	// Only generate title if chat doesn't exist or has default title
+	if (!existingChat || existingChat.title === "New Chat") {
 		const userMessage = messages.find((m) => m.role === "user");
 		const userPrompt = userMessage?.parts.find(
 			(p) => p.type === "text" && "text" in p,
@@ -91,6 +92,8 @@ export async function saveChat(
 		.onConflictDoUpdate({
 			target: chat.id,
 			set: {
+				title,
+				storageKey,
 				messageCount: messages.length,
 				updatedAt: new Date(),
 				model,
@@ -125,6 +128,35 @@ export async function deleteChat(chatId: string, userId: string) {
 		.where(and(eq(chat.id, chatId), eq(chat.userId, userId)));
 
 	return { success: true };
+}
+
+export async function initializeChat(
+	userId: string,
+	chatId: string,
+	model?: string,
+) {
+	// Check if chat already exists
+	const existingChat = await db.query.chat.findFirst({
+		where: eq(chat.id, chatId),
+	});
+
+	if (existingChat) {
+		return { success: true, alreadyExists: true };
+	}
+
+	// Create minimal chat record
+	await db.insert(chat).values({
+		id: chatId,
+		userId,
+		title: "New Chat",
+		model,
+		messageCount: 0,
+		storageKey: null,
+		createdAt: new Date(),
+		updatedAt: new Date(),
+	});
+
+	return { success: true, alreadyExists: false };
 }
 
 export async function generateChatTitle(userPrompt: string): Promise<string> {
