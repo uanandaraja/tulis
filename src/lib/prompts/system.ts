@@ -18,8 +18,10 @@ For long-form content requests:
 When editing existing documents:
 - Use Batch Edit tool for multiple changes (creates 1 version)
 - Use Edit Content tool only for single, isolated changes
+- Use Remove Citations tool specifically for removing inline citations [1] [2] and References section
 - Batch Edit is preferred for revisions, rewrites, and restructuring
 - Always provide a clear summary of all changes in Batch Edit
+- NEVER call the same editing tool multiple times - one call should accomplish the entire task
 
 Important:
 - NEVER write draft content in chat messages - only in the Write to Editor tool

@@ -1,10 +1,16 @@
 import { tool } from "ai";
+import { diff_match_patch } from "diff-match-patch";
+import { desc, eq } from "drizzle-orm";
 import { z } from "zod";
+import { db } from "@/lib/db";
+import { documentVersion } from "@/lib/db/schema";
 import {
 	getDocument,
 	updateDocument,
 } from "@/server/services/document.service";
 import type { ToolContext } from "./create-tools";
+
+const dmp = new diff_match_patch();
 
 function findSectionBoundaries(
 	content: string,
@@ -168,13 +174,39 @@ export function createEditContentTool(context: ToolContext) {
 
 				// Perform the edit based on selection mode
 				if (selectionMode === "search" && searchText) {
-					// Find and replace/delete text
+					// Check if search text exists in document
+					if (!updatedContent.includes(searchText)) {
+						return {
+							success: false,
+							message: `Text "${searchText.slice(0, 50)}" not found in document`,
+						};
+					}
+
+					// Count occurrences for better feedback
+					const occurrences = (
+						updatedContent.match(
+							new RegExp(
+								searchText.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"),
+								"g",
+							),
+						) || []
+					).length;
+
+					// Apply changes
 					if (operation === "replace" && newContent) {
-						updatedContent = updatedContent.replaceAll(searchText, newContent);
-						changeDescription = `Replaced text matching "${searchText.slice(0, 50)}"`;
+						// Use diff-match-patch for precise replacement
+						const diffs = dmp.diff_main(searchText, newContent);
+						const patches = dmp.patch_make(updatedContent, diffs);
+						const results = dmp.patch_apply(patches, updatedContent);
+						updatedContent = results[0] as string;
+						changeDescription = `Replaced ${occurrences} occurrence(s) of "${searchText.slice(0, 50)}"`;
 					} else if (operation === "delete") {
-						updatedContent = updatedContent.replaceAll(searchText, "");
-						changeDescription = `Deleted text matching "${searchText.slice(0, 50)}"`;
+						// Use diff-match-patch for precise deletion
+						const diffs = dmp.diff_main(searchText, "");
+						const patches = dmp.patch_make(updatedContent, diffs);
+						const results = dmp.patch_apply(patches, updatedContent);
+						updatedContent = results[0] as string;
+						changeDescription = `Deleted ${occurrences} occurrence(s) of "${searchText.slice(0, 50)}"`;
 					}
 				} else if (selectionMode === "section" && sectionTitle) {
 					// Find section and replace/delete it
@@ -231,11 +263,22 @@ export function createEditContentTool(context: ToolContext) {
 					changeDescription,
 				);
 
+				// Get version info from the document that was just updated
+				const latestVersion = await db.query.documentVersion.findFirst({
+					where: eq(documentVersion.documentId, updatedDoc.id),
+					orderBy: [desc(documentVersion.versionNumber)],
+				});
+
+				const versionId = latestVersion?.id;
+				const versionNumber = latestVersion?.versionNumber;
+
 				return {
 					success: true,
 					operation,
 					selectionMode,
 					documentId: updatedDoc.id,
+					versionId,
+					versionNumber,
 					message: `Successfully ${operation === "replace" ? "replaced" : "deleted"} content. ${changeDescription}`,
 				};
 			} catch (error) {

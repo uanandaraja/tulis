@@ -11,6 +11,7 @@ import {
 import { modelSupportsReasoning } from "@/lib/constants/models";
 import type { PlanStepsToolOutput } from "@/lib/types/ai";
 import {
+	shouldShowEditorArtifact,
 	isWebSearchToolOutput,
 	type ScrapeUrlToolOutput,
 	type WebSearchToolUIPart,
@@ -115,25 +116,27 @@ export function MessageRenderer({
 						);
 					}
 
-					// Render plan steps (show all updates in order)
+					// Render document editing tools artifact (scalable approach)
 					if (
 						isToolUIPart(part) &&
-						part.type === "tool-planSteps" &&
+						part.type !== "tool-writeToEditor" && // Handle separately below
 						part.state === "output-available" &&
-						!renderedPlanIds.has(part.toolCallId)
+						shouldShowEditorArtifact(part.type, part.output)
 					) {
-						renderedPlanIds.add(part.toolCallId);
-						const planData = allPlanSteps.find(
-							(p) => p.toolCallId === part.toolCallId,
+						const output = part.output as {
+							success: boolean;
+							documentId?: string;
+							message?: string;
+						};
+
+						return (
+							<EditorArtifact
+								key={`editor-${part.toolCallId}`}
+								title="Document Updated"
+								documentId={output.documentId}
+								onShowDocumentAction={onShowDocument}
+							/>
 						);
-						if (planData) {
-							return (
-								<PlanSteps
-									key={`plan-${part.toolCallId}`}
-									output={planData.output}
-								/>
-							);
-						}
 					}
 
 					// Render write to editor artifact
@@ -151,6 +154,32 @@ export function MessageRenderer({
 							<EditorArtifact
 								key={`editor-${part.toolCallId}`}
 								title={title}
+								documentId={output.documentId}
+								versionNumber={output.versionNumber}
+								onShowDocumentAction={onShowDocument}
+							/>
+						);
+					}
+
+					// Render document editing tools artifact (scalable approach)
+					if (
+						isToolUIPart(part) &&
+						part.type !== "tool-writeToEditor" && // Handle separately above
+						part.state === "output-available" &&
+						shouldShowEditorArtifact(part.type, part.output)
+					) {
+						const output = part.output as {
+							success: boolean;
+							documentId?: string;
+							versionId?: string;
+							versionNumber?: number;
+							message?: string;
+						};
+
+						return (
+							<EditorArtifact
+								key={`editor-${part.toolCallId}`}
+								title="Document Updated"
 								documentId={output.documentId}
 								versionNumber={output.versionNumber}
 								onShowDocumentAction={onShowDocument}

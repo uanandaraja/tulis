@@ -7,6 +7,7 @@ import { planStepsTool } from "./plan-steps";
 import { scrapeUrlTool } from "./scrape-url";
 import { webSearchTool } from "./web-search";
 import { createWriteToEditorTool } from "./write-to-editor-with-context";
+import { createRemoveCitationsTool } from "./remove-citations";
 
 export interface ToolContext {
 	userId: string;
@@ -23,6 +24,7 @@ export function createToolsWithContext(context: ToolContext): ToolSet {
 		editContent: createEditContentTool(context),
 		insertContent: createInsertContentTool(context),
 		getDocumentStructure: createGetDocumentStructureTool(context),
+		removeCitations: createRemoveCitationsTool(context),
 		planSteps: planStepsTool,
 	} as const;
 }
