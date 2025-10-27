@@ -2,6 +2,7 @@ import type { UIMessage } from "ai";
 import { isToolUIPart } from "ai";
 import { EditorArtifact } from "@/components/ui/editor-artifact";
 import { MessageContent } from "@/components/ui/message";
+import { PlanSteps } from "@/components/ui/plan-steps";
 import {
 	Reasoning,
 	ReasoningContent,
@@ -10,6 +11,7 @@ import {
 import { modelSupportsReasoning } from "@/lib/constants/models";
 import {
 	isWebSearchToolOutput,
+	type PlanStepsToolOutput,
 	type ScrapeUrlToolOutput,
 	shouldShowEditorArtifact,
 	type WebSearchToolUIPart,
@@ -24,6 +26,11 @@ interface MessageRendererProps {
 	selectedModel: string;
 	isStreaming: boolean;
 	enableReasoning: boolean;
+	allPlanSteps?: Array<{
+		messageId: string;
+		toolCallId: string;
+		output: PlanStepsToolOutput;
+	}>;
 	onShowDocument?: () => void;
 }
 
@@ -32,6 +39,7 @@ export function MessageRenderer({
 	selectedModel,
 	isStreaming,
 	enableReasoning,
+	allPlanSteps = [],
 	onShowDocument,
 }: MessageRendererProps) {
 	if (message.parts.length === 0) return null;
@@ -102,6 +110,28 @@ export function MessageRenderer({
 								</ReasoningContent>
 							</Reasoning>
 						);
+					}
+
+					// Render plan steps
+					if (
+						isToolUIPart(part) &&
+						part.type === "tool-planSteps" &&
+						part.state === "output-available"
+					) {
+						const planStepData = allPlanSteps.find(
+							(plan) =>
+								plan.messageId === message.id &&
+								plan.toolCallId === part.toolCallId,
+						);
+
+						if (planStepData) {
+							return (
+								<PlanSteps
+									key={`plan-${part.toolCallId}`}
+									output={planStepData.output}
+								/>
+							);
+						}
 					}
 
 					// Render document editing tools artifact (scalable approach)
