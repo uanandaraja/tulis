@@ -21,7 +21,7 @@ interface ChatMessagesProps {
 	isStreaming: boolean;
 	enableReasoning: boolean;
 	allPlanSteps: PlanStepData[];
-	onShowDocument?: () => void;
+	onShowDocument?: (versionId?: string) => void;
 }
 
 export function ChatMessages({

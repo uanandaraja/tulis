@@ -18,18 +18,35 @@ interface EditorPanelProps {
 	editorContent: string;
 	onClose: () => void;
 	documentId?: string | null;
+	selectedVersionId?: string | null;
+	currentVersionNumber?: number;
 	onDocumentUpdate?: () => void;
+	onShowLatest?: () => void;
 }
 
 export const EditorPanel = forwardRef<EditorHandle, EditorPanelProps>(
-	({ editorContent, onClose, documentId, onDocumentUpdate }, ref) => {
-		// Fetch versions to get current version number
+	(
+		{
+			editorContent,
+			onClose,
+			documentId,
+			selectedVersionId,
+			currentVersionNumber,
+			onDocumentUpdate,
+			onShowLatest,
+		},
+		ref,
+	) => {
+		// Fetch versions to get current version number (only if not viewing a specific version)
 		const { data: versions } = trpc.document.listVersions.useQuery(
 			{ documentId: documentId!, limit: 1 },
-			{ enabled: !!documentId },
+			{ enabled: !!documentId && !selectedVersionId },
 		);
 
-		const currentVersion = versions?.[0];
+		const latestVersion = versions?.[0];
+		const isViewingSpecificVersion = !!selectedVersionId;
+		const displayVersionNumber =
+			currentVersionNumber ?? latestVersion?.versionNumber;
 
 		return (
 			<div className="flex flex-col flex-1 min-h-0 min-w-0 border-l relative">
@@ -49,12 +66,22 @@ export const EditorPanel = forwardRef<EditorHandle, EditorPanelProps>(
 								<Clock className="h-4 w-4" />
 							</Button>
 						)}
-						<span className="text-sm text-muted-foreground">
-							Document{" "}
-							{currentVersion?.versionNumber
-								? `Version ${currentVersion.versionNumber}`
-								: ""}
-						</span>
+						<div className="flex items-center gap-2">
+							<span className="text-sm text-muted-foreground">
+								Document{" "}
+								{displayVersionNumber ? `Version ${displayVersionNumber}` : ""}
+							</span>
+							{isViewingSpecificVersion && onShowLatest && (
+								<Button
+									variant="ghost"
+									size="sm"
+									onClick={onShowLatest}
+									className="h-6 px-2 text-xs"
+								>
+									View Latest
+								</Button>
+							)}
+						</div>
 						{documentId && (
 							<TooltipProvider>
 								<Tooltip>

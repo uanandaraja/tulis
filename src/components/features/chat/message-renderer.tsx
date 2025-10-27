@@ -32,7 +32,7 @@ interface MessageRendererProps {
 		toolCallId: string;
 		output: PlanStepsToolOutput;
 	}>;
-	onShowDocument?: () => void;
+	onShowDocument?: (versionId?: string) => void;
 }
 
 export function MessageRenderer({
@@ -151,6 +151,7 @@ export function MessageRenderer({
 								key={`editor-${part.toolCallId}`}
 								title={title}
 								documentId={output.documentId}
+								versionId={output.versionId}
 								versionNumber={output.versionNumber}
 								onShowDocumentAction={onShowDocument}
 							/>
@@ -180,6 +181,7 @@ export function MessageRenderer({
 								key={`editor-${part.toolCallId}`}
 								title="Document Updated"
 								documentId={output.documentId}
+								versionId={output.versionId}
 								versionNumber={output.versionNumber}
 								onShowDocumentAction={onShowDocument}
 							/>
@@ -223,19 +225,21 @@ export function MessageRenderer({
 					// Render text
 					if (part.type === "text" && "text" in part && part.text.trim()) {
 						const fullText = part.text;
-						
+
 						// Extract <think> tags (OpenRouter embeds reasoning in text)
 						// Match both complete <think>...</think> and incomplete <think>... (streaming)
 						const completeMatch = fullText.match(/<think>([\s\S]*?)<\/think>/);
 						const incompleteMatch = fullText.match(/<think>([\s\S]*?)$/);
-						const reasoningText = completeMatch 
-							? completeMatch[1].trim() 
-							: (incompleteMatch ? incompleteMatch[1].trim() : null);
+						const reasoningText = completeMatch
+							? completeMatch[1].trim()
+							: incompleteMatch
+								? incompleteMatch[1].trim()
+								: null;
 						const textContent = fullText
-							.replace(/<think>[\s\S]*?<\/think>/g, '')
-							.replace(/<think>[\s\S]*$/g, '')
+							.replace(/<think>[\s\S]*?<\/think>/g, "")
+							.replace(/<think>[\s\S]*$/g, "")
 							.trim();
-						
+
 						const citedSourceIds = new Set(
 							(textContent.match(/\[(\d+)\]/g) || []).map((match) =>
 								parseInt(match.slice(1, -1), 10),

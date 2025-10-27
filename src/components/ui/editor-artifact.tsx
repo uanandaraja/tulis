@@ -9,13 +9,14 @@ export type EditorArtifactProps = {
 	documentId?: string;
 	versionId?: string;
 	versionNumber?: number;
-	onShowDocumentAction?: () => void;
+	onShowDocumentAction?: (versionId?: string) => void;
 	className?: string;
 };
 
 export const EditorArtifact = ({
 	title,
 	documentId,
+	versionId,
 	versionNumber,
 	onShowDocumentAction,
 	className,
@@ -61,7 +62,7 @@ export const EditorArtifact = ({
 				<Button
 					variant="outline"
 					size="sm"
-					onClick={onShowDocumentAction}
+					onClick={() => onShowDocumentAction?.(versionId)}
 					className="h-8 px-3 text-xs font-medium"
 				>
 					{versionNumber ? `Show v${versionNumber}` : 'Show document'}

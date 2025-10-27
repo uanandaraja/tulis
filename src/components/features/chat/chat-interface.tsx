@@ -56,8 +56,12 @@ export function ChatInterface({
 		editorContent,
 		hasContent: hasEditorContent,
 		isOpen: showEditor,
+		selectedVersionId,
+		currentVersionNumber,
 		open: openEditor,
 		close: closeEditor,
+		showVersion,
+		showLatest,
 	} = useEditorState(messages, documentId);
 
 	const { allPlanSteps } = usePlanStepsState(messages);
@@ -118,7 +122,13 @@ export function ChatInterface({
 					isStreaming={isStreaming}
 					enableReasoning={enableReasoning}
 					allPlanSteps={allPlanSteps}
-					onShowDocument={openEditor}
+					onShowDocument={(versionId) => {
+						if (versionId) {
+							showVersion(versionId);
+						} else {
+							showLatest();
+						}
+					}}
 				/>
 
 				{error && (
@@ -146,7 +156,10 @@ export function ChatInterface({
 					editorContent={editorContent ?? ""}
 					onClose={closeEditor}
 					documentId={documentId}
+					selectedVersionId={selectedVersionId}
+					currentVersionNumber={currentVersionNumber}
 					onDocumentUpdate={handleDocumentUpdate}
+					onShowLatest={showLatest}
 				/>
 			)}
 		</div>
