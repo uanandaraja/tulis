@@ -64,5 +64,13 @@ export function getDocumentStorageKey(
 	userId: string,
 	documentId: string,
 ): string {
-	return `documents/${userId}/${documentId}.json`;
+	return `documents/${userId}/${documentId}/current.json`;
+}
+
+export function getDocumentVersionStorageKey(
+	userId: string,
+	documentId: string,
+	versionNumber: number,
+): string {
+	return `documents/${userId}/${documentId}/versions/v${versionNumber}.json`;
 }

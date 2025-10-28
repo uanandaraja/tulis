@@ -3,6 +3,7 @@ import { z } from "zod";
 import {
 	deleteChat,
 	getChat,
+	initializeChat,
 	listChats,
 	saveChat,
 } from "@/server/services/chat.service";
@@ -17,6 +18,17 @@ export const chatRouter = router({
 		.input(z.object({ chatId: z.string() }))
 		.query(async ({ ctx, input }) => {
 			return getChat(input.chatId, ctx.user.id);
+		}),
+
+	initialize: protectedProcedure
+		.input(
+			z.object({
+				chatId: z.string(),
+				model: z.string().optional(),
+			}),
+		)
+		.mutation(async ({ ctx, input }) => {
+			return initializeChat(ctx.user.id, input.chatId, input.model);
 		}),
 
 	save: protectedProcedure

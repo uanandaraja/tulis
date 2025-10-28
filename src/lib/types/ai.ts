@@ -36,7 +36,9 @@ export type WriteToEditorToolOutput = {
 	success: boolean;
 	action: "set" | "append" | "prepend";
 	content: string;
-	title?: string;
+	documentId?: string;
+	versionId?: string;
+	versionNumber?: number;
 	message: string;
 };
 
@@ -56,9 +58,15 @@ export interface ToolConfig {
 	iconColor?: string;
 }
 
+// Define tool categories for scalable handling
+export const DOCUMENT_EDITING_TOOLS = [
+	"tool-writeToEditor",
+	"tool-applyDiff",
+] as const;
+
 const TOOL_CONFIGS: Record<string, ToolConfig> = {
 	"tool-webSearch": {
-		displayName: "Searching the web",
+		displayName: "Searching web",
 		iconName: "globe",
 		iconColor: "text-blue-500",
 	},
@@ -72,11 +80,27 @@ const TOOL_CONFIGS: Record<string, ToolConfig> = {
 		iconName: "fileEdit",
 		iconColor: "text-purple-500",
 	},
+	"tool-getDocumentStructure": {
+		displayName: "Analyzing document",
+		iconName: "fileText",
+		iconColor: "text-blue-500",
+	},
 	"tool-planSteps": {
 		displayName: "Planning steps",
 		iconName: "listChecks",
 		iconColor: "text-green-500",
 	},
+	// Auto-generate configs for document editing tools
+	...Object.fromEntries(
+		DOCUMENT_EDITING_TOOLS.map((toolType) => [
+			toolType,
+			{
+				displayName: "Editing document",
+				iconName: "fileEdit" as const,
+				iconColor: "text-purple-500" as const,
+			},
+		]),
+	),
 };
 
 export function getToolConfig(toolType: string): ToolConfig {
@@ -84,6 +108,24 @@ export function getToolConfig(toolType: string): ToolConfig {
 		TOOL_CONFIGS[toolType] || {
 			displayName: toolType.replace(/^tool-/, ""),
 		}
+	);
+}
+
+export function isDocumentEditingTool(toolType: string): boolean {
+	return DOCUMENT_EDITING_TOOLS.includes(
+		toolType as (typeof DOCUMENT_EDITING_TOOLS)[number],
+	);
+}
+
+export function shouldShowEditorArtifact(
+	toolType: string,
+	output: { success?: boolean; documentId?: string },
+): boolean {
+	// Show editor artifact for document editing tools that succeed and return a documentId
+	return (
+		isDocumentEditingTool(toolType) &&
+		output?.success === true &&
+		!!output?.documentId
 	);
 }
 

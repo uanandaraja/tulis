@@ -1,9 +1,47 @@
 import { isToolUIPart, type UIMessage } from "ai";
 import { useEffect, useMemo, useState } from "react";
+import { trpc } from "@/lib/trpc/react";
 import type { WriteToEditorToolOutput } from "@/lib/types/ai";
 
-export function useEditorState(messages: UIMessage[]) {
+export function useEditorState(
+	messages: UIMessage[],
+	documentId?: string | null,
+) {
+	const [selectedVersionId, setSelectedVersionId] = useState<string | null>(
+		null,
+	);
+	const [isOpen, setIsOpen] = useState(false);
+
+	// Fetch current document content when documentId is available
+	const { data: currentDocument } = trpc.document.get.useQuery(
+		{ documentId: documentId! },
+		{
+			enabled: !!documentId && !selectedVersionId, // Only fetch if not viewing a specific version
+			staleTime: 0, // Always fetch fresh data
+		},
+	);
+
+	// Fetch specific version when selected
+	const { data: selectedVersion } = trpc.document.getVersion.useQuery(
+		{ versionId: selectedVersionId! },
+		{
+			enabled: !!selectedVersionId,
+			staleTime: 0,
+		},
+	);
+
 	const editorContent = useMemo(() => {
+		// If viewing a specific version, use that
+		if (selectedVersion?.content) {
+			return selectedVersion.content;
+		}
+
+		// If we have a current document from the database, use its content
+		if (currentDocument?.content) {
+			return currentDocument.content;
+		}
+
+		// Otherwise, fall back to the last writeToEditor tool result
 		for (const message of [...messages].reverse()) {
 			if (message.role !== "assistant") continue;
 
@@ -19,28 +57,42 @@ export function useEditorState(messages: UIMessage[]) {
 				const output = part.output as WriteToEditorToolOutput;
 
 				if (output.success) {
-					let fullContent = output.content;
-					if (output.title) {
-						fullContent = `# ${output.title}\n\n${output.content}`;
-					}
-					return fullContent;
+					return output.content;
 				}
 			}
 		}
 		return null;
-	}, [messages]);
+	}, [messages, currentDocument, selectedVersion]);
 
-	const [isOpen, setIsOpen] = useState(false);
+	const hasContent = editorContent !== null;
 
+	// Only auto-open when new content appears (not when closing)
 	useEffect(() => {
-		setIsOpen(editorContent !== null);
-	}, [editorContent]);
+		if (hasContent && !isOpen) {
+			setIsOpen(true);
+		}
+	}, [hasContent]);
+
+	// Reset selected version when documentId changes
+	useEffect(() => {
+		setSelectedVersionId(null);
+	}, [documentId]);
 
 	return {
 		editorContent,
-		hasContent: editorContent !== null,
+		hasContent,
 		isOpen,
+		selectedVersionId,
+		currentVersionNumber: selectedVersion?.versionNumber,
 		open: () => setIsOpen(true),
 		close: () => setIsOpen(false),
+		showVersion: (versionId: string) => {
+			setSelectedVersionId(versionId);
+			setIsOpen(true);
+		},
+		showLatest: () => {
+			setSelectedVersionId(null);
+			setIsOpen(true);
+		},
 	};
 }

@@ -70,6 +70,7 @@ export const chat = pgTable(
 		storageKey: text("storage_key"),
 		createdAt: timestamp("created_at").notNull().defaultNow(),
 		updatedAt: timestamp("updated_at").notNull().defaultNow(),
+		deletedAt: timestamp("deleted_at"),
 	},
 	(table) => ({
 		userIdIdx: index("chat_user_id_idx").on(table.userId),
@@ -78,7 +79,104 @@ export const chat = pgTable(
 			table.userId,
 			table.updatedAt,
 		),
+		deletedAtIdx: index("chat_deleted_at_idx").on(table.deletedAt),
 	}),
 );
 
-export const schema = { user, session, account, verification, chat };
+export const document = pgTable(
+	"document",
+	{
+		id: text("id").primaryKey(),
+		chatId: text("chat_id").references(() => chat.id, { onDelete: "set null" }),
+		userId: text("user_id")
+			.notNull()
+			.references(() => user.id, { onDelete: "cascade" }),
+		title: text("title").notNull(),
+		currentVersionId: text("current_version_id"),
+		storageKey: text("storage_key").notNull(),
+		contentPreview: text("content_preview"),
+		wordCount: integer("word_count").default(0),
+		createdAt: timestamp("created_at").notNull().defaultNow(),
+		updatedAt: timestamp("updated_at").notNull().defaultNow(),
+	},
+	(table) => ({
+		userIdIdx: index("document_user_id_idx").on(table.userId),
+		chatIdIdx: index("document_chat_id_idx").on(table.chatId),
+		updatedAtIdx: index("document_updated_at_idx").on(table.updatedAt),
+	}),
+);
+
+export const documentVersion = pgTable(
+	"document_version",
+	{
+		id: text("id").primaryKey(),
+		documentId: text("document_id")
+			.notNull()
+			.references(() => document.id, { onDelete: "cascade" }),
+		versionNumber: integer("version_number").notNull(),
+		storageKey: text("storage_key").notNull(),
+		contentPreview: text("content_preview"),
+		changeDescription: text("change_description"),
+		diff: text("diff"),
+		wordCount: integer("word_count").default(0),
+		createdBy: text("created_by").notNull(), // 'user' | 'assistant'
+		createdAt: timestamp("created_at").notNull().defaultNow(),
+	},
+	(table) => ({
+		documentIdIdx: index("document_version_document_id_idx").on(
+			table.documentId,
+		),
+		versionNumberIdx: index("document_version_version_number_idx").on(
+			table.documentId,
+			table.versionNumber,
+		),
+	}),
+);
+
+export const plan = pgTable(
+	"plan",
+	{
+		id: text("id").primaryKey(),
+		chatId: text("chat_id")
+			.notNull()
+			.references(() => chat.id, { onDelete: "cascade" }),
+		status: text("status").notNull().default("active"), // 'active' | 'completed' | 'cancelled'
+		createdAt: timestamp("created_at").notNull().defaultNow(),
+		updatedAt: timestamp("updated_at").notNull().defaultNow(),
+	},
+	(table) => ({
+		chatIdIdx: index("plan_chat_id_idx").on(table.chatId),
+	}),
+);
+
+export const planStep = pgTable(
+	"plan_step",
+	{
+		id: text("id").primaryKey(),
+		planId: text("plan_id")
+			.notNull()
+			.references(() => plan.id, { onDelete: "cascade" }),
+		title: text("title").notNull(),
+		description: text("description"),
+		status: text("status").notNull().default("pending"), // 'pending' | 'in_progress' | 'completed'
+		stepOrder: integer("step_order").notNull(),
+		completedAt: timestamp("completed_at"),
+		createdAt: timestamp("created_at").notNull().defaultNow(),
+		updatedAt: timestamp("updated_at").notNull().defaultNow(),
+	},
+	(table) => ({
+		planIdIdx: index("plan_step_plan_id_idx").on(table.planId),
+	}),
+);
+
+export const schema = {
+	user,
+	session,
+	account,
+	verification,
+	chat,
+	document,
+	documentVersion,
+	plan,
+	planStep,
+};

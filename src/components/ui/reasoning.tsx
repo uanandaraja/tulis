@@ -1,7 +1,7 @@
 "use client"
 
 import { cn } from "@/lib/utils"
-import { ChevronDownIcon } from "lucide-react"
+import { Brain, ChevronDownIcon } from "lucide-react"
 import React, {
   createContext,
   useContext,
@@ -44,7 +44,7 @@ function Reasoning({
   onOpenChange,
   isStreaming,
 }: ReasoningProps) {
-  const [internalOpen, setInternalOpen] = useState(false)
+  const [internalOpen, setInternalOpen] = useState(true) // Default to open
   const [wasAutoOpened, setWasAutoOpened] = useState(false)
 
   const isControlled = open !== undefined
@@ -58,14 +58,16 @@ function Reasoning({
   }
 
   useEffect(() => {
+    // Auto-open when streaming starts
     if (isStreaming && !wasAutoOpened) {
       if (!isControlled) setInternalOpen(true)
       setWasAutoOpened(true)
     }
 
+    // Reset the auto-opened flag when streaming stops, but keep current open state
     if (!isStreaming && wasAutoOpened) {
-      if (!isControlled) setInternalOpen(false)
       setWasAutoOpened(false)
+      // Don't auto-close - let user control it
     }
   }, [isStreaming, wasAutoOpened, isControlled])
 
@@ -95,11 +97,12 @@ function ReasoningTrigger({
 
   return (
     <button
-      className={cn("flex cursor-pointer items-center gap-2", className)}
+      className={cn("flex cursor-pointer items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-foreground", className)}
       onClick={() => onOpenChange(!isOpen)}
       {...props}
     >
-      <span className="text-primary">{children}</span>
+      <Brain className="size-3.5" />
+      <span>{children}</span>
       <div
         className={cn(
           "transform transition-transform",
@@ -149,18 +152,19 @@ function ReasoningContent({
     <div
       ref={contentRef}
       className={cn(
-        "overflow-hidden transition-[max-height] duration-150 ease-out",
+        "overflow-hidden data-[state=closed]:fade-out-0 data-[state=closed]:slide-out-to-top-2 data-[state=open]:slide-in-from-top-2 outline-none data-[state=closed]:animate-out data-[state=open]:animate-in",
         className
       )}
       style={{
         maxHeight: isOpen ? "none" : "0px",
       }}
+      data-state={isOpen ? "open" : "closed"}
       {...props}
     >
       <div
         ref={innerRef}
         className={cn(
-          "text-muted-foreground prose prose-sm dark:prose-invert",
+          "mt-4 border-l-2 border-muted pl-4 text-muted-foreground prose prose-xs dark:prose-invert",
           contentClassName
         )}
       >

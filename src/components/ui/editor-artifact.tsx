@@ -6,15 +6,22 @@ import { FileEdit } from "lucide-react";
 
 export type EditorArtifactProps = {
 	title?: string;
-	onShowDocumentAction?: () => void;
+	documentId?: string;
+	versionId?: string;
+	versionNumber?: number;
+	onShowDocumentAction?: (versionId?: string) => void;
 	className?: string;
 };
 
 export const EditorArtifact = ({
 	title,
+	documentId,
+	versionId,
+	versionNumber,
 	onShowDocumentAction,
 	className,
 }: EditorArtifactProps) => {
+
 	return (
 		<div
 			className={cn(
@@ -31,18 +38,34 @@ export const EditorArtifact = ({
 						<span className="text-sm font-medium text-foreground">
 							{title || "Document"}
 						</span>
-						<span className="text-xs text-muted-foreground">
-							Written to editor
-						</span>
+						<div className="flex items-center gap-2 text-xs text-muted-foreground">
+							<span>Written to editor</span>
+							{versionNumber !== undefined && versionNumber !== null && (
+								<>
+									<span>•</span>
+									<span className="bg-muted px-1.5 py-0.5 rounded font-medium">
+										v{versionNumber}
+									</span>
+								</>
+							)}
+							{documentId && (
+								<>
+									<span>•</span>
+									<span className="font-mono bg-muted px-1.5 py-0.5 rounded">
+										{documentId.slice(0, 8)}
+									</span>
+								</>
+							)}
+						</div>
 					</div>
 				</div>
 				<Button
 					variant="outline"
 					size="sm"
-					onClick={onShowDocumentAction}
+					onClick={() => onShowDocumentAction?.(versionId)}
 					className="h-8 px-3 text-xs font-medium"
 				>
-					Show document
+					{versionNumber ? `Show v${versionNumber}` : 'Show document'}
 				</Button>
 			</div>
 		</div>

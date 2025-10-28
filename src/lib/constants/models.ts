@@ -35,6 +35,11 @@ export const AI_MODELS = [
 		supportsReasoning: false,
 	},
 	{
+		value: "minimax/minimax-m2:free",
+		label: "MiniMax M2",
+		supportsReasoning: true,
+	},
+	{
 		value: "deepseek/deepseek-r1-0528",
 		label: "DeepSeek R1",
 		supportsReasoning: true,
@@ -56,7 +61,9 @@ export const AI_MODELS = [
 	},
 ] as const;
 
-export const DEFAULT_MODEL = "google/gemini-2.5-flash-lite-preview-09-2025";
+export const DEFAULT_MODEL = "minimax/minimax-m2:free";
+export const CHAT_TITLE_GENERATION_MODEL =
+	"google/gemini-2.5-flash-lite-preview-09-2025";
 
 export function modelSupportsReasoning(modelValue: string): boolean {
 	return (

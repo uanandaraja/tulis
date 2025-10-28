@@ -1,7 +1,7 @@
 import { openrouter } from "@openrouter/ai-sdk-provider";
 import { generateText, type UIMessage } from "ai";
-import { and, desc, eq } from "drizzle-orm";
-import { DEFAULT_MODEL } from "@/lib/constants/models";
+import { and, desc, eq, isNull } from "drizzle-orm";
+import { CHAT_TITLE_GENERATION_MODEL } from "@/lib/constants/models";
 import { db } from "@/lib/db";
 import { chat } from "@/lib/db/schema";
 import { TITLE_GENERATION_PROMPT } from "@/lib/prompts";
@@ -10,7 +10,7 @@ import type { StoredChatData } from "@/lib/types/chat";
 
 export async function listChats(userId: string) {
 	return db.query.chat.findMany({
-		where: eq(chat.userId, userId),
+		where: and(eq(chat.userId, userId), isNull(chat.deletedAt)),
 		orderBy: [desc(chat.updatedAt)],
 		limit: 50,
 	});
@@ -18,7 +18,11 @@ export async function listChats(userId: string) {
 
 export async function getChat(chatId: string, userId: string) {
 	const chatData = await db.query.chat.findFirst({
-		where: and(eq(chat.id, chatId), eq(chat.userId, userId)),
+		where: and(
+			eq(chat.id, chatId),
+			eq(chat.userId, userId),
+			isNull(chat.deletedAt),
+		),
 	});
 
 	if (!chatData || !chatData.storageKey) {
@@ -63,9 +67,10 @@ export async function saveChat(
 		where: eq(chat.id, chatId),
 	});
 
-	let title = "New Chat";
+	let title = existingChat?.title || "New Chat";
 
-	if (!existingChat) {
+	// Only generate title if chat doesn't exist or has default title
+	if (!existingChat || existingChat.title === "New Chat") {
 		const userMessage = messages.find((m) => m.role === "user");
 		const userPrompt = userMessage?.parts.find(
 			(p) => p.type === "text" && "text" in p,
@@ -91,6 +96,8 @@ export async function saveChat(
 		.onConflictDoUpdate({
 			target: chat.id,
 			set: {
+				title,
+				storageKey,
 				messageCount: messages.length,
 				updatedAt: new Date(),
 				model,
@@ -101,36 +108,53 @@ export async function saveChat(
 }
 
 export async function deleteChat(chatId: string, userId: string) {
-	// Get chat data to find storage key
-	const chatData = await db.query.chat.findFirst({
-		where: and(eq(chat.id, chatId), eq(chat.userId, userId)),
-	});
+	// Soft delete by setting deletedAt timestamp
+	const result = await db
+		.update(chat)
+		.set({ deletedAt: new Date() })
+		.where(and(eq(chat.id, chatId), eq(chat.userId, userId)))
+		.returning({ storageKey: chat.storageKey });
 
-	if (!chatData) {
+	if (result.length === 0) {
 		throw new Error("Chat not found");
 	}
 
-	// Delete from storage if storage key exists
-	if (chatData.storageKey) {
-		try {
-			await storage.file(chatData.storageKey).delete();
-		} catch (_error) {
-			// Storage deletion failed, but continue with DB deletion
-		}
+	return { success: true };
+}
+
+export async function initializeChat(
+	userId: string,
+	chatId: string,
+	model?: string,
+) {
+	// Check if chat already exists
+	const existingChat = await db.query.chat.findFirst({
+		where: eq(chat.id, chatId),
+	});
+
+	if (existingChat) {
+		return { success: true, alreadyExists: true };
 	}
 
-	// Delete from database
-	await db
-		.delete(chat)
-		.where(and(eq(chat.id, chatId), eq(chat.userId, userId)));
+	// Create minimal chat record
+	await db.insert(chat).values({
+		id: chatId,
+		userId,
+		title: "New Chat",
+		model,
+		messageCount: 0,
+		storageKey: null,
+		createdAt: new Date(),
+		updatedAt: new Date(),
+	});
 
-	return { success: true };
+	return { success: true, alreadyExists: false };
 }
 
 export async function generateChatTitle(userPrompt: string): Promise<string> {
 	try {
 		const { text } = await generateText({
-			model: openrouter(DEFAULT_MODEL),
+			model: openrouter(CHAT_TITLE_GENERATION_MODEL),
 			prompt: `${TITLE_GENERATION_PROMPT}\n\nUser message: ${userPrompt}`,
 		});
 
