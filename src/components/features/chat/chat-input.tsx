@@ -19,6 +19,7 @@ import {
 	TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { AI_MODELS } from "@/lib/constants/models";
+import React from "react";
 
 interface ChatInputProps {
 	input: string;
@@ -32,7 +33,7 @@ interface ChatInputProps {
 	supportsReasoning: boolean;
 }
 
-export function ChatInput({
+export const ChatInput = React.memo(function ChatInput({
 	input,
 	onInputChange,
 	onSubmit,
@@ -43,42 +44,48 @@ export function ChatInput({
 	onReasoningToggle,
 	supportsReasoning,
 }: ChatInputProps) {
+	const handleSubmit = React.useCallback(
+		(e: React.FormEvent) => {
+			e.preventDefault();
+			onSubmit();
+		},
+		[onSubmit],
+	);
+
+	const handleReasoningToggle = React.useCallback(() => {
+		onReasoningToggle();
+	}, [onReasoningToggle]);
+
 	return (
-		<form
-			onSubmit={(e) => {
-				e.preventDefault();
-				onSubmit();
-			}}
-			className="pb-4"
-		>
-			<PromptInput
-				value={input}
-				onValueChange={onInputChange}
-				onSubmit={onSubmit}
-				isLoading={isLoading}
-			>
-				<PromptInputTextarea placeholder="Ask me anything..." />
-				<PromptInputActions className="justify-between">
-					<div className="flex items-center gap-2">
-						<Select value={selectedModel} onValueChange={onModelChange}>
-							<SelectTrigger className="w-[200px] border-0 shadow-none focus:ring-0">
-								<SelectValue placeholder="Select model" />
-							</SelectTrigger>
-							<SelectContent>
-								{AI_MODELS.map((model) => (
-									<SelectItem key={model.value} value={model.value}>
-										{model.label}
-									</SelectItem>
-								))}
-							</SelectContent>
-						</Select>
-						{supportsReasoning && (
-							<TooltipProvider>
+		<TooltipProvider>
+			<form onSubmit={handleSubmit} className="pb-4">
+				<PromptInput
+					value={input}
+					onValueChange={onInputChange}
+					onSubmit={onSubmit}
+					isLoading={isLoading}
+				>
+					<PromptInputTextarea placeholder="Ask me anything..." />
+					<PromptInputActions className="justify-between">
+						<div className="flex items-center gap-2">
+							<Select value={selectedModel} onValueChange={onModelChange}>
+								<SelectTrigger className="w-[200px] border-0 shadow-none focus:ring-0">
+									<SelectValue placeholder="Select model" />
+								</SelectTrigger>
+								<SelectContent>
+									{AI_MODELS.map((model) => (
+										<SelectItem key={model.value} value={model.value}>
+											{model.label}
+										</SelectItem>
+									))}
+								</SelectContent>
+							</Select>
+							{supportsReasoning && (
 								<Tooltip>
 									<TooltipTrigger asChild>
 										<button
 											type="button"
-											onClick={onReasoningToggle}
+											onClick={handleReasoningToggle}
 											aria-label="Toggle reasoning"
 											className="p-2 rounded-md hover:bg-muted transition-colors"
 										>
@@ -95,19 +102,19 @@ export function ChatInput({
 										<p>Show reasoning</p>
 									</TooltipContent>
 								</Tooltip>
-							</TooltipProvider>
-						)}
-					</div>
-					<Button
-						type="submit"
-						size="icon"
-						disabled={isLoading || !input.trim()}
-						className="rounded-full h-8 w-8"
-					>
-						<ArrowUp className="h-4 w-4" />
-					</Button>
-				</PromptInputActions>
-			</PromptInput>
-		</form>
+							)}
+						</div>
+						<Button
+							type="submit"
+							size="icon"
+							disabled={isLoading || !input.trim()}
+							className="rounded-full h-8 w-8"
+						>
+							<ArrowUp className="h-4 w-4" />
+						</Button>
+					</PromptInputActions>
+				</PromptInput>
+			</form>
+		</TooltipProvider>
 	);
-}
+});

@@ -14,6 +14,8 @@ import React, {
   useEffect,
   useRef,
   useState,
+  useCallback,
+  useMemo,
 } from "react"
 
 type PromptInputContextType = {
@@ -54,7 +56,7 @@ type PromptInputProps = {
   className?: string
 }
 
-function PromptInput({
+const PromptInput = React.memo(function PromptInput({
   className,
   isLoading = false,
   maxHeight = 240,
@@ -63,45 +65,41 @@ function PromptInput({
   onSubmit,
   children,
 }: PromptInputProps) {
-  const [internalValue, setInternalValue] = useState(value || "")
   const textareaRef = useRef<HTMLTextAreaElement>(null)
 
-  const handleChange = (newValue: string) => {
-    setInternalValue(newValue)
-    onValueChange?.(newValue)
-  }
+  const contextValue = useMemo(() => ({
+    isLoading,
+    value: value || "",
+    setValue: onValueChange || (() => {}),
+    maxHeight,
+    onSubmit,
+    textareaRef,
+  }), [isLoading, value, onValueChange, maxHeight, onSubmit])
+
+  const handleClick = useCallback(() => {
+    textareaRef.current?.focus()
+  }, [])
 
   return (
-    <TooltipProvider>
-      <PromptInputContext.Provider
-        value={{
-          isLoading,
-          value: value ?? internalValue,
-          setValue: onValueChange ?? handleChange,
-          maxHeight,
-          onSubmit,
-          textareaRef,
-        }}
+    <PromptInputContext.Provider value={contextValue}>
+      <div
+        className={cn(
+          "border-input bg-background cursor-text rounded-3xl border p-2 shadow-xs",
+          className
+        )}
+        onClick={handleClick}
       >
-        <div
-          className={cn(
-            "border-input bg-background cursor-text rounded-3xl border p-2 shadow-xs",
-            className
-          )}
-          onClick={() => textareaRef.current?.focus()}
-        >
-          {children}
-        </div>
-      </PromptInputContext.Provider>
-    </TooltipProvider>
+        {children}
+      </div>
+    </PromptInputContext.Provider>
   )
-}
+})
 
 export type PromptInputTextareaProps = {
   disableAutosize?: boolean
 } & React.ComponentProps<typeof Textarea>
 
-function PromptInputTextarea({
+const PromptInputTextarea = React.memo(function PromptInputTextarea({
   className,
   onKeyDown,
   disableAutosize = false,
@@ -110,34 +108,45 @@ function PromptInputTextarea({
   const { value, setValue, maxHeight, onSubmit, disabled, textareaRef } =
     usePromptInput()
 
+  // Debounced autosize effect to reduce DOM calculations
   useEffect(() => {
     if (disableAutosize) return
 
-    if (!textareaRef.current) return
+    const textarea = textareaRef.current
+    if (!textarea) return
 
-    if (textareaRef.current.scrollTop === 0) {
-      textareaRef.current.style.height = "auto"
-    }
+    // Use requestAnimationFrame for smoother updates
+    const rafId = requestAnimationFrame(() => {
+      if (textarea.scrollTop === 0) {
+        textarea.style.height = "auto"
+      }
 
-    textareaRef.current.style.height =
-      typeof maxHeight === "number"
-        ? `${Math.min(textareaRef.current.scrollHeight, maxHeight)}px`
-        : `min(${textareaRef.current.scrollHeight}px, ${maxHeight})`
+      textarea.style.height =
+        typeof maxHeight === "number"
+          ? `${Math.min(textarea.scrollHeight, maxHeight)}px`
+          : `min(${textarea.scrollHeight}px, ${maxHeight})`
+    })
+
+    return () => cancelAnimationFrame(rafId)
   }, [value, maxHeight, disableAutosize])
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+  const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault()
       onSubmit?.()
     }
     onKeyDown?.(e)
-  }
+  }, [onKeyDown, onSubmit])
+
+  const handleChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setValue(e.target.value)
+  }, [setValue])
 
   return (
     <Textarea
       ref={textareaRef}
       value={value}
-      onChange={(e) => setValue(e.target.value)}
+      onChange={handleChange}
       onKeyDown={handleKeyDown}
       className={cn(
         "text-primary min-h-[44px] w-full resize-none border-none bg-transparent shadow-none outline-none focus-visible:ring-0 focus-visible:ring-offset-0",
@@ -148,11 +157,11 @@ function PromptInputTextarea({
       {...props}
     />
   )
-}
+})
 
 type PromptInputActionsProps = React.HTMLAttributes<HTMLDivElement>
 
-function PromptInputActions({
+const PromptInputActions = React.memo(function PromptInputActions({
   children,
   className,
   ...props
@@ -162,7 +171,7 @@ function PromptInputActions({
       {children}
     </div>
   )
-}
+})
 
 type PromptInputActionProps = {
   className?: string
@@ -171,7 +180,7 @@ type PromptInputActionProps = {
   side?: "top" | "bottom" | "left" | "right"
 } & React.ComponentProps<typeof Tooltip>
 
-function PromptInputAction({
+const PromptInputAction = React.memo(function PromptInputAction({
   tooltip,
   children,
   className,
@@ -180,9 +189,13 @@ function PromptInputAction({
 }: PromptInputActionProps) {
   const { disabled } = usePromptInput()
 
+  const handleClick = useCallback((event: React.MouseEvent) => {
+    event.stopPropagation()
+  }, [])
+
   return (
     <Tooltip {...props}>
-      <TooltipTrigger asChild disabled={disabled} onClick={event => event.stopPropagation()}>
+      <TooltipTrigger asChild disabled={disabled} onClick={handleClick}>
         {children}
       </TooltipTrigger>
       <TooltipContent side={side} className={className}>
@@ -190,11 +203,17 @@ function PromptInputAction({
       </TooltipContent>
     </Tooltip>
   )
-}
+})
+
+// Wrap with TooltipProvider to prevent recreation on each render
+const OptimizedPromptInput = PromptInput
+const OptimizedPromptInputTextarea = PromptInputTextarea
+const OptimizedPromptInputActions = PromptInputActions
+const OptimizedPromptInputAction = PromptInputAction
 
 export {
-  PromptInput,
-  PromptInputTextarea,
-  PromptInputActions,
-  PromptInputAction,
+  OptimizedPromptInput as PromptInput,
+  OptimizedPromptInputTextarea as PromptInputTextarea,
+  OptimizedPromptInputActions as PromptInputActions,
+  OptimizedPromptInputAction as PromptInputAction,
 }
