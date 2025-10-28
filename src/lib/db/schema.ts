@@ -133,6 +133,42 @@ export const documentVersion = pgTable(
 	}),
 );
 
+export const plan = pgTable(
+	"plan",
+	{
+		id: text("id").primaryKey(),
+		chatId: text("chat_id")
+			.notNull()
+			.references(() => chat.id, { onDelete: "cascade" }),
+		status: text("status").notNull().default("active"), // 'active' | 'completed' | 'cancelled'
+		createdAt: timestamp("created_at").notNull().defaultNow(),
+		updatedAt: timestamp("updated_at").notNull().defaultNow(),
+	},
+	(table) => ({
+		chatIdIdx: index("plan_chat_id_idx").on(table.chatId),
+	}),
+);
+
+export const planStep = pgTable(
+	"plan_step",
+	{
+		id: text("id").primaryKey(),
+		planId: text("plan_id")
+			.notNull()
+			.references(() => plan.id, { onDelete: "cascade" }),
+		title: text("title").notNull(),
+		description: text("description"),
+		status: text("status").notNull().default("pending"), // 'pending' | 'in_progress' | 'completed'
+		stepOrder: integer("step_order").notNull(),
+		completedAt: timestamp("completed_at"),
+		createdAt: timestamp("created_at").notNull().defaultNow(),
+		updatedAt: timestamp("updated_at").notNull().defaultNow(),
+	},
+	(table) => ({
+		planIdIdx: index("plan_step_plan_id_idx").on(table.planId),
+	}),
+);
+
 export const schema = {
 	user,
 	session,
@@ -141,4 +177,6 @@ export const schema = {
 	chat,
 	document,
 	documentVersion,
+	plan,
+	planStep,
 };

@@ -8,6 +8,7 @@ import { useChatState } from "@/hooks/use-chat-state";
 import { useEditorState } from "@/hooks/use-editor-state";
 import { usePlanStepsState } from "@/hooks/use-plan-steps-state";
 import { modelSupportsReasoning } from "@/lib/constants/models";
+import { trpc } from "@/lib/trpc/react";
 import { ChatInput } from "./chat-input";
 import { ChatMessages } from "./chat-messages";
 import { EditorPanel } from "./editor-panel";
@@ -64,7 +65,30 @@ export function ChatInterface({
 		showLatest,
 	} = useEditorState(messages, documentId);
 
-	const { allPlanSteps } = usePlanStepsState(messages);
+	// Fetch plan from DB (new way)
+	const { data: dbPlan } = trpc.plan.getActive.useQuery({ chatId });
+
+	// Extract plan from messages (old way - for backwards compatibility)
+	const { allPlanSteps: messagePlanSteps } = usePlanStepsState(messages);
+
+	// Use DB plan if it exists, otherwise fall back to message-based plans
+	const allPlanSteps = dbPlan
+		? [
+				{
+					messageId: "db-plan",
+					toolCallId: dbPlan.id,
+					output: {
+						success: true,
+						steps: dbPlan.steps.map((step) => ({
+							title: step.title,
+							description: step.description || "",
+							status: step.status as "pending" | "in_progress" | "completed",
+						})),
+						message: "Plan from database",
+					},
+				},
+			]
+		: messagePlanSteps;
 
 	useAutoSend({
 		isNewChat,
