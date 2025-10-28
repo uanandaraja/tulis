@@ -103,7 +103,7 @@ export function MessageRenderer({
 						return (
 							<Reasoning
 								key={partKey}
-								open={isStreaming && enableReasoning && supportsReasoning}
+								isStreaming={isStreaming && enableReasoning}
 							>
 								<ReasoningTrigger>Show reasoning</ReasoningTrigger>
 								<ReasoningContent markdown>
@@ -233,7 +233,7 @@ export function MessageRenderer({
 						const reasoningText = completeMatch
 							? completeMatch[1].trim()
 							: incompleteMatch
-								? incompleteMatch[1].trim()
+								? incompleteMatch[1].trim() || "Thinking..." // Show placeholder while streaming
 								: null;
 						const textContent = fullText
 							.replace(/<think>[\s\S]*?<\/think>/g, "")
@@ -255,7 +255,7 @@ export function MessageRenderer({
 								{reasoningText && supportsReasoning && (
 									<Reasoning
 										key={`reasoning-${textKey}`}
-										isStreaming={isStreaming && enableReasoning}
+										isStreaming={isStreaming}
 									>
 										<ReasoningTrigger>Show reasoning</ReasoningTrigger>
 										<ReasoningContent markdown>

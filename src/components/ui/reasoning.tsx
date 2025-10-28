@@ -44,7 +44,7 @@ function Reasoning({
   onOpenChange,
   isStreaming,
 }: ReasoningProps) {
-  const [internalOpen, setInternalOpen] = useState(false)
+  const [internalOpen, setInternalOpen] = useState(true) // Default to open
   const [wasAutoOpened, setWasAutoOpened] = useState(false)
 
   const isControlled = open !== undefined
@@ -58,14 +58,16 @@ function Reasoning({
   }
 
   useEffect(() => {
+    // Auto-open when streaming starts
     if (isStreaming && !wasAutoOpened) {
       if (!isControlled) setInternalOpen(true)
       setWasAutoOpened(true)
     }
 
+    // Reset the auto-opened flag when streaming stops, but keep current open state
     if (!isStreaming && wasAutoOpened) {
-      if (!isControlled) setInternalOpen(false)
       setWasAutoOpened(false)
+      // Don't auto-close - let user control it
     }
   }, [isStreaming, wasAutoOpened, isControlled])
 

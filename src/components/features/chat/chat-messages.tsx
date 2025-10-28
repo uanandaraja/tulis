@@ -45,12 +45,12 @@ export function ChatMessages({
 					</div>
 				) : (
 					<>
-						{messages.map((message) => (
+						{messages.map((message, index) => (
 							<MessageRenderer
 								key={message.id}
 								message={message}
 								selectedModel={selectedModel}
-								isStreaming={isStreaming}
+								isStreaming={isStreaming && index === messages.length - 1}
 								enableReasoning={enableReasoning}
 								allPlanSteps={allPlanSteps}
 								onShowDocument={onShowDocument}
