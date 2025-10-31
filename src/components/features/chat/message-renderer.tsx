@@ -111,26 +111,13 @@ export function MessageRenderer({
 						);
 					}
 
-					// Render plan steps
+					// Skip plan steps rendering - they're now shown above the prompt input
 					if (
 						isToolUIPart(part) &&
 						part.type === "tool-planSteps" &&
 						part.state === "output-available"
 					) {
-						const planStepData = allPlanSteps.find(
-							(plan) =>
-								plan.messageId === message.id &&
-								plan.toolCallId === part.toolCallId,
-						);
-
-						if (planStepData) {
-							return (
-								<PlanSteps
-									key={`plan-${part.toolCallId}`}
-									output={planStepData.output}
-								/>
-							);
-						}
+						return null;
 					}
 
 					// Render write to editor artifact
