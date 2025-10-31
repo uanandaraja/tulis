@@ -90,6 +90,12 @@ export function ChatInterface({
 			]
 		: messagePlanSteps;
 
+	// Get the latest plan steps for display above input
+	const latestPlanSteps =
+		allPlanSteps.length > 0
+			? allPlanSteps[allPlanSteps.length - 1].output
+			: null;
+
 	useAutoSend({
 		isNewChat,
 		initialPrompt,
@@ -171,6 +177,7 @@ export function ChatInterface({
 					enableReasoning={enableReasoning}
 					onReasoningToggle={() => setEnableReasoning(!enableReasoning)}
 					supportsReasoning={supportsReasoning}
+					planSteps={latestPlanSteps}
 				/>
 			</div>
 
