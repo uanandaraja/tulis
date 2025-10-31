@@ -1,10 +1,15 @@
-import { Clock, X } from "lucide-react";
-import { forwardRef } from "react";
+import { Check, Clock, Code, Copy, FileText, X } from "lucide-react";
+import { forwardRef, useState } from "react";
 import {
 	DocumentEditor,
 	type EditorHandle,
 } from "@/components/editor/document-editor";
 import { Button } from "@/components/ui/button";
+import {
+	Popover,
+	PopoverContent,
+	PopoverTrigger,
+} from "@/components/ui/popover";
 import {
 	Tooltip,
 	TooltipContent,
@@ -13,6 +18,8 @@ import {
 } from "@/components/ui/tooltip";
 import { VersionHistoryPopover } from "@/components/ui/version-history-modal";
 import { trpc } from "@/lib/trpc/react";
+import { extractPlainText } from "@/lib/editor/text-extraction";
+import type { YooptaContentValue } from "@yoopta/editor";
 
 interface EditorPanelProps {
 	editorContent: string;
@@ -47,6 +54,46 @@ export const EditorPanel = forwardRef<EditorHandle, EditorPanelProps>(
 		const isViewingSpecificVersion = !!selectedVersionId;
 		const displayVersionNumber =
 			currentVersionNumber ?? latestVersion?.versionNumber;
+		const [copyPopoverOpen, setCopyPopoverOpen] = useState(false);
+		const [copiedType, setCopiedType] = useState<"raw" | "markdown" | null>(
+			null,
+		);
+
+		const handleCopyRawText = async () => {
+			if (!ref || typeof ref === "function" || !ref.current) return;
+
+			try {
+				const content = ref.current.getContent();
+				const editorValue = JSON.parse(content) as YooptaContentValue;
+				const plainText = extractPlainText(editorValue);
+
+				if (typeof window !== "undefined" && navigator.clipboard) {
+					await navigator.clipboard.writeText(plainText);
+					setCopiedType("raw");
+					setTimeout(() => {
+						setCopiedType(null);
+						setCopyPopoverOpen(false);
+					}, 2000);
+				}
+			} catch (error) {
+				console.error("Error copying raw text:", error);
+			}
+		};
+
+		const handleCopyMarkdown = async () => {
+			try {
+				if (typeof window !== "undefined" && navigator.clipboard) {
+					await navigator.clipboard.writeText(editorContent);
+					setCopiedType("markdown");
+					setTimeout(() => {
+						setCopiedType(null);
+						setCopyPopoverOpen(false);
+					}, 2000);
+				}
+			} catch (error) {
+				console.error("Error copying markdown:", error);
+			}
+		};
 
 		return (
 			<div className="flex flex-col flex-1 min-h-0 min-w-0 border-l relative">
@@ -98,6 +145,53 @@ export const EditorPanel = forwardRef<EditorHandle, EditorPanelProps>(
 						)}
 					</div>
 					<div className="flex items-center gap-1">
+						<Popover open={copyPopoverOpen} onOpenChange={setCopyPopoverOpen}>
+							<PopoverTrigger asChild>
+								<Button variant="ghost" size="icon" className="h-8 w-8">
+									<Copy className="h-4 w-4" />
+								</Button>
+							</PopoverTrigger>
+							<PopoverContent className="w-48 p-1" align="end">
+								<div className="flex flex-col">
+									<Button
+										variant="ghost"
+										size="sm"
+										className="justify-start h-9 px-2 gap-2"
+										onClick={handleCopyRawText}
+									>
+										{copiedType === "raw" ? (
+											<>
+												<Check className="h-4 w-4" />
+												Copied!
+											</>
+										) : (
+											<>
+												<FileText className="h-4 w-4" />
+												Copy Raw Text
+											</>
+										)}
+									</Button>
+									<Button
+										variant="ghost"
+										size="sm"
+										className="justify-start h-9 px-2 gap-2"
+										onClick={handleCopyMarkdown}
+									>
+										{copiedType === "markdown" ? (
+											<>
+												<Check className="h-4 w-4" />
+												Copied!
+											</>
+										) : (
+											<>
+												<Code className="h-4 w-4" />
+												Copy Markdown
+											</>
+										)}
+									</Button>
+								</div>
+							</PopoverContent>
+						</Popover>
 						<Button
 							variant="ghost"
 							size="icon"
@@ -113,7 +207,7 @@ export const EditorPanel = forwardRef<EditorHandle, EditorPanelProps>(
 				</div>
 			</div>
 		);
-	},
-);
+		},
+	);
 
 EditorPanel.displayName = "EditorPanel";
