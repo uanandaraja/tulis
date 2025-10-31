@@ -1,29 +1,23 @@
 "use client";
 
-import ActionMenuList, {
-	DefaultActionMenuRender,
-} from "@yoopta/action-menu-list";
-import Blockquote from "@yoopta/blockquote";
-import Code from "@yoopta/code";
-import YooptaEditor, { createYooptaEditor } from "@yoopta/editor";
-import { HeadingOne, HeadingThree, HeadingTwo } from "@yoopta/headings";
-import LinkTool, { DefaultLinkToolRender } from "@yoopta/link-tool";
-import { BulletedList, NumberedList } from "@yoopta/lists";
-import { Bold, Italic, Strike, Underline } from "@yoopta/marks";
-import Paragraph from "@yoopta/paragraph";
-import Table from "@yoopta/table";
-import Toolbar, { DefaultToolbarRender } from "@yoopta/toolbar";
+import { useEditor, EditorContent } from "@tiptap/react";
+import StarterKit from "@tiptap/starter-kit";
+import Placeholder from "@tiptap/extension-placeholder";
+import Link from "@tiptap/extension-link";
+import { Table } from "@tiptap/extension-table";
+import { TableRow } from "@tiptap/extension-table-row";
+import { TableCell } from "@tiptap/extension-table-cell";
+import { TableHeader } from "@tiptap/extension-table-header";
 import {
 	forwardRef,
 	useCallback,
 	useEffect,
 	useImperativeHandle,
-	useMemo,
 	useRef,
 	useState,
 } from "react";
-import { parseMarkdownToYoopta } from "@/lib/editor/markdown-parser";
-import { calculateWordCount } from "@/lib/editor/word-count";
+import { htmlToMarkdown } from "@/lib/editor/markdown-serializer";
+import { markdownToHtml } from "@/lib/editor/markdown-to-html";
 import { cn } from "@/lib/utils";
 
 export interface EditorHandle {
@@ -40,97 +34,139 @@ export interface DocumentEditorProps {
 	initialContent?: string;
 }
 
-const plugins = [
-	Paragraph,
-	HeadingOne,
-	HeadingTwo,
-	HeadingThree,
-	Blockquote,
-	Code,
-	Table,
-	NumberedList,
-	BulletedList,
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-] as any;
-
-const marks = [Bold, Italic, Strike, Underline];
-
 export const DocumentEditor = forwardRef<EditorHandle, DocumentEditorProps>(
 	(
-		{ className, placeholder = "Type '/' for commands...", initialContent },
+		{ className, placeholder = "Start writing...", initialContent },
 		ref,
 	) => {
-		const editor = useMemo(() => createYooptaEditor(), []);
-		const selectionRef = useRef(null);
-		const isInitialized = useRef(false);
 		const [wordCount, setWordCount] = useState(0);
+		const isInitialized = useRef(false);
 
-		const updateWordCount = useCallback(() => {
-			const value = editor.getEditorValue();
-			const count = calculateWordCount(value);
-			setWordCount(count);
-		}, [editor]);
+		const editor = useEditor({
+			immediatelyRender: false,
+			extensions: [
+				StarterKit.configure({
+					heading: {
+						levels: [1, 2, 3],
+					},
+				}),
+				Placeholder.configure({
+					placeholder,
+				}),
+				Link.configure({
+					openOnClick: false,
+					HTMLAttributes: {
+						class: "text-primary underline",
+					},
+				}),
+				Table.configure({
+					resizable: true,
+					HTMLAttributes: {
+						class: "border-collapse table-auto w-full my-4",
+					},
+				}),
+				TableRow.configure({
+					HTMLAttributes: {
+						class: "border-b border-border",
+					},
+				}),
+				TableCell.configure({
+					HTMLAttributes: {
+						class: "px-4 py-2",
+					},
+				}),
+				TableHeader.configure({
+					HTMLAttributes: {
+						class: "px-4 py-2 font-semibold",
+					},
+				}),
+			],
+			content: initialContent ? markdownToHtml(initialContent) : "",
+			onUpdate: ({ editor }) => {
+				const text = editor.getText();
+				const words = text.trim().split(/\s+/).filter(Boolean);
+				setWordCount(words.length);
+			},
+			editorProps: {
+				attributes: {
+					class: "prose prose-sm dark:prose-invert max-w-none focus:outline-none min-h-[200px]",
+				},
+			},
+		});
 
+		// Initialize content
 		useEffect(() => {
-			// Initialize editor with initial content
-			if (initialContent && !isInitialized.current) {
-				try {
-					const value = parseMarkdownToYoopta(initialContent);
-					if (value && Object.keys(value).length > 0) {
-						editor.setEditorValue(value);
-						isInitialized.current = true;
-						updateWordCount();
-					}
-				} catch (error) {
-					console.error("Error parsing markdown:", error);
-				}
+			if (editor && initialContent && !isInitialized.current) {
+				editor.commands.setContent(markdownToHtml(initialContent));
+				isInitialized.current = true;
+				// Calculate initial word count
+				const text = editor.getText();
+				const words = text.trim().split(/\s+/).filter(Boolean);
+				setWordCount(words.length);
 			}
+		}, [editor, initialContent]);
 
-			// Update content when it changes (after initialization)
-			if (initialContent && isInitialized.current) {
-				try {
-					const value = parseMarkdownToYoopta(initialContent);
-					if (value && Object.keys(value).length > 0) {
-						editor.setEditorValue(value);
-						updateWordCount();
-					}
-				} catch (error) {
-					console.error("Error updating markdown:", error);
+		// Update content when it changes externally
+		useEffect(() => {
+			if (editor && initialContent && isInitialized.current) {
+				// Only update if content actually changed to avoid infinite loops
+				const currentMarkdown = htmlToMarkdown(editor.getHTML());
+				if (currentMarkdown.trim() !== initialContent.trim()) {
+					editor.commands.setContent(markdownToHtml(initialContent));
+					const text = editor.getText();
+					const words = text.trim().split(/\s+/).filter(Boolean);
+					setWordCount(words.length);
 				}
+			} else if (editor && !initialContent && isInitialized.current) {
+				editor.commands.clearContent();
+				setWordCount(0);
 			}
-		}, [initialContent, editor, updateWordCount]);
+		}, [editor, initialContent]);
 
 		useImperativeHandle(ref, () => ({
-			setContent: (_content: string) => {
-				try {
-					const value = parseMarkdownToYoopta(_content);
-					editor.setEditorValue(value);
-				} catch (error) {
-					console.error("Error parsing markdown in setContent:", error);
+			setContent: (content: string) => {
+				if (editor) {
+					// Content is expected to be markdown
+					editor.commands.setContent(markdownToHtml(content));
+					const text = editor.getText();
+					const words = text.trim().split(/\s+/).filter(Boolean);
+					setWordCount(words.length);
 				}
 			},
-			appendContent: (_content: string) => {
-				console.log("Append not yet implemented for Yoopta");
+			appendContent: (content: string) => {
+				if (editor) {
+					// Content is expected to be markdown
+					editor.commands.insertContent(markdownToHtml(content));
+					const text = editor.getText();
+					const words = text.trim().split(/\s+/).filter(Boolean);
+					setWordCount(words.length);
+				}
 			},
-			prependContent: (_content: string) => {
-				console.log("Prepend not yet implemented for Yoopta");
+			prependContent: (content: string) => {
+				if (editor) {
+					// Content is expected to be markdown
+					editor.commands.insertContentAt(0, markdownToHtml(content));
+					const text = editor.getText();
+					const words = text.trim().split(/\s+/).filter(Boolean);
+					setWordCount(words.length);
+				}
 			},
 			getContent: () => {
-				return JSON.stringify(editor.getEditorValue());
+				if (!editor) return "";
+				// Return markdown format
+				return htmlToMarkdown(editor.getHTML());
 			},
 			clear: () => {
-				editor.setEditorValue({});
+				if (editor) {
+					editor.commands.clearContent();
+					setWordCount(0);
+				}
 			},
 		}));
 
-		useEffect(() => {
-			// Set up change listener
-			editor.on("change", updateWordCount);
-
-			return () => {
-				editor.off("change", updateWordCount);
-			};
-		}, [editor, updateWordCount]);
+		if (!editor) {
+			return null;
+		}
 
 		return (
 			<div
@@ -138,33 +174,10 @@ export const DocumentEditor = forwardRef<EditorHandle, DocumentEditorProps>(
 					"flex flex-col h-full w-full overflow-hidden bg-background relative",
 					className,
 				)}
-				ref={selectionRef}
 			>
 				<div className="flex-1 w-full overflow-y-auto px-16 py-12">
 					<div className="max-w-3xl mx-auto px-8">
-						<YooptaEditor
-							editor={editor}
-							className="w-full max-w-none"
-							style={{ width: "100%" }}
-							plugins={plugins}
-							marks={marks}
-							tools={{
-								ActionMenu: {
-									render: DefaultActionMenuRender,
-									tool: ActionMenuList,
-								},
-								Toolbar: {
-									render: DefaultToolbarRender,
-									tool: Toolbar,
-								},
-								LinkTool: {
-									render: DefaultLinkToolRender,
-									tool: LinkTool,
-								},
-							}}
-							placeholder={placeholder}
-							selectionBoxRoot={selectionRef}
-						/>
+						<EditorContent editor={editor} />
 					</div>
 				</div>
 				<div className="absolute bottom-4 right-4 px-3 py-1.5 rounded-md bg-muted border border-border text-xs text-muted-foreground z-10">

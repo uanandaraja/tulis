@@ -59,6 +59,7 @@ export function ChatInterface({
 		isOpen: showEditor,
 		selectedVersionId,
 		currentVersionNumber,
+		latestVersionContent,
 		open: openEditor,
 		close: closeEditor,
 		showVersion,
@@ -189,6 +190,7 @@ export function ChatInterface({
 					documentId={documentId}
 					selectedVersionId={selectedVersionId}
 					currentVersionNumber={currentVersionNumber}
+					latestVersionContent={latestVersionContent}
 					onDocumentUpdate={handleDocumentUpdate}
 					onShowLatest={showLatest}
 				/>

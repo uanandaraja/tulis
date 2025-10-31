@@ -30,6 +30,15 @@ export function useEditorState(
 		},
 	);
 
+	// Fetch latest version for comparison when viewing an older version
+	const { data: latestVersion } = trpc.document.get.useQuery(
+		{ documentId: documentId! },
+		{
+			enabled: !!documentId && !!selectedVersionId, // Only fetch when viewing a specific version
+			staleTime: 0,
+		},
+	);
+
 	const editorContent = useMemo(() => {
 		// If viewing a specific version, use that
 		if (selectedVersion?.content) {
@@ -84,6 +93,7 @@ export function useEditorState(
 		isOpen,
 		selectedVersionId,
 		currentVersionNumber: selectedVersion?.versionNumber,
+		latestVersionContent: latestVersion?.content,
 		open: () => setIsOpen(true),
 		close: () => setIsOpen(false),
 		showVersion: (versionId: string) => {
