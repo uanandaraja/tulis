@@ -44,7 +44,7 @@ function Reasoning({
   onOpenChange,
   isStreaming,
 }: ReasoningProps) {
-  const [internalOpen, setInternalOpen] = useState(true) // Default to open
+  const [internalOpen, setInternalOpen] = useState(false) // Default to closed
   const [wasAutoOpened, setWasAutoOpened] = useState(false)
 
   const isControlled = open !== undefined

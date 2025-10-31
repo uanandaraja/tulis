@@ -9,7 +9,6 @@ import {
 	ReasoningContent,
 	ReasoningTrigger,
 } from "@/components/ui/reasoning";
-import { modelSupportsReasoning } from "@/lib/constants/models";
 import {
 	isWebSearchToolOutput,
 	type PlanStepsToolOutput,
@@ -46,7 +45,6 @@ export function MessageRenderer({
 	if (message.parts.length === 0) return null;
 
 	const isUserMessage = message.role === "user";
-	const supportsReasoning = modelSupportsReasoning(selectedModel);
 
 	// For user messages, just show text
 	if (isUserMessage) {
@@ -93,8 +91,8 @@ export function MessageRenderer({
 		<div className="flex justify-start w-full">
 			<div className="flex flex-col gap-1.5 w-full min-w-0">
 				{message.parts.map((part, partIndex) => {
-					// Render reasoning
-					if (part.type === "reasoning" && supportsReasoning) {
+					// Render reasoning (always show if it exists, regardless of current model selection)
+					if (part.type === "reasoning") {
 						const reasoningText = "text" in part ? part.text : "";
 						const partKey =
 							"toolCallId" in part && part.toolCallId
@@ -252,7 +250,7 @@ export function MessageRenderer({
 
 						return (
 							<Fragment key={textKey}>
-								{reasoningText && supportsReasoning && (
+								{reasoningText && (
 									<Reasoning
 										key={`reasoning-${textKey}`}
 										isStreaming={isStreaming}
