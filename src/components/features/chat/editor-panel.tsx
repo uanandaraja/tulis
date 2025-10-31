@@ -1,5 +1,5 @@
 import { Check, Clock, Code, Copy, FileText, GitCompare, X } from "lucide-react";
-import { forwardRef, useState, useEffect } from "react";
+import { forwardRef, useState, useEffect, useMemo } from "react";
 import {
 	DocumentEditor,
 	type EditorHandle,
@@ -52,13 +52,16 @@ export const EditorPanel = forwardRef<EditorHandle, EditorPanelProps>(
 		);
 
 		const latestVersion = versions?.[0];
+		const latestVersionNumber = latestVersion?.versionNumber;
 		const isViewingSpecificVersion = !!selectedVersionId;
 		// Check if we're viewing the latest version by comparing version numbers
-		const isViewingLatestVersion = 
-			!isViewingSpecificVersion || 
-			(currentVersionNumber !== undefined && 
-			 latestVersion?.versionNumber !== undefined && 
-			 currentVersionNumber === latestVersion.versionNumber);
+		const isViewingLatestVersion = useMemo(() => {
+			if (!isViewingSpecificVersion) return true;
+			if (currentVersionNumber === undefined || latestVersionNumber === undefined) {
+				return false;
+			}
+			return currentVersionNumber === latestVersionNumber;
+		}, [isViewingSpecificVersion, currentVersionNumber, latestVersionNumber]);
 		const canShowDiff = isViewingSpecificVersion && latestVersionContent;
 		// Default to showing diff when viewing an older version
 		const [showDiff, setShowDiff] = useState(isViewingSpecificVersion);
@@ -76,7 +79,7 @@ export const EditorPanel = forwardRef<EditorHandle, EditorPanelProps>(
 			} else {
 				setShowDiff(true);
 			}
-		}, [selectedVersionId, isViewingLatestVersion, currentVersionNumber, latestVersion?.versionNumber]);
+		}, [isViewingLatestVersion]);
 
 		const handleCopyRawText = async () => {
 			if (!ref || typeof ref === "function" || !ref.current) return;
