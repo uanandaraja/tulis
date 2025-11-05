@@ -53,12 +53,12 @@ export default function NewChatPage() {
 	};
 
 	return (
-		<div className="flex flex-col items-center justify-center h-[calc(100vh-4rem)] max-w-4xl mx-auto px-4">
-			<div className="text-center mb-12">
-				<h1 className="text-4xl font-bold mb-4">
+		<div className="flex flex-col justify-center h-[calc(100vh-4rem)] max-w-4xl mx-auto px-4">
+			<div className="text-left mb-12">
+				<h1 className="text-2xl font-semibold mb-4">
 					What would you like to write today?
 				</h1>
-				<p className="text-muted-foreground text-lg">
+				<p className="text-muted-foreground text-base">
 					I'll research, plan, and write high-quality content for you.
 				</p>
 			</div>
@@ -161,7 +161,7 @@ export default function NewChatPage() {
 				</Button>
 			</form>
 
-			<div className="mt-12 flex flex-wrap gap-2 justify-center w-full max-w-2xl">
+			<div className="mt-12 flex flex-wrap gap-2 justify-start w-full max-w-2xl">
 				<PromptSuggestion
 					onClick={() =>
 						setInput("Write a comprehensive guide about AI safety")
