@@ -8,11 +8,11 @@ export function ScrollIndicator() {
 
 		const handleScroll = (e: Event) => {
 			const target = e.target as HTMLElement;
-			if (target && target !== document.documentElement) {
+			if (target?.classList && target !== document.documentElement) {
 				target.classList.add("scrolling");
 				clearTimeout(scrollTimer);
 				scrollTimer = setTimeout(() => {
-					target.classList.remove("scrolling");
+					target.classList?.remove("scrolling");
 				}, 1000);
 			}
 		};
