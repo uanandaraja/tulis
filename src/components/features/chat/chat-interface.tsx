@@ -3,6 +3,7 @@
 import type { UIMessage } from "ai";
 import { useRef, useState } from "react";
 import type { EditorHandle } from "@/components/editor/document-editor";
+import { Loader } from "@/components/ui/loader";
 import { useAutoSend } from "@/hooks/use-auto-send";
 import { useChatState } from "@/hooks/use-chat-state";
 import { useEditorState } from "@/hooks/use-editor-state";
@@ -57,6 +58,7 @@ export function ChatInterface({
 		editorContent,
 		hasContent: hasEditorContent,
 		isOpen: showEditor,
+		isLoading: isEditorLoading,
 		selectedVersionId,
 		currentVersionNumber,
 		latestVersionContent,
@@ -182,17 +184,26 @@ export function ChatInterface({
 			</div>
 
 			{showEditor && hasEditorContent && (
-				<EditorPanel
-					ref={editorRef}
-					editorContent={editorContent ?? ""}
-					onClose={closeEditor}
-					documentId={documentId}
-					selectedVersionId={selectedVersionId}
-					currentVersionNumber={currentVersionNumber}
-					latestVersionContent={latestVersionContent}
-					onDocumentUpdate={handleDocumentUpdate}
-					onShowLatest={showLatest}
-				/>
+				<>
+					{isEditorLoading && (
+						<div className="flex flex-col flex-1 min-h-0 min-w-0 border-l items-center justify-center">
+							<Loader variant="circular" size="lg" />
+						</div>
+					)}
+					{!isEditorLoading && (
+						<EditorPanel
+							ref={editorRef}
+							editorContent={editorContent ?? ""}
+							onClose={closeEditor}
+							documentId={documentId}
+							selectedVersionId={selectedVersionId}
+							currentVersionNumber={currentVersionNumber}
+							latestVersionContent={latestVersionContent}
+							onDocumentUpdate={handleDocumentUpdate}
+							onShowLatest={showLatest}
+						/>
+					)}
+				</>
 			)}
 		</div>
 	);
