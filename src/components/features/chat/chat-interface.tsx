@@ -3,6 +3,7 @@
 import type { UIMessage } from "ai";
 import { useRef, useState } from "react";
 import type { EditorHandle } from "@/components/editor/document-editor";
+import { Loader } from "@/components/ui/loader";
 import { useAutoSend } from "@/hooks/use-auto-send";
 import { useChatState } from "@/hooks/use-chat-state";
 import { useEditorState } from "@/hooks/use-editor-state";
@@ -12,7 +13,6 @@ import { trpc } from "@/lib/trpc/react";
 import { ChatInput } from "./chat-input";
 import { ChatMessages } from "./chat-messages";
 import { EditorPanel } from "./editor-panel";
-import { Loader } from "@/components/ui/loader";
 
 interface ChatInterfaceProps {
 	chatId: string;
