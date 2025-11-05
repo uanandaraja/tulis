@@ -10,14 +10,14 @@ import { TableRow } from "@tiptap/extension-table-row";
 import { EditorContent, useEditor } from "@tiptap/react";
 import { BubbleMenu } from "@tiptap/react/menus";
 import StarterKit from "@tiptap/starter-kit";
-import { createLowlight } from "lowlight";
-import javascript from "highlight.js/lib/languages/javascript";
-import typescript from "highlight.js/lib/languages/typescript";
-import python from "highlight.js/lib/languages/python";
-import css from "highlight.js/lib/languages/css";
-import html from "highlight.js/lib/languages/xml";
-import json from "highlight.js/lib/languages/json";
 import bash from "highlight.js/lib/languages/bash";
+import css from "highlight.js/lib/languages/css";
+import javascript from "highlight.js/lib/languages/javascript";
+import json from "highlight.js/lib/languages/json";
+import python from "highlight.js/lib/languages/python";
+import typescript from "highlight.js/lib/languages/typescript";
+import html from "highlight.js/lib/languages/xml";
+import { createLowlight } from "lowlight";
 import {
 	Bold,
 	Code,
