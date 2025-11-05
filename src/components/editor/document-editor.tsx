@@ -1,5 +1,6 @@
 "use client";
 
+import CodeBlockLowlight from "@tiptap/extension-code-block-lowlight";
 import Link from "@tiptap/extension-link";
 import Placeholder from "@tiptap/extension-placeholder";
 import { Table } from "@tiptap/extension-table";
@@ -9,9 +10,18 @@ import { TableRow } from "@tiptap/extension-table-row";
 import { EditorContent, useEditor } from "@tiptap/react";
 import { BubbleMenu } from "@tiptap/react/menus";
 import StarterKit from "@tiptap/starter-kit";
+import { createLowlight } from "lowlight";
+import javascript from "highlight.js/lib/languages/javascript";
+import typescript from "highlight.js/lib/languages/typescript";
+import python from "highlight.js/lib/languages/python";
+import css from "highlight.js/lib/languages/css";
+import html from "highlight.js/lib/languages/xml";
+import json from "highlight.js/lib/languages/json";
+import bash from "highlight.js/lib/languages/bash";
 import {
 	Bold,
 	Code,
+	Code2,
 	Italic,
 	Link as LinkIcon,
 	Strikethrough,
@@ -51,6 +61,17 @@ export interface DocumentEditorProps {
 	initialContent?: string;
 }
 
+// Create lowlight instance with common languages
+const lowlight = createLowlight({
+	javascript,
+	typescript,
+	python,
+	css,
+	html,
+	json,
+	bash,
+});
+
 export const DocumentEditor = forwardRef<EditorHandle, DocumentEditorProps>(
 	({ className, placeholder = "Start writing...", initialContent }, ref) => {
 		const [wordCount, setWordCount] = useState(0);
@@ -64,6 +85,13 @@ export const DocumentEditor = forwardRef<EditorHandle, DocumentEditorProps>(
 				StarterKit.configure({
 					heading: {
 						levels: [1, 2, 3],
+					},
+					codeBlock: false, // Disable default code block to use CodeBlockLowlight
+				}),
+				CodeBlockLowlight.configure({
+					lowlight,
+					HTMLAttributes: {
+						class: "code-block",
 					},
 				}),
 				Placeholder.configure({
@@ -278,6 +306,14 @@ export const DocumentEditor = forwardRef<EditorHandle, DocumentEditorProps>(
 							className="h-8 w-8"
 						>
 							<Code className="h-4 w-4" />
+						</Button>
+						<Button
+							variant={editor.isActive("codeBlock") ? "secondary" : "ghost"}
+							size="icon-sm"
+							onClick={() => editor.chain().focus().toggleCodeBlock().run()}
+							className="h-8 w-8"
+						>
+							<Code2 className="h-4 w-4" />
 						</Button>
 						<Popover open={linkPopoverOpen} onOpenChange={setLinkPopoverOpen}>
 							<PopoverTrigger asChild>

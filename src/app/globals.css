@@ -414,17 +414,20 @@
 
 .ProseMirror pre {
 	background-color: var(--muted);
+	border: 1px solid var(--border);
 	border-radius: 0.5rem;
 	padding: 1rem;
 	overflow-x: auto;
 	margin-top: 0.75rem;
 	margin-bottom: 0.75rem;
+	color: var(--foreground);
 }
 
 .ProseMirror pre code {
 	background-color: transparent;
 	padding: 0;
 	font-size: 0.875rem;
+	color: inherit;
 }
 
 /* Match Streamdown/Prose styling to Tiptap for consistency */
@@ -531,17 +534,20 @@
 
 .prose pre {
 	background-color: var(--muted);
+	border: 1px solid var(--border);
 	border-radius: 0.5rem;
 	padding: 1rem;
 	overflow-x: auto;
 	margin-top: 0.75rem;
 	margin-bottom: 0.75rem;
+	color: var(--foreground);
 }
 
 .prose pre code {
 	background-color: transparent;
 	padding: 0;
 	font-size: 0.875rem;
+	color: inherit;
 }
 
 /* Tables - Match styling between Tiptap and Streamdown */
@@ -634,4 +640,101 @@
 
 .dark .scrolling::-webkit-scrollbar-thumb {
 	background-color: oklch(0.7 0 0 / 0.2);
+}
+
+/* Dark mode code block styling */
+.dark .ProseMirror pre {
+	background-color: var(--muted);
+	border-color: var(--border);
+	color: var(--foreground);
+}
+
+.dark .prose pre {
+	background-color: var(--muted);
+	border-color: var(--border);
+	color: var(--foreground);
+}
+
+/* Syntax highlighting for code blocks */
+.hljs {
+	background: transparent !important;
+	color: inherit;
+}
+
+/* Light theme syntax highlighting */
+.code-block .hljs-keyword {
+	color: var(--primary);
+	font-weight: 600;
+}
+
+.code-block .hljs-string {
+	color: oklch(0.55 0.12 25);
+}
+
+.code-block .hljs-number {
+	color: oklch(0.5 0.15 240);
+}
+
+.code-block .hljs-comment {
+	color: var(--muted-foreground);
+	font-style: italic;
+}
+
+.code-block .hljs-function {
+	color: oklch(0.4 0.14 200);
+}
+
+.code-block .hljs-variable {
+	color: var(--foreground);
+}
+
+.code-block .hljs-class {
+	color: oklch(0.4 0.12 250);
+}
+
+.code-block .hljs-tag {
+	color: var(--primary);
+}
+
+.code-block .hljs-attribute {
+	color: oklch(0.5 0.12 60);
+}
+
+/* Dark theme syntax highlighting */
+.dark .code-block .hljs-keyword {
+	color: var(--primary);
+	font-weight: 600;
+}
+
+.dark .code-block .hljs-string {
+	color: oklch(0.75 0.12 25);
+}
+
+.dark .code-block .hljs-number {
+	color: oklch(0.7 0.15 240);
+}
+
+.dark .code-block .hljs-comment {
+	color: var(--muted-foreground);
+	font-style: italic;
+}
+
+.dark .code-block .hljs-function {
+	color: oklch(0.65 0.14 200);
+}
+
+.dark .code-block .hljs-variable {
+	color: var(--foreground);
+}
+
+.dark .code-block .hljs-class {
+	color: oklch(0.65 0.12 250);
+}
+
+.dark .code-block .hljs-tag {
+	color: var(--primary);
+}
+
+.dark .code-block .hljs-attribute {
+	color: oklch(0.7 0.12 60);
 }
