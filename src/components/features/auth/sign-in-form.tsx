@@ -62,9 +62,9 @@ export function SignInForm() {
 		<div className="w-full">
 			<div className="space-y-6">
 				<div className="space-y-2">
-					<h1 className="text-3xl font-bold tracking-tight">Welcome back</h1>
+					<h1 className="text-3xl font-semibold tracking-tight">welcome back</h1>
 					<p className="text-muted-foreground">
-						Sign in to your account to continue
+						sign in to your account to continue
 					</p>
 				</div>
 
@@ -82,7 +82,7 @@ export function SignInForm() {
 						</ItemMedia>
 						<ItemContent>
 							<ItemDescription className="text-primary">
-								Check your email! We sent you a magic link to sign in.
+								check your email! we sent you a magic link to sign in.
 							</ItemDescription>
 						</ItemContent>
 					</Item>
@@ -137,12 +137,12 @@ export function SignInForm() {
 						{magicLinkLoading ? (
 							<>
 								<Loader2 className="h-5 w-5 animate-spin mr-2" />
-								Sending...
+								sending...
 							</>
 						) : (
 							<>
 								<Mail className="h-5 w-5 mr-2" />
-								Send magic link
+								send magic link
 							</>
 						)}
 					</Button>
@@ -154,7 +154,7 @@ export function SignInForm() {
 					</div>
 					<div className="relative flex justify-center text-xs uppercase">
 						<span className="bg-background px-2 text-muted-foreground">
-							Or continue with
+							or continue with
 						</span>
 					</div>
 				</div>
@@ -170,21 +170,21 @@ export function SignInForm() {
 					) : (
 						<GoogleIcon className="h-5 w-5 mr-1" />
 					)}
-					{googleLoading ? "Signing in..." : "Sign in with Google"}
+					{googleLoading ? "signing in..." : "sign in with Google"}
 				</Button>
 
 				<div className="text-center text-sm">
-					<span className="text-muted-foreground">Don't have an account? </span>
+					<span className="text-muted-foreground">don't have an account? </span>
 					<Link
 						href="/auth/sign-up"
 						className="text-primary hover:underline font-medium"
 					>
-						Sign up
+						sign up
 					</Link>
 				</div>
 
 				<p className="text-xs text-muted-foreground">
-					By signing in, you agree to our Terms of Service and Privacy Policy
+					by signing in, you agree to our terms of service and privacy policy
 				</p>
 			</div>
 		</div>

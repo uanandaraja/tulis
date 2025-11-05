@@ -63,9 +63,9 @@ export function SignUpForm() {
 		<div className="w-full">
 			<div className="space-y-6">
 				<div className="space-y-2">
-					<h1 className="text-3xl font-bold tracking-tight">Create account</h1>
+					<h1 className="text-3xl font-semibold tracking-tight">create account</h1>
 					<p className="text-muted-foreground">
-						Get started with your free account
+						get started with your free account
 					</p>
 				</div>
 
@@ -83,7 +83,7 @@ export function SignUpForm() {
 						</ItemMedia>
 						<ItemContent>
 							<ItemDescription className="text-primary">
-								Check your email! We sent you a magic link to complete sign up.
+								check your email! we sent you a magic link to complete sign up.
 							</ItemDescription>
 						</ItemContent>
 					</Item>
@@ -171,12 +171,12 @@ export function SignUpForm() {
 						{magicLinkLoading ? (
 							<>
 								<Loader2 className="h-5 w-5 animate-spin mr-2" />
-								Creating account...
+								creating account...
 							</>
 						) : (
 							<>
 								<Mail className="h-5 w-5 mr-2" />
-								Create account
+								create account
 							</>
 						)}
 					</Button>
@@ -188,7 +188,7 @@ export function SignUpForm() {
 					</div>
 					<div className="relative flex justify-center text-xs uppercase">
 						<span className="bg-background px-2 text-muted-foreground">
-							Or continue with
+							or continue with
 						</span>
 					</div>
 				</div>
@@ -204,24 +204,24 @@ export function SignUpForm() {
 					) : (
 						<GoogleIcon className="h-5 w-5 mr-1" />
 					)}
-					{googleLoading ? "Signing in..." : "Sign up with Google"}
+					{googleLoading ? "signing in..." : "sign up with Google"}
 				</Button>
 
 				<div className="text-center text-sm">
 					<span className="text-muted-foreground">
-						Already have an account?{" "}
+						already have an account?{" "}
 					</span>
 					<Link
 						href="/auth"
 						className="text-primary hover:underline font-medium"
 					>
-						Sign in
+						sign in
 					</Link>
 				</div>
 
 				<p className="text-xs text-muted-foreground">
-					By creating an account, you agree to our Terms of Service and Privacy
-					Policy
+					by creating an account, you agree to our terms of service and privacy
+					policy
 				</p>
 			</div>
 		</div>
