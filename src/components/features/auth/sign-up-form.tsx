@@ -63,7 +63,9 @@ export function SignUpForm() {
 		<div className="w-full">
 			<div className="space-y-6">
 				<div className="space-y-2">
-					<h1 className="text-3xl font-semibold tracking-tight">create account</h1>
+					<h1 className="text-3xl font-semibold tracking-tight">
+						create account
+					</h1>
 					<p className="text-muted-foreground">
 						get started with your free account
 					</p>

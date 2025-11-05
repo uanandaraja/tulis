@@ -62,7 +62,9 @@ export function SignInForm() {
 		<div className="w-full">
 			<div className="space-y-6">
 				<div className="space-y-2">
-					<h1 className="text-3xl font-semibold tracking-tight">welcome back</h1>
+					<h1 className="text-3xl font-semibold tracking-tight">
+						welcome back
+					</h1>
 					<p className="text-muted-foreground">
 						sign in to your account to continue
 					</p>

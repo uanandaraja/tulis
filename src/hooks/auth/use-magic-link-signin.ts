@@ -54,4 +54,3 @@ export function useMagicLinkSignin(options: UseMagicLinkSigninOptions = {}) {
 
 	return { signIn, loading, error, sent };
 }
-

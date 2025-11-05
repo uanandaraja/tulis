@@ -19,7 +19,8 @@ export const metadata: Metadata = {
 		template: "%s - tulis",
 		default: "tulis - vibe writing",
 	},
-	description: "research, write, and edit in one flow. less thinking, more writing.",
+	description:
+		"research, write, and edit in one flow. less thinking, more writing.",
 	icons: {
 		icon: [
 			{ url: "/favicon.svg", type: "image/svg+xml" },
