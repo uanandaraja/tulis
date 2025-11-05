@@ -29,11 +29,11 @@ export function Hero() {
 				<div className="space-y-4">
 					<div className="space-y-4">
 						<h1 className="text-2xl md:text-4xl font-semibold text-foreground max-w-3xl">
-							your vibe writing tool
+							your vibe writing place
 						</h1>
 
 						<p className="text-sm md:text-xl text-muted-foreground max-w-xl">
-							let AI help you research, write, and edit in one flow.
+							let AI help you research, write, and edit all in one place.
 						</p>
 					</div>
 					<div className="flex flex-row flex-nowrap gap-4 pt-4">
