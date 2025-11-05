@@ -50,7 +50,7 @@ export function Hero() {
 									Loading...
 								</>
 							) : (
-								"start writing"
+								"start writing -- it's free"
 							)}
 						</Button>
 					</div>
