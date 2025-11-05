@@ -15,8 +15,8 @@ import {
 	ItemMedia,
 } from "@/components/ui/item";
 import { Label } from "@/components/ui/label";
-import { useGoogleSignin } from "@/lib/hooks/auth/use-google-signin";
-import { useMagicLinkSignin } from "@/lib/hooks/auth/use-magic-link-signin";
+import { useGoogleSignin } from "@/hooks/auth/use-google-signin";
+import { useMagicLinkSignin } from "@/hooks/auth/use-magic-link-signin";
 import { signInSchema } from "@/lib/validators/auth";
 
 export function SignInForm() {
