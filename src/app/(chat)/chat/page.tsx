@@ -82,7 +82,10 @@ export default function NewChatPage() {
 					/>
 					<div className="flex items-center gap-3 px-2">
 						<Select value={selectedModel} onValueChange={setSelectedModel}>
-							<SelectTrigger className="w-[200px] border-0 shadow-none focus:ring-0">
+							<SelectTrigger
+								className="w-[200px] border-0 shadow-none focus:ring-0"
+								suppressHydrationWarning
+							>
 								<SelectValue placeholder="Select model" />
 							</SelectTrigger>
 							<SelectContent>
