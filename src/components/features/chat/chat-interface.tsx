@@ -60,7 +60,6 @@ export function ChatInterface({
 		selectedVersionId,
 		currentVersionNumber,
 		latestVersionContent,
-		open: openEditor,
 		close: closeEditor,
 		showVersion,
 		showLatest,

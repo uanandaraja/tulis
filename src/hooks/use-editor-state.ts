@@ -1,5 +1,5 @@
 import { isToolUIPart, type UIMessage } from "ai";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { trpc } from "@/lib/trpc/react";
 import type { WriteToEditorToolOutput } from "@/lib/types/ai";
 
@@ -11,6 +11,7 @@ export function useEditorState(
 		null,
 	);
 	const [isOpen, setIsOpen] = useState(false);
+	const prevDocumentIdRef = useRef(documentId);
 
 	// Fetch current document content when documentId is available
 	const { data: currentDocument } = trpc.document.get.useQuery(
@@ -80,12 +81,15 @@ export function useEditorState(
 		if (hasContent && !isOpen) {
 			setIsOpen(true);
 		}
-	}, [hasContent]);
+	}, [hasContent, isOpen]);
 
 	// Reset selected version when documentId changes
 	useEffect(() => {
-		setSelectedVersionId(null);
-	}, [documentId]);
+		if (prevDocumentIdRef.current !== documentId) {
+			setSelectedVersionId(null);
+			prevDocumentIdRef.current = documentId;
+		}
+	});
 
 	return {
 		editorContent,

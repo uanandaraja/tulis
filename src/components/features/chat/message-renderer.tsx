@@ -3,7 +3,6 @@ import { isToolUIPart } from "ai";
 import { Fragment } from "react";
 import { EditorArtifact } from "@/components/ui/editor-artifact";
 import { MessageContent } from "@/components/ui/message";
-import { PlanSteps } from "@/components/ui/plan-steps";
 import {
 	Reasoning,
 	ReasoningContent,
@@ -36,10 +35,10 @@ interface MessageRendererProps {
 
 export function MessageRenderer({
 	message,
-	selectedModel,
+	selectedModel: _selectedModel,
 	isStreaming,
 	enableReasoning,
-	allPlanSteps = [],
+	allPlanSteps: _allPlanSteps = [],
 	onShowDocument,
 }: MessageRendererProps) {
 	if (message.parts.length === 0) return null;

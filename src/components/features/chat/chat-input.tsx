@@ -99,7 +99,7 @@ export const ChatInput = React.memo(function ChatInput({
 								{planSteps.steps.map((step, index) => {
 									const isCompleted = step.status === "completed";
 									return (
-										<TaskItem key={index}>
+										<TaskItem key={`${step.title}-${index}`}>
 											<div className="flex items-start gap-2">
 												{isCompleted ? (
 													<CheckCircle2 className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />

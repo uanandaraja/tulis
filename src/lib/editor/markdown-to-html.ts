@@ -1,5 +1,4 @@
 import MarkdownIt from "markdown-it";
-// @ts-expect-error - markdown-it-table doesn't have types
 import { markdownItTable } from "markdown-it-table";
 
 const md = new MarkdownIt({
