@@ -316,6 +316,13 @@
 	margin-top: 0 !important;
 }
 
+.ProseMirror ul,
+.ProseMirror ol {
+	padding-left: 1.625rem;
+	margin-top: 0.25rem;
+	margin-bottom: 0.25rem;
+}
+
 .ProseMirror h1 + p,
 .ProseMirror h1 + div,
 .ProseMirror h1 + h2,
@@ -323,13 +330,6 @@
 .ProseMirror h1 + ul,
 .ProseMirror h1 + ol {
 	margin-top: 0 !important;
-}
-
-.ProseMirror ul,
-.ProseMirror ol {
-	padding-left: 1.625rem;
-	margin-top: 0.25rem;
-	margin-bottom: 0.25rem;
 }
 
 .ProseMirror li {
