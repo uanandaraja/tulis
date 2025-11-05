@@ -6,7 +6,7 @@ export function Demo() {
 			<div className="w-full max-w-5xl mx-auto">
 				<div className="relative w-full aspect-video rounded-lg border border-border bg-card overflow-hidden ring-4 ring-inset ring-border/50">
 					<Image
-						src="https://storage.nizzy.xyz/tulis-demo.webp"
+						src="https://storage.nizzy.xyz/tulis/tulis-demo.webp"
 						alt="Tulis demo"
 						fill
 						className="object-cover"
