@@ -37,12 +37,12 @@ export function useEditorState(
 		return null;
 	}, [messages]);
 
-	// Fetch current document content when documentId is available and no message-based content exists
+	// Fetch current document content when documentId is available and no specific version is selected
 	const { data: currentDocument, isLoading: isLoadingCurrentDocument } =
 		trpc.document.get.useQuery(
 			{ documentId: documentId! },
 			{
-				enabled: !!documentId && !selectedVersionId && !messageBasedContent, // Only fetch if not viewing specific version and no message content
+				enabled: !!documentId && !selectedVersionId, // Always fetch latest version when not viewing specific version
 				staleTime: 0, // Always fetch fresh data
 			},
 		);
@@ -73,18 +73,30 @@ export function useEditorState(
 			return selectedVersion.content;
 		}
 
-		// Prioritize message-based content (latest from AI responses)
-		if (messageBasedContent) {
-			return messageBasedContent;
+		// When loading latest version from database, wait for it instead of showing stale message content
+		if (!selectedVersionId && documentId && isLoadingCurrentDocument) {
+			return null; // Show loading state instead of stale content
 		}
 
-		// If we have a current document from the database, use its content
+		// Prioritize current document from database (latest saved version)
 		if (currentDocument?.content) {
 			return currentDocument.content;
 		}
 
+		// Use message-based content as fallback (only when no documentId or not loading)
+		if (messageBasedContent) {
+			return messageBasedContent;
+		}
+
 		return null;
-	}, [messageBasedContent, currentDocument, selectedVersion]);
+	}, [
+		messageBasedContent,
+		currentDocument,
+		selectedVersion,
+		selectedVersionId,
+		documentId,
+		isLoadingCurrentDocument,
+	]);
 
 	const hasContent = editorContent !== null;
 
