@@ -15,7 +15,7 @@ export default async function SignUpPage() {
 	});
 
 	if (session) {
-		redirect("/dashboard");
+		redirect("/chat");
 	}
 
 	return (

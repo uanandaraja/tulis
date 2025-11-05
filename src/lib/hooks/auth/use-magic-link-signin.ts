@@ -37,7 +37,7 @@ export function useMagicLinkSignin(options: UseMagicLinkSigninOptions = {}) {
 			const { error: authError } = await authClient.signIn.magicLink({
 				email,
 				name,
-				callbackURL: "/dashboard",
+				callbackURL: "/chat",
 			});
 
 			if (authError) {

@@ -12,7 +12,7 @@ export function useGoogleSignin() {
 		try {
 			await authClient.signIn.social({
 				provider: "google",
-				callbackURL: "/dashboard",
+				callbackURL: "/chat",
 			});
 		} catch {
 			setError("An unexpected error occurred");

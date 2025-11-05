@@ -8,10 +8,10 @@ import { SidebarProvider } from "@/components/ui/sidebar";
 import { auth } from "@/lib/auth";
 
 export const metadata: Metadata = {
-	title: "Dashboard",
+	title: "Chat",
 };
 
-export default async function DashboardGroupLayout({
+export default async function ChatGroupLayout({
 	children,
 }: {
 	children: React.ReactNode;

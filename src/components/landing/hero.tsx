@@ -64,7 +64,7 @@ export function Hero() {
 		const session = await authClient.getSession();
 
 		if (session?.data?.session) {
-			router.push("/dashboard");
+			router.push("/chat");
 		} else {
 			router.push("/auth");
 		}
