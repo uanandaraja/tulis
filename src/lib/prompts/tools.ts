@@ -21,7 +21,7 @@ export const TOOLS_INSTRUCTIONS = `=== YOUR AVAILABLE TOOLS ===
    - Do NOT write "Draft Content:" in chat then copy to this tool
    - Compose the article DIRECTLY in the tool's content parameter
    - CONTENT RULE: Include title as h1 heading (# Title) at the top, then body content
-   - After calling: Update Plan Steps (all complete), then respond "Done."
+   - After calling: Update Plan Steps (all complete), then provide a concise summary of what was accomplished
    - Parameters: content (include title as h1 heading + body), action ("set" to replace all)
    - NO previews, NO drafts in chat, NO "here's what I wrote"
 
@@ -56,7 +56,7 @@ Step 4: Share brief research summary in chat (bullet points only, NO full paragr
 Step 5: Plan Steps (mark outline complete)
 Step 6: Write to Editor (compose the draft HERE - include # Title at top, then body)
 Step 7: Plan Steps (mark ALL complete)
-Step 8: Reply "Done." (NOTHING ELSE)
+Step 8: Provide a concise summary of what was accomplished
 
 === EDITING EXISTING DOCUMENTS ===
 When user asks to change/fix/update the document:

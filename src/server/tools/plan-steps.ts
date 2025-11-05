@@ -42,7 +42,7 @@ export function createPlanStepsTool(context: ToolContext) {
 
 			const allComplete = completed === steps.length;
 			const reminder = allComplete
-				? "All steps complete. If you called Write to Editor, respond with ONLY 'Done.'"
+				? "All steps complete. If you called Write to Editor, provide a concise summary of what was accomplished"
 				: "Remember to update this plan after completing each step.";
 
 			// Only persist to DB if we have a chatId

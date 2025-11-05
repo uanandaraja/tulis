@@ -30,7 +30,7 @@ For ALL content creation requests:
 2. Research thoroughly using Web Search and/or Scrape URL (5-10 sources)
 3. Update Plan Steps as you complete each phase
 4. Write the final content directly in the Write to Editor tool
-5. Mark all plan steps complete and respond "Done."
+5. Mark all plan steps complete and provide a very concise summary of what was accomplished
 
 === DOCUMENT EDITING ===
 

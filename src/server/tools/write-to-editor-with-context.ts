@@ -111,7 +111,7 @@ export function createWriteToEditorTool(context: ToolContext) {
 					documentId: document.id,
 					versionId,
 					versionNumber,
-					message: `Content ${action === "set" ? "written" : action === "append" ? "appended" : "prepended"} to editor. Document saved with version history. You MUST now: (1) Call Plan Steps to mark all steps completed, (2) Respond with ONLY "Done.",`,
+					message: `Content ${action === "set" ? "written" : action === "append" ? "appended" : "prepended"} to editor. Document saved with version history. You MUST now: (1) Call Plan Steps to mark all steps completed, (2) Provide a concise summary of what was accomplished.`,
 				};
 			} catch (error) {
 				console.error("Error in writeToEditor:", error);
