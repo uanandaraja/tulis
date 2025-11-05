@@ -76,8 +76,23 @@ export const EditorPanel = forwardRef<EditorHandle, EditorPanelProps>(
 		const canShowDiff = isViewingSpecificVersion && latestVersionContent;
 		// Default to showing diff when viewing an older version
 		const [showDiff, setShowDiff] = useState(isViewingSpecificVersion);
-		const displayVersionNumber =
-			currentVersionNumber ?? latestVersion?.versionNumber;
+		const displayVersionNumber = useMemo(() => {
+			// If viewing a specific version, show that version number
+			if (isViewingSpecificVersion && currentVersionNumber !== undefined) {
+				return currentVersionNumber;
+			}
+			// If loading latest version and not viewing specific version, don't show version number yet
+			if (!isViewingSpecificVersion && !versions?.length) {
+				return null;
+			}
+			// Otherwise show the latest version number
+			return latestVersion?.versionNumber;
+		}, [
+			isViewingSpecificVersion,
+			currentVersionNumber,
+			latestVersion?.versionNumber,
+			versions,
+		]);
 		const [copyPopoverOpen, setCopyPopoverOpen] = useState(false);
 		const [copiedType, setCopiedType] = useState<"raw" | "markdown" | null>(
 			null,
