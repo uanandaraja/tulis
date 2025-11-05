@@ -16,10 +16,10 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
 	title: {
-		template: "%s - Nizzy's Starter Kit",
-		default: "Nizzy's Starter Kit",
+		template: "%s - tulis",
+		default: "tulis - vibe writing",
 	},
-	description: "Building block to build project, fast.",
+	description: "research, write, and edit in one flow. less thinking, more writing.",
 	icons: {
 		icon: [
 			{ url: "/favicon.svg", type: "image/svg+xml" },

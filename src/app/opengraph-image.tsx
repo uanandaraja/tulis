@@ -2,7 +2,7 @@ import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { ImageResponse } from "next/og";
 
-export const alt = "Nizzy's Starter Kit";
+export const alt = "tulis - vibe writing";
 export const size = {
 	width: 1200,
 	height: 630,
@@ -26,7 +26,7 @@ export default async function Image() {
 			>
 				<img
 					src={imageSrc as unknown as string}
-					alt="Nizzy's Starter Kit"
+					alt="tulis - vibe writing"
 					style={{ width: "100%", height: "100%", objectFit: "cover" }}
 				/>
 			</div>,
@@ -51,7 +51,7 @@ export default async function Image() {
 					fontWeight: "bold",
 				}}
 			>
-				Nizzy's Starter Kit
+				tulis - vibe writing
 			</div>,
 			{
 				...size,
