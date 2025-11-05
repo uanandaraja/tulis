@@ -13,6 +13,7 @@ import { trpc } from "@/lib/trpc/react";
 import { ChatInput } from "./chat-input";
 import { ChatMessages } from "./chat-messages";
 import { EditorPanel } from "./editor-panel";
+import { Loader } from "@/components/ui/loader";
 
 interface ChatInterfaceProps {
 	chatId: string;
