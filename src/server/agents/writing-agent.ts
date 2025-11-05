@@ -31,7 +31,7 @@ export function createWritingAgent(
 		model: baseModel,
 		instructions: SYSTEM_PROMPT,
 		tools: context ? createToolsWithContext(context) : {},
-		stopWhen: stepCountIs(20),
+		stopWhen: stepCountIs(35),
 	});
 }
 
