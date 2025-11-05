@@ -300,6 +300,30 @@
 	margin-bottom: 0.25rem;
 }
 
+.ProseMirror h4 {
+	font-size: 0.8125rem;
+	font-weight: 500;
+	line-height: 1.4;
+	margin-top: 1rem;
+	margin-bottom: 0.25rem;
+}
+
+.ProseMirror h5 {
+	font-size: 0.75rem;
+	font-weight: 500;
+	line-height: 1.4;
+	margin-top: 0.875rem;
+	margin-bottom: 0.25rem;
+}
+
+.ProseMirror h6 {
+	font-size: 0.6875rem;
+	font-weight: 500;
+	line-height: 1.4;
+	margin-top: 0.75rem;
+	margin-bottom: 0.25rem;
+}
+
 /* Paragraphs - Notion style with better spacing */
 .ProseMirror p {
 	margin-top: 0.25rem;
@@ -401,10 +425,34 @@
 }
 
 .prose h3 {
-	font-size: 1.25rem;
+	font-size: 0.875rem;
 	font-weight: 600;
 	line-height: 1.4;
 	margin-top: 1.25rem;
+	margin-bottom: 0.25rem;
+}
+
+.prose h4 {
+	font-size: 0.8125rem;
+	font-weight: 600;
+	line-height: 1.4;
+	margin-top: 1rem;
+	margin-bottom: 0.25rem;
+}
+
+.prose h5 {
+	font-size: 0.75rem;
+	font-weight: 600;
+	line-height: 1.4;
+	margin-top: 0.875rem;
+	margin-bottom: 0.25rem;
+}
+
+.prose h6 {
+	font-size: 0.6875rem;
+	font-weight: 600;
+	line-height: 1.4;
+	margin-top: 0.75rem;
 	margin-bottom: 0.25rem;
 }
 
