@@ -55,10 +55,10 @@ export default function NewChatPage() {
 	return (
 		<div className="flex flex-col justify-center h-[calc(100vh-4rem)] max-w-4xl mx-auto px-4">
 			<div className="text-left mb-12">
-				<h1 className="text-2xl font-semibold mb-4">
+				<h1 className="text-2xl font-semibold mb-2">
 					What would you like to write today?
 				</h1>
-				<p className="text-muted-foreground text-base">
+				<p className="text-muted-foreground text-sm">
 					I'll research, plan, and write high-quality content for you.
 				</p>
 			</div>
