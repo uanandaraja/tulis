@@ -90,7 +90,7 @@ export const ChatInput = React.memo(function ChatInput({
 			<div className="pb-4">
 				{planSteps && planSteps.steps.length > 0 && (
 					<div
-						className="mb-0 mx-auto rounded-t-3xl border-x border-t border-input bg-background px-3 py-2 shadow-xs relative z-0"
+						className="mb-0 mx-auto rounded-t-md border-x border-t border-input bg-background px-3 py-2 shadow-xs relative z-0"
 						style={{ width: "calc(100% - 32px)" }}
 					>
 						<Task defaultOpen={false} className="mt-0">

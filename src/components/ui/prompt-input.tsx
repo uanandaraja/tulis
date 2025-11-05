@@ -84,7 +84,7 @@ const PromptInput = React.memo(function PromptInput({
     <PromptInputContext.Provider value={contextValue}>
       <div
         className={cn(
-          "border-input bg-background cursor-text rounded-3xl border p-2 shadow-xs",
+          "border-input bg-background cursor-text rounded-md border p-2 shadow-xs",
           className
         )}
         onClick={handleClick}
