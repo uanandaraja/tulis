@@ -18,6 +18,7 @@
 		"@ai-sdk-tools/store": "^0.9.0",
 		"@ai-sdk/react": "^3.0.0-beta.69",
 		"@aws-sdk/client-s3": "^3.914.0",
+		"@floating-ui/dom": "^1.6.0",
 		"@hookform/resolvers": "^5.2.2",
 		"@openrouter/ai-sdk-provider": "^1.2.0",
 		"@radix-ui/react-alert-dialog": "^1.1.15",

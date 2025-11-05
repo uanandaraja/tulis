@@ -1,4 +1,11 @@
 import { ArrowUp, Brain, CheckCircle2, Circle, Loader2 } from "lucide-react";
+import React from "react";
+import {
+	Task,
+	TaskContent,
+	TaskItem,
+	TaskTrigger,
+} from "@/components/ai-elements/task";
 import { Button } from "@/components/ui/button";
 import {
 	PromptInput,
@@ -19,14 +26,7 @@ import {
 	TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { AI_MODELS } from "@/lib/constants/models";
-import {
-	Task,
-	TaskContent,
-	TaskItem,
-	TaskTrigger,
-} from "@/components/ai-elements/task";
 import type { PlanStepsToolOutput } from "@/lib/types/ai";
-import React from "react";
 
 interface ChatInputProps {
 	input: string;
@@ -89,12 +89,12 @@ export const ChatInput = React.memo(function ChatInput({
 		<TooltipProvider>
 			<div className="pb-4">
 				{planSteps && planSteps.steps.length > 0 && (
-					<div className="mb-0 mx-auto rounded-t-3xl border-x border-t border-input bg-background px-3 py-2 shadow-xs relative z-0" style={{ width: "calc(100% - 32px)" }}>
+					<div
+						className="mb-0 mx-auto rounded-t-3xl border-x border-t border-input bg-background px-3 py-2 shadow-xs relative z-0"
+						style={{ width: "calc(100% - 32px)" }}
+					>
 						<Task defaultOpen={false} className="mt-0">
-							<TaskTrigger
-								title="Plan Steps"
-								icon={getStatusIcon()}
-							/>
+							<TaskTrigger title="Plan Steps" icon={getStatusIcon()} />
 							<TaskContent>
 								{planSteps.steps.map((step, index) => {
 									const isCompleted = step.status === "completed";
@@ -121,9 +121,7 @@ export const ChatInput = React.memo(function ChatInput({
 													{step.description && (
 														<div
 															className={`text-xs text-muted-foreground mt-1 ${
-																isCompleted
-																	? "line-through"
-																	: ""
+																isCompleted ? "line-through" : ""
 															}`}
 														>
 															{step.description}

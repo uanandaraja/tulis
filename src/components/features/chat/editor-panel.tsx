@@ -1,10 +1,19 @@
-import { Check, Clock, Code, Copy, FileText, GitCompare, X } from "lucide-react";
-import { forwardRef, useState, useEffect, useMemo } from "react";
+import {
+	Check,
+	Clock,
+	Code,
+	Copy,
+	FileText,
+	GitCompare,
+	X,
+} from "lucide-react";
+import { forwardRef, useEffect, useMemo, useState } from "react";
 import {
 	DocumentEditor,
 	type EditorHandle,
 } from "@/components/editor/document-editor";
 import { Button } from "@/components/ui/button";
+import { DiffViewer } from "@/components/ui/diff-viewer";
 import {
 	Popover,
 	PopoverContent,
@@ -17,7 +26,6 @@ import {
 	TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { VersionHistoryPopover } from "@/components/ui/version-history-modal";
-import { DiffViewer } from "@/components/ui/diff-viewer";
 import { trpc } from "@/lib/trpc/react";
 
 interface EditorPanelProps {
@@ -57,7 +65,10 @@ export const EditorPanel = forwardRef<EditorHandle, EditorPanelProps>(
 		// Check if we're viewing the latest version by comparing version numbers
 		const isViewingLatestVersion = useMemo(() => {
 			if (!isViewingSpecificVersion) return true;
-			if (currentVersionNumber === undefined || latestVersionNumber === undefined) {
+			if (
+				currentVersionNumber === undefined ||
+				latestVersionNumber === undefined
+			) {
 				return false;
 			}
 			return currentVersionNumber === latestVersionNumber;
@@ -162,16 +173,18 @@ export const EditorPanel = forwardRef<EditorHandle, EditorPanelProps>(
 									{showDiff ? "Hide Diff" : "Show Diff"}
 								</Button>
 							)}
-							{!isViewingLatestVersion && isViewingSpecificVersion && onShowLatest && (
-								<Button
-									variant="ghost"
-									size="sm"
-									onClick={onShowLatest}
-									className="h-6 px-2 text-xs"
-								>
-									View Latest
-								</Button>
-							)}
+							{!isViewingLatestVersion &&
+								isViewingSpecificVersion &&
+								onShowLatest && (
+									<Button
+										variant="ghost"
+										size="sm"
+										onClick={onShowLatest}
+										className="h-6 px-2 text-xs"
+									>
+										View Latest
+									</Button>
+								)}
 						</div>
 						{documentId && (
 							<TooltipProvider>
@@ -258,16 +271,16 @@ export const EditorPanel = forwardRef<EditorHandle, EditorPanelProps>(
 							</div>
 						</div>
 					) : (
-						<DocumentEditor 
-							key={selectedVersionId || 'latest'} 
-							ref={ref} 
-							initialContent={editorContent} 
+						<DocumentEditor
+							key={selectedVersionId || "latest"}
+							ref={ref}
+							initialContent={editorContent}
 						/>
 					)}
 				</div>
 			</div>
 		);
-		},
-	);
+	},
+);
 
 EditorPanel.displayName = "EditorPanel";

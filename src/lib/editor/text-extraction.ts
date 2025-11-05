@@ -44,4 +44,3 @@ export function extractPlainText(value: YooptaContentValue): string {
 
 	return texts.join("\n");
 }
-
