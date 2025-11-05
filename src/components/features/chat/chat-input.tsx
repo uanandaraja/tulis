@@ -89,54 +89,56 @@ export const ChatInput = React.memo(function ChatInput({
 	return (
 		<TooltipProvider>
 			<div className="pb-4">
-				{planSteps && planSteps.steps.length > 0 && (
-					<div
-						className="mb-0 mx-auto rounded-t-md border-x border-t border-input bg-background px-3 py-2 shadow-xs relative z-0"
-						style={{ width: "calc(100% - 32px)" }}
-					>
-						<Task defaultOpen={false} className="mt-0">
-							<TaskTrigger title="Plan Steps" icon={getStatusIcon()} />
-							<TaskContent>
-								{planSteps.steps.map((step, index) => {
-									const isCompleted = step.status === "completed";
-									return (
-										<TaskItem key={`${step.title}-${index}`}>
-											<div className="flex items-start gap-2">
-												{isCompleted ? (
-													<CheckCircle2 className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
-												) : step.status === "in_progress" ? (
-													<Loader2 className="h-4 w-4 text-blue-500 animate-spin mt-0.5 flex-shrink-0" />
-												) : (
-													<Circle className="h-4 w-4 text-muted-foreground mt-0.5 flex-shrink-0" />
-												)}
-												<div className="flex-1 min-w-0">
-													<div
-														className={
-															isCompleted
-																? "text-muted-foreground line-through"
-																: ""
-														}
-													>
-														{step.title}
-													</div>
-													{step.description && (
-														<div
-															className={`text-xs text-muted-foreground mt-1 ${
-																isCompleted ? "line-through" : ""
-															}`}
-														>
-															{step.description}
-														</div>
+				{planSteps &&
+					planSteps.steps.length > 0 &&
+					!planSteps.steps.every((s) => s.status === "completed") && (
+						<div
+							className="mb-0 mx-auto rounded-t-md border-x border-t border-input bg-background px-3 py-2 shadow-xs relative z-0"
+							style={{ width: "calc(100% - 32px)" }}
+						>
+							<Task defaultOpen={false} className="mt-0">
+								<TaskTrigger title="Plan Steps" icon={getStatusIcon()} />
+								<TaskContent>
+									{planSteps.steps.map((step, index) => {
+										const isCompleted = step.status === "completed";
+										return (
+											<TaskItem key={`${step.title}-${index}`}>
+												<div className="flex items-start gap-2">
+													{isCompleted ? (
+														<CheckCircle2 className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
+													) : step.status === "in_progress" ? (
+														<Loader2 className="h-4 w-4 text-blue-500 animate-spin mt-0.5 flex-shrink-0" />
+													) : (
+														<Circle className="h-4 w-4 text-muted-foreground mt-0.5 flex-shrink-0" />
 													)}
+													<div className="flex-1 min-w-0">
+														<div
+															className={
+																isCompleted
+																	? "text-muted-foreground line-through"
+																	: ""
+															}
+														>
+															{step.title}
+														</div>
+														{step.description && (
+															<div
+																className={`text-xs text-muted-foreground mt-1 ${
+																	isCompleted ? "line-through" : ""
+																}`}
+															>
+																{step.description}
+															</div>
+														)}
+													</div>
 												</div>
-											</div>
-										</TaskItem>
-									);
-								})}
-							</TaskContent>
-						</Task>
-					</div>
-				)}
+											</TaskItem>
+										);
+									})}
+								</TaskContent>
+							</Task>
+						</div>
+					)}
 				<form onSubmit={handleSubmit} className="relative z-10">
 					<PromptInput
 						value={input}
