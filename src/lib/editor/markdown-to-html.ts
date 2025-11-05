@@ -1,14 +1,10 @@
-import MarkdownIt from "markdown-it";
-import { markdownItTable } from "markdown-it-table";
+import { createMarkdownExit } from "markdown-exit";
 
-const md = new MarkdownIt({
+const md = createMarkdownExit({
 	html: true,
 	linkify: true,
 	typographer: true,
 });
-
-// Add table plugin
-md.use(markdownItTable);
 
 export function markdownToHtml(markdown: string): string {
 	if (!markdown || markdown.trim() === "") {
