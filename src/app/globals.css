@@ -271,18 +271,21 @@
 }
 
 /* Headings - Notion style */
-.ProseMirror h1 {
-	font-size: 1.875rem;
-	font-weight: 700;
+.ProseMirror h1,
+.prose .ProseMirror h1,
+.prose.ProseMirror h1 {
+	font-size: 1.5rem;
+	font-weight: 600;
 	line-height: 1.2;
 	margin-top: 2rem;
-	margin-bottom: 0.25rem;
+	margin-bottom: 1.5rem !important;
+	padding-bottom: 0;
 	letter-spacing: -0.02em;
 }
 
 .ProseMirror h2 {
-	font-size: 1.5rem;
-	font-weight: 600;
+	font-size: 1rem;
+	font-weight: 500;
 	line-height: 1.3;
 	margin-top: 1.5rem;
 	margin-bottom: 0.25rem;
@@ -290,8 +293,8 @@
 }
 
 .ProseMirror h3 {
-	font-size: 1.25rem;
-	font-weight: 600;
+	font-size: 0.875rem;
+	font-weight: 500;
 	line-height: 1.4;
 	margin-top: 1.25rem;
 	margin-bottom: 0.25rem;
@@ -307,6 +310,19 @@
 
 .ProseMirror > * + * {
 	margin-top: 0.25rem;
+}
+
+.ProseMirror h1 + * {
+	margin-top: 0 !important;
+}
+
+.ProseMirror h1 + p,
+.ProseMirror h1 + div,
+.ProseMirror h1 + h2,
+.ProseMirror h1 + h3,
+.ProseMirror h1 + ul,
+.ProseMirror h1 + ol {
+	margin-top: 0 !important;
 }
 
 .ProseMirror ul,
@@ -367,7 +383,7 @@
 
 /* Match Streamdown/Prose styling to Tiptap for consistency */
 .prose h1 {
-	font-size: 1.875rem;
+	font-size: 1.5rem;
 	font-weight: 700;
 	line-height: 1.2;
 	margin-top: 2rem;
@@ -376,7 +392,7 @@
 }
 
 .prose h2 {
-	font-size: 1.5rem;
+	font-size: 1rem;
 	font-weight: 600;
 	line-height: 1.3;
 	margin-top: 1.5rem;
