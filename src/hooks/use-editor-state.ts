@@ -13,45 +13,8 @@ export function useEditorState(
 	const [isOpen, setIsOpen] = useState(false);
 	const prevDocumentIdRef = useRef(documentId);
 
-	// Fetch current document content when documentId is available
-	const { data: currentDocument } = trpc.document.get.useQuery(
-		{ documentId: documentId! },
-		{
-			enabled: !!documentId && !selectedVersionId, // Only fetch if not viewing a specific version
-			staleTime: 0, // Always fetch fresh data
-		},
-	);
-
-	// Fetch specific version when selected
-	const { data: selectedVersion } = trpc.document.getVersion.useQuery(
-		{ versionId: selectedVersionId! },
-		{
-			enabled: !!selectedVersionId,
-			staleTime: 0,
-		},
-	);
-
-	// Fetch latest version for comparison when viewing an older version
-	const { data: latestVersion } = trpc.document.get.useQuery(
-		{ documentId: documentId! },
-		{
-			enabled: !!documentId && !!selectedVersionId, // Only fetch when viewing a specific version
-			staleTime: 0,
-		},
-	);
-
-	const editorContent = useMemo(() => {
-		// If viewing a specific version, use that
-		if (selectedVersion?.content) {
-			return selectedVersion.content;
-		}
-
-		// If we have a current document from the database, use its content
-		if (currentDocument?.content) {
-			return currentDocument.content;
-		}
-
-		// Otherwise, fall back to the last writeToEditor tool result
+	// Get the latest content from messages first
+	const messageBasedContent = useMemo(() => {
 		for (const message of [...messages].reverse()) {
 			if (message.role !== "assistant") continue;
 
@@ -72,9 +35,65 @@ export function useEditorState(
 			}
 		}
 		return null;
-	}, [messages, currentDocument, selectedVersion]);
+	}, [messages]);
+
+	// Fetch current document content when documentId is available and no message-based content exists
+	const { data: currentDocument, isLoading: isLoadingCurrentDocument } =
+		trpc.document.get.useQuery(
+			{ documentId: documentId! },
+			{
+				enabled: !!documentId && !selectedVersionId && !messageBasedContent, // Only fetch if not viewing specific version and no message content
+				staleTime: 0, // Always fetch fresh data
+			},
+		);
+
+	// Fetch specific version when selected
+	const { data: selectedVersion, isLoading: isLoadingSelectedVersion } =
+		trpc.document.getVersion.useQuery(
+			{ versionId: selectedVersionId! },
+			{
+				enabled: !!selectedVersionId,
+				staleTime: 0,
+			},
+		);
+
+	// Fetch latest version for comparison when viewing an older version
+	const { data: latestVersion, isLoading: isLoadingLatestVersion } =
+		trpc.document.get.useQuery(
+			{ documentId: documentId! },
+			{
+				enabled: !!documentId && !!selectedVersionId, // Only fetch when viewing a specific version
+				staleTime: 0,
+			},
+		);
+
+	const editorContent = useMemo(() => {
+		// If viewing a specific version, use that
+		if (selectedVersion?.content) {
+			return selectedVersion.content;
+		}
+
+		// Prioritize message-based content (latest from AI responses)
+		if (messageBasedContent) {
+			return messageBasedContent;
+		}
+
+		// If we have a current document from the database, use its content
+		if (currentDocument?.content) {
+			return currentDocument.content;
+		}
+
+		return null;
+	}, [messageBasedContent, currentDocument, selectedVersion]);
 
 	const hasContent = editorContent !== null;
+
+	// Determine if we're still loading content
+	const isLoading = selectedVersionId
+		? isLoadingSelectedVersion || isLoadingLatestVersion
+		: messageBasedContent
+			? false
+			: isLoadingCurrentDocument;
 
 	// Only auto-open when new content appears (not when closing)
 	useEffect(() => {
@@ -95,6 +114,7 @@ export function useEditorState(
 		editorContent,
 		hasContent,
 		isOpen,
+		isLoading,
 		selectedVersionId,
 		currentVersionNumber: selectedVersion?.versionNumber,
 		latestVersionContent: latestVersion?.content,

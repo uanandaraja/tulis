@@ -12,6 +12,7 @@ import { trpc } from "@/lib/trpc/react";
 import { ChatInput } from "./chat-input";
 import { ChatMessages } from "./chat-messages";
 import { EditorPanel } from "./editor-panel";
+import { Loader } from "@/components/ui/loader";
 
 interface ChatInterfaceProps {
 	chatId: string;
@@ -57,6 +58,7 @@ export function ChatInterface({
 		editorContent,
 		hasContent: hasEditorContent,
 		isOpen: showEditor,
+		isLoading: isEditorLoading,
 		selectedVersionId,
 		currentVersionNumber,
 		latestVersionContent,
@@ -182,17 +184,26 @@ export function ChatInterface({
 			</div>
 
 			{showEditor && hasEditorContent && (
-				<EditorPanel
-					ref={editorRef}
-					editorContent={editorContent ?? ""}
-					onClose={closeEditor}
-					documentId={documentId}
-					selectedVersionId={selectedVersionId}
-					currentVersionNumber={currentVersionNumber}
-					latestVersionContent={latestVersionContent}
-					onDocumentUpdate={handleDocumentUpdate}
-					onShowLatest={showLatest}
-				/>
+				<>
+					{isEditorLoading && (
+						<div className="flex flex-col flex-1 min-h-0 min-w-0 border-l items-center justify-center">
+							<Loader variant="circular" size="lg" />
+						</div>
+					)}
+					{!isEditorLoading && (
+						<EditorPanel
+							ref={editorRef}
+							editorContent={editorContent ?? ""}
+							onClose={closeEditor}
+							documentId={documentId}
+							selectedVersionId={selectedVersionId}
+							currentVersionNumber={currentVersionNumber}
+							latestVersionContent={latestVersionContent}
+							onDocumentUpdate={handleDocumentUpdate}
+							onShowLatest={showLatest}
+						/>
+					)}
+				</>
 			)}
 		</div>
 	);
