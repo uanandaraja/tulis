@@ -10,7 +10,6 @@ export function Hero() {
 	const router = useRouter();
 	const [isNavigating, setIsNavigating] = useState(false);
 
-
 	const handleGetStarted = async () => {
 		setIsNavigating(true);
 
@@ -34,7 +33,8 @@ export function Hero() {
 						</h1>
 
 						<p className="text-sm md:text-xl text-muted-foreground max-w-xl">
-							research, write, and edit in one flow. less thinking, more writing.
+							research, write, and edit in one flow. less thinking, more
+							writing.
 						</p>
 					</div>
 					<div className="flex flex-row flex-nowrap gap-4 pt-4">
