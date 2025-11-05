@@ -1,4 +1,5 @@
 import { ArrowUp, Brain, CheckCircle2, Circle, Loader2 } from "lucide-react";
+import Image from "next/image";
 import React from "react";
 import {
 	Task,
@@ -147,13 +148,40 @@ export const ChatInput = React.memo(function ChatInput({
 						<PromptInputActions className="justify-between">
 							<div className="flex items-center gap-2">
 								<Select value={selectedModel} onValueChange={onModelChange}>
-									<SelectTrigger className="w-[200px] border-0 shadow-none focus:ring-0">
-										<SelectValue placeholder="Select model" />
+									<SelectTrigger className="min-w-[200px] w-auto border-0 shadow-none focus:ring-0">
+										<SelectValue placeholder="Select model">
+											{(() => {
+												const selected = AI_MODELS.find(
+													(m) => m.value === selectedModel,
+												);
+												return selected ? (
+													<div className="flex items-center gap-2 whitespace-nowrap">
+														<Image
+															src={selected.logo}
+															alt={selected.label}
+															width={16}
+															height={16}
+															className="shrink-0"
+														/>
+														<span>{selected.label}</span>
+													</div>
+												) : null;
+											})()}
+										</SelectValue>
 									</SelectTrigger>
 									<SelectContent>
 										{AI_MODELS.map((model) => (
 											<SelectItem key={model.value} value={model.value}>
-												{model.label}
+												<div className="flex items-center gap-2">
+													<Image
+														src={model.logo}
+														alt={model.label}
+														width={16}
+														height={16}
+														className="shrink-0"
+													/>
+													<span>{model.label}</span>
+												</div>
 											</SelectItem>
 										))}
 									</SelectContent>
