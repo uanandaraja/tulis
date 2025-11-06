@@ -1,5 +1,6 @@
 import { AIWritingPartnerMock } from "./features/ai-writing-partner-mock";
 import { SmartEditingMock } from "./features/smart-editing-mock";
+import { RichTextEditorMock } from "./features/rich-text-editor-mock";
 
 export function Features() {
 	const features = [
@@ -16,6 +17,7 @@ export function Features() {
 		{
 			title: "rich text editor",
 			description: "full editor with formatting, tables, and clean interface",
+			mockup: <RichTextEditorMock />,
 		},
 		{
 			title: "version tracking",
