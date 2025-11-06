@@ -8,15 +8,18 @@ interface SendEmailOptions {
 
 function getResendClient() {
 	if (!process.env.RESEND_API_KEY) {
-		throw new Error(
-			"Email service is not configured. Please set RESEND_API_KEY environment variable.",
-		);
+		return null;
 	}
 	return new Resend(process.env.RESEND_API_KEY);
 }
 
 export async function sendEmail({ to, subject, react }: SendEmailOptions) {
 	const resend = getResendClient();
+	
+	if (!resend) {
+		console.warn("Email service is not configured. Skipping email send.");
+		return null;
+	}
 
 	try {
 		const { data, error } = await resend.emails.send({

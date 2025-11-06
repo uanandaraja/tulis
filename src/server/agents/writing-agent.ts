@@ -7,7 +7,7 @@ import {
 } from "@/server/tools/create-tools";
 
 const openrouter = createOpenRouter({
-	apiKey: process.env.OPENROUTER_API_KEY,
+	apiKey: process.env.OPENROUTER_API_KEY || "",
 });
 
 export function createWritingAgent(
