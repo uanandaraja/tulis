@@ -13,10 +13,6 @@ export function AuthImage() {
 					style={{ transform: "scale(1.05)" }}
 				/>
 			</div>
-			<div className="absolute bottom-0 right-0 p-4 text-white/90 text-sm text-right z-10">
-				<div className="font-medium">Josephine and Mercie (1908)</div>
-				<div>Edmund Tarbell</div>
-			</div>
 		</div>
 	);
 }
