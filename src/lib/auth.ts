@@ -22,7 +22,7 @@ export const auth = betterAuth({
 		},
 	},
 	socialProviders: {
-		google: getGoogleOAuthConfig(),
+		...(getGoogleOAuthConfig() && { google: getGoogleOAuthConfig() }),
 	},
 	plugins: [
 		magicLink({

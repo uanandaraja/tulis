@@ -14,9 +14,7 @@ export function getGoogleOAuthConfig() {
 	const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
 
 	if (!clientId || !clientSecret) {
-		throw new Error(
-			"Google OAuth is not configured. Please set GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET environment variables.",
-		);
+		return undefined;
 	}
 
 	return {
