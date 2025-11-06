@@ -1,6 +1,6 @@
 import { AIWritingPartnerMock } from "./features/ai-writing-partner-mock";
-import { SmartEditingMock } from "./features/smart-editing-mock";
 import { RichTextEditorMock } from "./features/rich-text-editor-mock";
+import { SmartEditingMock } from "./features/smart-editing-mock";
 import { VersionTrackingMock } from "./features/version-tracking-mock";
 
 export function Features() {

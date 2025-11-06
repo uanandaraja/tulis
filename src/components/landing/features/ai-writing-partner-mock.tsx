@@ -1,4 +1,4 @@
-import { Search, ChevronDown } from "lucide-react";
+import { ChevronDown, Search } from "lucide-react";
 
 const mockMessages = [
 	{
