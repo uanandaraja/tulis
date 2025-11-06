@@ -1,8 +1,11 @@
+import { AIWritingPartnerMock } from "./features/ai-writing-partner-mock";
+
 export function Features() {
 	const features = [
 		{
 			title: "ai writing partner",
 			description: "researches, plans, then drafts your content automatically",
+			mockup: <AIWritingPartnerMock />,
 		},
 		{
 			title: "smart editing",
@@ -26,14 +29,19 @@ export function Features() {
 						return (
 							<div
 								key={feature.title}
-								className="group p-6 bg-card border border-border rounded-lg transition-all duration-100 ring-4 ring-inset ring-border/50 outline outline-0 outline-border/50 hover:outline-[3px] hover:border-ring/50"
+								className="group p-6 bg-muted rounded-lg transition-all duration-100 hover:!ring-[3px] hover:!ring-border"
 							>
 								<h3 className="text-lg font-semibold mb-2 text-foreground">
 									{feature.title}
 								</h3>
-								<p className="text-muted-foreground leading-relaxed">
+								<p className="text-muted-foreground leading-relaxed mb-4">
 									{feature.description}
 								</p>
+								{feature.mockup && (
+									<div className="mt-4 p-4 bg-background rounded-lg border border-border">
+										{feature.mockup}
+									</div>
+								)}
 							</div>
 						);
 					})}
