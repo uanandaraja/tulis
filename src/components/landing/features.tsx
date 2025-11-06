@@ -1,20 +1,20 @@
 export function Features() {
 	const features = [
 		{
-			title: "ai writes",
-			description: "research and draft in one flow",
+			title: "ai writing partner",
+			description: "researches, plans, then drafts your content automatically",
 		},
 		{
-			title: "ai edits",
-			description: "refines and improves on its own",
+			title: "smart editing", 
+			description: "makes intelligent improvements and refinements on its own",
 		},
 		{
-			title: "you edit",
-			description: "fine-tune with a proper editor",
+			title: "rich text editor",
+			description: "full editor with formatting, tables, and clean interface",
 		},
 		{
-			title: "version control",
-			description: "track changes and restore anytime",
+			title: "version tracking",
+			description: "every change saved, compare versions, restore anytime",
 		},
 	];
 
