@@ -1,7 +1,7 @@
 "use client";
 
+import { Bold, Code, Italic, Link2, Strikethrough } from "lucide-react";
 import { useState } from "react";
-import { Bold, Italic, Code, Link2, Strikethrough } from "lucide-react";
 
 export function RichTextEditorMock() {
 	const [showBubbleMenu, setShowBubbleMenu] = useState(false);
@@ -32,6 +32,7 @@ export function RichTextEditorMock() {
 
 	return (
 		<div
+			role="application"
 			className="relative h-64 w-full overflow-hidden bg-background border border-border rounded-lg"
 			onMouseUp={handleMouseUp}
 		>
@@ -63,7 +64,7 @@ export function RichTextEditorMock() {
 					<p>
 						To learn more about implementing remote work strategies, check out
 						our{" "}
-						<a href="#" className="text-primary underline">
+						<a href="/guide" className="text-primary underline">
 							comprehensive guide
 						</a>
 						.
@@ -81,19 +82,34 @@ export function RichTextEditorMock() {
 					}}
 				>
 					<div className="flex items-center gap-1 rounded-lg border border-border bg-background p-1 shadow-lg">
-						<button className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 hover:bg-accent hover:text-accent-foreground h-8 w-8">
+						<button
+							type="button"
+							className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 hover:bg-accent hover:text-accent-foreground h-8 w-8"
+						>
 							<Bold className="h-4 w-4" />
 						</button>
-						<button className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 hover:bg-accent hover:text-accent-foreground h-8 w-8">
+						<button
+							type="button"
+							className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 hover:bg-accent hover:text-accent-foreground h-8 w-8"
+						>
 							<Italic className="h-4 w-4" />
 						</button>
-						<button className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 hover:bg-accent hover:text-accent-foreground h-8 w-8">
+						<button
+							type="button"
+							className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 hover:bg-accent hover:text-accent-foreground h-8 w-8"
+						>
 							<Strikethrough className="h-4 w-4" />
 						</button>
-						<button className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 hover:bg-accent hover:text-accent-foreground h-8 w-8">
+						<button
+							type="button"
+							className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 hover:bg-accent hover:text-accent-foreground h-8 w-8"
+						>
 							<Code className="h-4 w-4" />
 						</button>
-						<button className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 hover:bg-accent hover:text-accent-foreground h-8 w-8">
+						<button
+							type="button"
+							className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 hover:bg-accent hover:text-accent-foreground h-8 w-8"
+						>
 							<Link2 className="h-4 w-4" />
 						</button>
 					</div>
