@@ -19,14 +19,15 @@ export default async function SignInPage() {
 	}
 
 	return (
-		<div className="min-h-screen grid lg:grid-cols-2">
-			<div className="flex items-center justify-center p-8">
-				<div className="w-full max-w-sm">
+		<div className="min-h-screen relative">
+			<div className="absolute inset-0">
+				<AuthImage />
+			</div>
+			<div className="relative min-h-screen flex items-center justify-center p-8">
+				<div className="w-full max-w-md bg-background/95 backdrop-blur-sm rounded-lg shadow-lg p-8">
 					<SignInForm />
 				</div>
 			</div>
-
-			<AuthImage />
 		</div>
 	);
 }
