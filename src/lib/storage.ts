@@ -6,18 +6,40 @@ import {
 } from "@aws-sdk/client-s3";
 import { config } from "./config";
 
-const s3Client = config.storage
-	? new S3Client({
-			credentials: {
-				accessKeyId: config.storage.accessKeyId,
-				secretAccessKey: config.storage.secretAccessKey,
-			},
-			endpoint: config.storage.endpoint,
-			region: config.storage.region,
-		})
-	: null;
+let _s3Client: S3Client | null = null;
+let _bucket: string | null = null;
 
-const bucket = config.storage?.bucket || null;
+function getS3Client() {
+	if (_s3Client !== null) {
+		return _s3Client;
+	}
+
+	const storageConfig = config.storage;
+	if (!storageConfig) {
+		return null;
+	}
+
+	_s3Client = new S3Client({
+		credentials: {
+			accessKeyId: storageConfig.accessKeyId,
+			secretAccessKey: storageConfig.secretAccessKey,
+		},
+		endpoint: storageConfig.endpoint,
+		region: storageConfig.region,
+	});
+
+	return _s3Client;
+}
+
+function getBucket() {
+	if (_bucket !== null) {
+		return _bucket;
+	}
+
+	const storageConfig = config.storage;
+	_bucket = storageConfig?.bucket || null;
+	return _bucket;
+}
 
 export const storage = {
 	async write(
@@ -25,6 +47,9 @@ export const storage = {
 		content: string,
 		options?: { type?: string },
 	): Promise<void> {
+		const s3Client = getS3Client();
+		const bucket = getBucket();
+
 		if (!s3Client || !bucket) {
 			throw new Error(
 				"Storage is not configured. Please set S3 environment variables.",
@@ -43,6 +68,9 @@ export const storage = {
 	file(key: string) {
 		return {
 			async text(): Promise<string> {
+				const s3Client = getS3Client();
+				const bucket = getBucket();
+
 				if (!s3Client || !bucket) {
 					throw new Error(
 						"Storage is not configured. Please set S3 environment variables.",
@@ -58,6 +86,9 @@ export const storage = {
 			},
 
 			async delete(): Promise<void> {
+				const s3Client = getS3Client();
+				const bucket = getBucket();
+
 				if (!s3Client || !bucket) {
 					throw new Error(
 						"Storage is not configured. Please set S3 environment variables.",

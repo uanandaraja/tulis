@@ -10,6 +10,19 @@ import type {
 } from "./types";
 
 function createConfig(): AppConfig {
+	// Skip validation during build time
+	if (
+		typeof window === "undefined" &&
+		process.env.NODE_ENV === "production" &&
+		!process.env.DATABASE_URL
+	) {
+		// Return dummy config for build time
+		return {
+			database: { url: "" },
+			auth: { secret: "" },
+		} as AppConfig;
+	}
+
 	// Validate required environment variables
 	const requiredVars = ["DATABASE_URL", "BETTER_AUTH_SECRET"];
 	const missing = requiredVars.filter((key) => !process.env[key]);

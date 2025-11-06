@@ -13,7 +13,7 @@ function getResendClient() {
 			"Email service is not configured. Please set RESEND_API_KEY environment variable.",
 		);
 	}
-	return new Resend(config.email.apiKey);
+	return new Resend(config.email!.apiKey);
 }
 
 export async function sendEmail({ to, subject, react }: SendEmailOptions) {

@@ -88,7 +88,7 @@ export function AppSidebar() {
 										Loading...
 									</div>
 								) : chats && chats.length > 0 ? (
-									chats.map((chat) => (
+									chats.map((chat: any) => (
 										<SidebarMenuItem key={chat.id}>
 											<div className="group/item relative flex items-center">
 												<SidebarMenuButton

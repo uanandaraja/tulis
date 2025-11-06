@@ -81,7 +81,7 @@ export function ChatInterface({
 					toolCallId: dbPlan.id,
 					output: {
 						success: true,
-						steps: dbPlan.steps.map((step) => ({
+						steps: dbPlan.steps.map((step: any) => ({
 							title: step.title,
 							description: step.description || "",
 							status: step.status as "pending" | "in_progress" | "completed",
@@ -103,9 +103,9 @@ export function ChatInterface({
 		initialPrompt,
 		sendMessage,
 		onBeforeSend: () => {
-			utils.chat.list.setData(undefined, (old) => {
+			utils.chat.list.setData(undefined, (old: any) => {
 				if (!old) return old;
-				const exists = old.some((c) => c.id === chatId);
+				const exists = old.some((c: any) => c.id === chatId);
 				if (exists) return old;
 				return [
 					{
