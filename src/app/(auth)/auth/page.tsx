@@ -6,7 +6,7 @@ import { SignInForm } from "@/components/features/auth/sign-in-form";
 import { auth } from "@/lib/auth";
 
 export const metadata: Metadata = {
-	title: "Sign In",
+	title: "sign in",
 };
 
 export default async function SignInPage() {

@@ -8,7 +8,7 @@ import { SidebarProvider } from "@/components/ui/sidebar";
 import { auth } from "@/lib/auth";
 
 export const metadata: Metadata = {
-	title: "Chat",
+	title: "chat",
 };
 
 export default async function ChatGroupLayout({
