@@ -1,6 +1,7 @@
 import { AIWritingPartnerMock } from "./features/ai-writing-partner-mock";
 import { SmartEditingMock } from "./features/smart-editing-mock";
 import { RichTextEditorMock } from "./features/rich-text-editor-mock";
+import { VersionTrackingMock } from "./features/version-tracking-mock";
 
 export function Features() {
 	const features = [
@@ -22,6 +23,7 @@ export function Features() {
 		{
 			title: "version tracking",
 			description: "every change saved, compare versions, restore anytime",
+			mockup: <VersionTrackingMock />,
 		},
 	];
 
