@@ -13,8 +13,8 @@ RUN bun install --frozen-lockfile
 # Copy source code
 COPY . .
 
-# Build the application (disable Turbopack for stability)
-RUN NEXT_BUILD_TURBOPACK=false bun run build
+# Build the application
+RUN bun run build
 
 # Remove dev dependencies to keep production image small
 RUN bun install --frozen-lockfile --production
