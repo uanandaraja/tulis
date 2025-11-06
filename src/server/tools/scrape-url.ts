@@ -9,6 +9,14 @@ export const scrapeUrlTool = tool({
 		url: z.string().url().describe("The URL to scrape"),
 	}),
 	execute: async ({ url }) => {
+		if (!firecrawl) {
+			return {
+				success: false,
+				error: "Firecrawl is not configured. Please set FIRECRAWL_API_KEY environment variable.",
+				url,
+			};
+		}
+
 		try {
 			const response = await firecrawl.scrape(url, {
 				formats: ["markdown"],
