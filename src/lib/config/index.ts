@@ -10,12 +10,8 @@ import type {
 } from "./types";
 
 function createConfig(): AppConfig {
-	// Skip validation during build time
-	if (
-		typeof window === "undefined" &&
-		process.env.NODE_ENV === "production" &&
-		!process.env.DATABASE_URL
-	) {
+	// Skip validation during Next.js build time only
+	if (process.env.NEXT_PHASE === "phase-production-build") {
 		// Return dummy config for build time
 		return {
 			database: { url: "" },
