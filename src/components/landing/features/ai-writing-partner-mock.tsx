@@ -41,7 +41,7 @@ export function AIWritingPartnerMock() {
 						</div>
 					) : (
 						<div className="flex justify-start">
-							<div className="space-y-3 max-w-xs">
+							<div className="space-y-3 w-full">
 								<div className="rounded-lg p-2 text-sm text-foreground">
 									{message.content}
 								</div>

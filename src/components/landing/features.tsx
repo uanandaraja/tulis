@@ -1,4 +1,5 @@
 import { AIWritingPartnerMock } from "./features/ai-writing-partner-mock";
+import { SmartEditingMock } from "./features/smart-editing-mock";
 
 export function Features() {
 	const features = [
@@ -10,6 +11,7 @@ export function Features() {
 		{
 			title: "smart editing",
 			description: "makes intelligent improvements and refinements on its own",
+			mockup: <SmartEditingMock />,
 		},
 		{
 			title: "rich text editor",
