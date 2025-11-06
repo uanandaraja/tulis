@@ -7,14 +7,17 @@ WORKDIR /app
 # Copy package files
 COPY package.json bun.lock* ./
 
-# Install dependencies
-RUN bun install --frozen-lockfile --production
+# Install all dependencies (including dev dependencies for build)
+RUN bun install --frozen-lockfile
 
 # Copy source code
 COPY . .
 
-# Build the application
-RUN bun run build
+# Build the application (disable Turbopack for stability)
+RUN NEXT_BUILD_TURBOPACK=false bun run build
+
+# Remove dev dependencies to keep production image small
+RUN bun install --frozen-lockfile --production
 
 # Expose port
 EXPOSE 3000
