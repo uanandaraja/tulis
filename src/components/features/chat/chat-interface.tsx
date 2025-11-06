@@ -82,8 +82,9 @@ export function ChatInterface({
 					output: {
 						success: true,
 						steps: dbPlan.steps.map((step: unknown) => ({
-							title: (step as Record<string, unknown>).title,
-							description: (step as Record<string, unknown>).description || "",
+							title: (step as Record<string, unknown>).title as string,
+							description:
+								((step as Record<string, unknown>).description as string) || "",
 							status: (step as Record<string, unknown>).status as
 								| "pending"
 								| "in_progress"
@@ -106,9 +107,10 @@ export function ChatInterface({
 		initialPrompt,
 		sendMessage,
 		onBeforeSend: () => {
-			utils.chat.list.setData(undefined, (old: unknown) => {
+			utils.chat.list.setData(undefined, (old) => {
 				if (!old) return old;
-				const exists = (old as Array<Record<string, unknown>>).some(
+				const chatList = old as Array<Record<string, unknown>>;
+				const exists = chatList.some(
 					(c: unknown) => (c as Record<string, unknown>).id === chatId,
 				);
 				if (exists) return old;
@@ -125,7 +127,7 @@ export function ChatInterface({
 						updatedAt: new Date(),
 					},
 					...old,
-				];
+				] as typeof old;
 			});
 		},
 	});

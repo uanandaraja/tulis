@@ -91,16 +91,16 @@ export function AppSidebar() {
 									chats.map((chat: unknown) => {
 										const typedChat = chat as Record<string, unknown>;
 										return (
-											<SidebarMenuItem key={typedChat.id}>
+											<SidebarMenuItem key={typedChat.id as string}>
 												<div className="group/item relative flex items-center">
 													<SidebarMenuButton
 														asChild
 														isActive={pathname === `/chat/${typedChat.id}`}
 														className="flex-1 pr-8"
 													>
-														<Link href={`/chat/${typedChat.id}`}>
+														<Link href={`/chat/${typedChat.id as string}`}>
 															<span className="truncate">
-																{typedChat.title}
+																{typedChat.title as string}
 															</span>
 														</Link>
 													</SidebarMenuButton>
@@ -121,8 +121,8 @@ export function AppSidebar() {
 																</AlertDialogTitle>
 																<AlertDialogDescription>
 																	This will permanently delete "
-																	{typedChat.title}" and all its messages. This
-																	action cannot be undone.
+																	{typedChat.title as string}" and all its
+																	messages. This action cannot be undone.
 																</AlertDialogDescription>
 															</AlertDialogHeader>
 															<AlertDialogFooter>
