@@ -8,7 +8,7 @@ const mockVersions = [
 	{
 		id: "v2",
 		versionNumber: 2,
-		createdAt: new Date(Date.now() - 1000 * 60 * 30), // 30 minutes ago
+		timeAgo: "30 minutes ago",
 		changeDescription: "Expanded benefits section with more details",
 		wordCount: 142,
 		isCurrent: true,
@@ -16,25 +16,12 @@ const mockVersions = [
 	{
 		id: "v1",
 		versionNumber: 1,
-		createdAt: new Date(Date.now() - 1000 * 60 * 60 * 2), // 2 hours ago
+		timeAgo: "2 hours ago",
 		changeDescription: "Initial draft with basic structure",
 		wordCount: 98,
 		isCurrent: false,
 	},
 ];
-
-function formatDistanceToNow(date: Date): string {
-	const now = new Date();
-	const diffMs = now.getTime() - date.getTime();
-	const diffMins = Math.floor(diffMs / (1000 * 60));
-	const diffHours = Math.floor(diffMins / 60);
-	const diffDays = Math.floor(diffHours / 24);
-
-	if (diffMins < 1) return "just now";
-	if (diffMins < 60) return `${diffMins} minute${diffMins > 1 ? "s" : ""} ago`;
-	if (diffHours < 24) return `${diffHours} hour${diffHours > 1 ? "s" : ""} ago`;
-	return `${diffDays} day${diffDays > 1 ? "s" : ""} ago`;
-}
 
 export function VersionTrackingMock() {
 	return (
@@ -64,7 +51,7 @@ export function VersionTrackingMock() {
 									)}
 								</div>
 								<div className="text-xs text-muted-foreground mb-1">
-									{formatDistanceToNow(version.createdAt)}
+									{version.timeAgo}
 								</div>
 								<div className="text-xs text-muted-foreground mb-2">
 									{version.changeDescription}
