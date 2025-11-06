@@ -10,6 +10,14 @@ export const webSearchTool = tool({
 	}),
 	execute: async ({ query }) => {
 		const numResults = 10;
+		if (!exa) {
+			return {
+				success: false,
+				message: "Web search is not configured. Please set EXA_API_KEY environment variable.",
+				results: [],
+			};
+		}
+
 		try {
 			const searchResponse = await exa.searchAndContents(query, {
 				numResults,
