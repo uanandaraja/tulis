@@ -12,7 +12,8 @@ export const scrapeUrlTool = tool({
 		if (!firecrawl) {
 			return {
 				success: false,
-				error: "Firecrawl is not configured. Please set FIRECRAWL_API_KEY environment variable.",
+				error:
+					"Firecrawl is not configured. Please set FIRECRAWL_API_KEY environment variable.",
 				url,
 			};
 		}

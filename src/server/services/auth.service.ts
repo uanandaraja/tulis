@@ -9,16 +9,8 @@ export async function handleMagicLinkRequest(
 	await sendMagicLinkEmail(email, url, isNewUser);
 }
 
+import { config } from "@/lib/config";
+
 export function getGoogleOAuthConfig() {
-	const clientId = process.env.GOOGLE_CLIENT_ID;
-	const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
-
-	if (!clientId || !clientSecret) {
-		return undefined;
-	}
-
-	return {
-		clientId,
-		clientSecret,
-	};
+	return config.auth.google;
 }

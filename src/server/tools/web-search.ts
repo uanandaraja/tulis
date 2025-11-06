@@ -13,7 +13,8 @@ export const webSearchTool = tool({
 		if (!exa) {
 			return {
 				success: false,
-				message: "Web search is not configured. Please set EXA_API_KEY environment variable.",
+				message:
+					"Web search is not configured. Please set EXA_API_KEY environment variable.",
 				results: [],
 			};
 		}

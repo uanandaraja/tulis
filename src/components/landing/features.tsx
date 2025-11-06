@@ -5,7 +5,7 @@ export function Features() {
 			description: "researches, plans, then drafts your content automatically",
 		},
 		{
-			title: "smart editing", 
+			title: "smart editing",
 			description: "makes intelligent improvements and refinements on its own",
 		},
 		{

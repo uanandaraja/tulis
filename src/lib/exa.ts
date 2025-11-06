@@ -1,5 +1,4 @@
 import Exa from "exa-js";
+import { config } from "./config";
 
-const exaApiKey = process.env.EXA_API_KEY;
-
-export const exa = exaApiKey ? new Exa(exaApiKey) : null;
+export const exa = config.exa ? new Exa(config.exa.apiKey) : null;

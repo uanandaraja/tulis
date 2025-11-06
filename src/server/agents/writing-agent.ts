@@ -1,5 +1,6 @@
 import { createOpenRouter } from "@openrouter/ai-sdk-provider";
 import { type InferAgentUIMessage, stepCountIs, ToolLoopAgent } from "ai";
+import { config } from "@/lib/config";
 import { SYSTEM_PROMPT } from "@/lib/prompts";
 import {
 	createToolsWithContext,
@@ -7,7 +8,7 @@ import {
 } from "@/server/tools/create-tools";
 
 const openrouter = createOpenRouter({
-	apiKey: process.env.OPENROUTER_API_KEY || "",
+	apiKey: config.ai?.apiKey || "",
 });
 
 export function createWritingAgent(

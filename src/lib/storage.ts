@@ -4,19 +4,20 @@ import {
 	PutObjectCommand,
 	S3Client,
 } from "@aws-sdk/client-s3";
+import { config } from "./config";
 
-const s3Client = process.env.S3_ACCESS_KEY_ID && process.env.S3_SECRET_ACCESS_KEY
+const s3Client = config.storage
 	? new S3Client({
 			credentials: {
-				accessKeyId: process.env.S3_ACCESS_KEY_ID,
-				secretAccessKey: process.env.S3_SECRET_ACCESS_KEY,
+				accessKeyId: config.storage.accessKeyId,
+				secretAccessKey: config.storage.secretAccessKey,
 			},
-			endpoint: process.env.S3_ENDPOINT,
-			region: process.env.S3_REGION || "auto",
+			endpoint: config.storage.endpoint,
+			region: config.storage.region,
 		})
 	: null;
 
-const bucket = process.env.S3_BUCKET || null;
+const bucket = config.storage?.bucket || null;
 
 export const storage = {
 	async write(
@@ -25,7 +26,9 @@ export const storage = {
 		options?: { type?: string },
 	): Promise<void> {
 		if (!s3Client || !bucket) {
-			throw new Error("Storage is not configured. Please set S3 environment variables.");
+			throw new Error(
+				"Storage is not configured. Please set S3 environment variables.",
+			);
 		}
 		await s3Client.send(
 			new PutObjectCommand({
@@ -41,7 +44,9 @@ export const storage = {
 		return {
 			async text(): Promise<string> {
 				if (!s3Client || !bucket) {
-					throw new Error("Storage is not configured. Please set S3 environment variables.");
+					throw new Error(
+						"Storage is not configured. Please set S3 environment variables.",
+					);
 				}
 				const response = await s3Client.send(
 					new GetObjectCommand({
@@ -54,7 +59,9 @@ export const storage = {
 
 			async delete(): Promise<void> {
 				if (!s3Client || !bucket) {
-					throw new Error("Storage is not configured. Please set S3 environment variables.");
+					throw new Error(
+						"Storage is not configured. Please set S3 environment variables.",
+					);
 				}
 				await s3Client.send(
 					new DeleteObjectCommand({
