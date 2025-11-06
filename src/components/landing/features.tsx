@@ -35,7 +35,7 @@ export function Features() {
 						return (
 							<div
 								key={feature.title}
-								className="group p-6 bg-muted rounded-lg transition-all duration-100 hover:!ring-[3px] hover:!ring-border"
+								className="group p-6 bg-muted rounded-lg transition-all duration-100 hover:!ring-[3px] hover:!ring-border h-full flex flex-col"
 							>
 								<h3 className="text-lg font-semibold mb-2 text-foreground">
 									{feature.title}

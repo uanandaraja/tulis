@@ -1,7 +1,6 @@
 "use client";
 
-import { useState } from "react";
-import { Clock, Eye, RotateCcw } from "lucide-react";
+import { Clock, RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 
@@ -38,16 +37,10 @@ function formatDistanceToNow(date: Date): string {
 }
 
 export function VersionTrackingMock() {
-	const [expandedVersion, setExpandedVersion] = useState<string | null>(null);
-
-	const toggleDiff = (versionId: string) => {
-		setExpandedVersion(expandedVersion === versionId ? null : versionId);
-	};
-
 	return (
-		<div className="w-full bg-background border border-border rounded-lg shadow-lg max-h-[400px] overflow-hidden">
+		<div className="w-full bg-background border border-border rounded-lg shadow-lg h-64 flex flex-col">
 			{/* Modal Header */}
-			<div className="p-3 border-b">
+			<div className="p-3 border-b flex-shrink-0">
 				<h3 className="font-medium text-sm flex items-center gap-2">
 					<Clock className="h-4 w-4" />
 					Version History
@@ -55,7 +48,7 @@ export function VersionTrackingMock() {
 			</div>
 
 			{/* Version List */}
-			<div className="max-h-80 overflow-y-auto">
+			<div className="flex-1 overflow-y-auto">
 				<div className="p-2">
 					{mockVersions.map((version, index) => (
 						<div key={version.id}>
@@ -76,15 +69,16 @@ export function VersionTrackingMock() {
 								<div className="text-xs text-muted-foreground mb-2">
 									{version.changeDescription}
 								</div>
-								<div className="flex items-center justify-between">
-									<span className="text-xs text-muted-foreground">
+								<div className="flex items-center justify-between gap-2">
+									<span className="text-xs text-muted-foreground flex-shrink-0">
 										{version.wordCount} words
 									</span>
 									{!version.isCurrent && (
 										<Button
 											variant="ghost"
 											size="sm"
-											className="h-6 px-2 text-xs"
+											className="h-6 px-2 text-xs flex-shrink-0"
+											disabled
 										>
 											<RotateCcw className="h-3 w-3 mr-1" />
 											Restore

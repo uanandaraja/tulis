@@ -30,7 +30,7 @@ const mockWebSearchResults = [
 
 export function AIWritingPartnerMock() {
 	return (
-		<div className="space-y-3">
+		<div className="space-y-3 h-64 overflow-y-auto">
 			{mockMessages.map((message) => (
 				<div key={message.id}>
 					{message.role === "user" ? (
