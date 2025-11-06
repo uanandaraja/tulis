@@ -9,17 +9,34 @@ import type {
 	StorageConfig,
 } from "./types";
 
+let cachedConfig: AppConfig | null = null;
+
 function createConfig(): AppConfig {
-	// Skip validation during Next.js build time only
+	// Return cached config if already created
+	if (cachedConfig) {
+		return cachedConfig;
+	}
+
+	// Skip validation during Next.js build time
 	if (process.env.NEXT_PHASE === "phase-production-build") {
 		// Return dummy config for build time
+		cachedConfig = {
+			database: { url: "" },
+			auth: { secret: "" },
+		} as AppConfig;
+		return cachedConfig;
+	}
+
+	// If we're in browser/client context, return dummy config
+	// This shouldn't happen with proper "use server" directives, but it's a safety net
+	if (typeof window !== "undefined") {
 		return {
 			database: { url: "" },
 			auth: { secret: "" },
 		} as AppConfig;
 	}
 
-	// Validate required environment variables
+	// Validate required environment variables only on server at runtime
 	const requiredVars = ["DATABASE_URL", "BETTER_AUTH_SECRET"];
 	const missing = requiredVars.filter((key) => !process.env[key]);
 
@@ -97,6 +114,7 @@ function createConfig(): AppConfig {
 		};
 	}
 
+	cachedConfig = config;
 	return config;
 }
 
