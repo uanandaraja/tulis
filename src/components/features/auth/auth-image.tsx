@@ -5,7 +5,7 @@ export function AuthImage() {
 		<div className="relative w-full h-full overflow-hidden">
 			<div className="absolute inset-0">
 				<Image
-					src="https://storage.nizzy.xyz/josephine_and_mercie.jpg"
+					src="https://storage.nizzy.fyi/josephine_and_mercie.jpg"
 					alt="Authentication"
 					fill
 					className="object-cover blur-xs"
